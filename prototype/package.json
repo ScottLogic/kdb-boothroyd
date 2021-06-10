@@ -1,0 +1,28 @@
+{
+  "name": "kdb-studio-2-proto",
+  "version": "1.0.0",
+  "description": "Prototype for KDB Studio replacement",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ScottLogic/kdb-studio-2.git"
+  },
+  "keywords": [
+    "kdb",
+    "studio",
+    "prototype"
+  ],
+  "author": "Ian Hull",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ScottLogic/kdb-studio-2/issues"
+  },
+  "homepage": "https://github.com/ScottLogic/kdb-studio-2#readme",
+  "devDependencies": {
+    "electron": "^13.1.2"
+  }
+}
