@@ -5,7 +5,9 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-packager . kdb-studio-2-proto --platform win32 --arch x64 --out dist/ --overwrite",
+    "setup": "electron-installer-windows --src dist/app-win32-x64/ --dest dist/installers/"
   },
   "repository": {
     "type": "git",
@@ -23,6 +25,11 @@
   },
   "homepage": "https://github.com/ScottLogic/kdb-studio-2#readme",
   "devDependencies": {
-    "electron": "^13.1.2"
+    "electron": "^13.1.2",
+    "electron-installer-windows": "^3.0.0",
+    "electron-packager": "^15.2.0"
+  },
+  "dependencies": {
+    "tabulator-tables": "^4.9.3"
   }
 }
