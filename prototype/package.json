@@ -30,6 +30,7 @@
     "electron-packager": "^15.2.0"
   },
   "dependencies": {
+    "node-q": "^2.5.0",
     "tabulator-tables": "^4.9.3"
   }
 }
