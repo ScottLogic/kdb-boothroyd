@@ -3,6 +3,7 @@
 
 const path = require("path");
 const amdLoader = require("./node_modules/monaco-editor/min/vs/loader.js");
+const syntax = require("./syntax");
 const amdRequire = amdLoader.require;
 
 function uriFromPath(_path) {
@@ -24,8 +25,15 @@ amdRequire.config({
 
 module.exports = new Promise((resolve) => {
   amdRequire(["vs/editor/editor.main"], () => {
+    // Register a new language
+    monaco.languages.register({ id: "kdb/q" });
+
+    // Register a tokens provider for the language
+    monaco.languages.setMonarchTokensProvider("kdb/q", syntax);
+
     const editor = monaco.editor.create(document.getElementById("txtInput"), {
       value: "4 + 4",
+      language: "kdb/q",
       minimap: {
         enabled: false,
       },
