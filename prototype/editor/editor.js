@@ -17,7 +17,7 @@ function uriFromPath(_path) {
 
 amdRequire.config({
   baseUrl: uriFromPath(
-    path.join(__dirname, "./node_modules/monaco-editor/min")
+    path.join(__dirname, "../node_modules/monaco-editor/min")
   ),
 });
 
