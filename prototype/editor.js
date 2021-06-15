@@ -2,8 +2,9 @@
 // https://github.com/microsoft/monaco-editor-samples/tree/main/electron-amd-nodeIntegration
 
 const path = require("path");
-const amdLoader = require("./node_modules/monaco-editor/min/vs/loader.js");
+const amdLoader = require("monaco-editor/min/vs/loader");
 const syntax = require("./syntax");
+const theme = require("./theme");
 const amdRequire = amdLoader.require;
 
 function uriFromPath(_path) {
@@ -25,15 +26,14 @@ amdRequire.config({
 
 module.exports = new Promise((resolve) => {
   amdRequire(["vs/editor/editor.main"], () => {
-    // Register a new language
     monaco.languages.register({ id: "kdb/q" });
-
-    // Register a tokens provider for the language
     monaco.languages.setMonarchTokensProvider("kdb/q", syntax);
+    monaco.editor.defineTheme("kdb", theme);
 
     const editor = monaco.editor.create(document.getElementById("txtInput"), {
       value: "4 + 4",
       language: "kdb/q",
+      theme: "kdb",
       minimap: {
         enabled: false,
       },

@@ -231,13 +231,13 @@ module.exports = {
         {
           cases: {
             "@keywords": "keyword",
-            "@default": "symbol",
+            "@default": "variable",
           },
         },
       ],
 
       // symbols
-      [/`\w*/, "regex"],
+      [/`\w*/, "symbol"],
 
       // whitespace
       { include: "@whitespace" },
