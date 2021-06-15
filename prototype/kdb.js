@@ -1,9 +1,25 @@
+
 (async () => {
 
     const nodeq = require("node-q");
     const promisify = require('util').promisify;
     const editor = await require("./editor/editor");
 
+    Vue.createApp({
+        data() {
+          return {
+            servers: ['localhost'],
+            enteredValue: ''
+          };
+        },
+        methods: {
+          addServer() {
+            this.servers.push(this.enteredValue);
+            this.enteredValue = '';
+          }
+        }
+      }).mount('#kdbsrv');
+ 
     // not sure why util.promisify doesn't work here?
     const qSend = (conn, value) => new Promise((resolve, reject) => {
         conn.k(value, function(err, res) {
@@ -11,6 +27,7 @@
             resolve(res);
         });
     })
+
 
     const input=document.getElementById("txtInput");
     const output=document.getElementById("txtOutput");
