@@ -2,7 +2,7 @@
 
     const nodeq = require("node-q");
     const promisify = require('util').promisify;
-    const editor = await require("./editor");
+    const editor = await require("./editor/editor");
 
     // not sure why util.promisify doesn't work here?
     const qSend = (conn, value) => new Promise((resolve, reject) => {
