@@ -3,12 +3,12 @@
 
 const path = require("path");
 const amdLoader = require("monaco-editor/min/vs/loader");
-const syntax = require("./syntax");
+const { syntax, keywords } = require("./syntax");
 const theme = require("./theme");
 const amdRequire = amdLoader.require;
 
 function uriFromPath(_path) {
-  var pathName = path.resolve(_path).replace(/\\/g, "/");
+  let pathName = path.resolve(_path).replace(/\\/g, "/");
   if (pathName.length > 0 && pathName.charAt(0) !== "/") {
     pathName = "/" + pathName;
   }
@@ -29,6 +29,17 @@ module.exports = new Promise((resolve) => {
     monaco.languages.register({ id: "kdb/q" });
     monaco.languages.setMonarchTokensProvider("kdb/q", syntax);
     monaco.editor.defineTheme("kdb", theme);
+
+    // Register a completion item provider for the new language
+    monaco.languages.registerCompletionItemProvider("kdb/q", {
+      provideCompletionItems: () => ({
+        suggestions: keywords.map((keyword) => ({
+          label: keyword,
+          kind: monaco.languages.CompletionItemKind.Text,
+          insertText: keyword,
+        })),
+      }),
+    });
 
     const editor = monaco.editor.create(document.getElementById("txtInput"), {
       value: "4 + 4",
