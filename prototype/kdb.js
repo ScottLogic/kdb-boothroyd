@@ -1,24 +1,39 @@
-
 (async () => {
 
     const nodeq = require("node-q");
     const promisify = require('util').promisify;
-    const editor = await require("./editor/editor");
+    let conn;
 
-    Vue.createApp({
+    const app = Vue.createApp({
         data() {
           return {
-            servers: ['localhost'],
-            enteredValue: ''
+            query: '',
+            servers: [
+                {
+                    text: 'local',
+                    value: 'localhost:5005'
+                }
+            ],
+            selectServer: 'localhost:5005',
+            resultJSON: '',
+            resultHTML: ''
           };
         },
         methods: {
-          addServer() {
-            this.servers.push(this.enteredValue);
-            this.enteredValue = '';
+          async connect() {
+            let [host, port] = this.selectServer.split(':');
+            await _connect(host, parseInt(port));
+          },
+          async send() {
+            const res = await _send();
+            this.resultJSON = res.j;
+            this.resultHTML = res.h;
           }
         }
-      }).mount('#kdbsrv');
+    });
+    app.mount('#v-app');
+
+    const editor = await require("./editor/editor");
  
     // not sure why util.promisify doesn't work here?
     const qSend = (conn, value) => new Promise((resolve, reject) => {
@@ -29,23 +44,22 @@
     })
 
 
-    const input=document.getElementById("txtInput");
-    const output=document.getElementById("txtOutput");
-    const result=document.getElementById("txtResult");
+    // const input=document.getElementById("txtInput");
+    // const output=document.getElementById("txtOutput");
+    // const result=document.getElementById("txtResult");
 
-    document.getElementById("cmdConnect").addEventListener("click", connect);
-    document.getElementById("cmdInput").addEventListener("click", send);
+    // document.getElementById("cmdConnect").addEventListener("click", connect);
+    // document.getElementById("cmdInput").addEventListener("click", send);
 
-    let conn;
 
-    async function connect() {
-        conn = await promisify(nodeq.connect)({host: "localhost", port: 5005});
+    async function _connect(h, p) {
+        conn = await promisify(nodeq.connect)({host: h, port: p});
     }
 
-    async function send() {
+    async function _send() {
         console.log(editor.getValue());
         const data = await qSend(conn, editor.getValue());
-        output.innerHTML = JSON.stringify(data, null, 2);
+        const resultJSON = JSON.stringify(data, null, 2);
 
         let outputHTML;
             
@@ -78,11 +92,14 @@
                 /* if not an object, then message must have simple data structure*/
                 outputHTML = data;
             };
-            if (outputHTML) {
-                result.innerHTML = outputHTML;
-            }
+            // if (outputHTML) {
+            //     result.innerHTML = outputHTML;
+            // }
 
         }
+        // console.log(resultJSON);
+        // console.log(outputHTML);
+        return {j: resultJSON, h: outputHTML};
     }
 
     function generateTableHTML(data){
@@ -94,7 +111,7 @@
             tableHTML += data.map(row => data[0].map(col => `<td>${row[col]}</td>`));
         }
         else {
-            tableHTML += data.map(x => `<td>${x}</td>`);
+            tableHTML += data.map(x => `<td>${x}</td>`).join('');
         }
         tableHTML += '</table>';
         return tableHTML;

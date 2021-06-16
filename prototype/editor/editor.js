@@ -30,8 +30,8 @@ module.exports = new Promise((resolve) => {
     monaco.languages.setMonarchTokensProvider("kdb/q", syntax);
     monaco.editor.defineTheme("kdb", theme);
 
-    const editor = monaco.editor.create(document.getElementById("txtInput"), {
-      value: "4 + 4",
+    const editor = monaco.editor.create(document.getElementById("editor"), {
+      value: "til 10",
       language: "kdb/q",
       theme: "kdb",
       minimap: {
