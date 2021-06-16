@@ -30,19 +30,8 @@ module.exports = new Promise((resolve) => {
     monaco.languages.setMonarchTokensProvider("kdb/q", syntax);
     monaco.editor.defineTheme("kdb", theme);
 
-    // Register a completion item provider for the new language
-    monaco.languages.registerCompletionItemProvider("kdb/q", {
-      provideCompletionItems: () => ({
-        suggestions: syntax.keywords.map((keyword) => ({
-          label: keyword,
-          kind: monaco.languages.CompletionItemKind.Text,
-          insertText: keyword,
-        })),
-      }),
-    });
-
-    const editor = monaco.editor.create(document.getElementById("txtInput"), {
-      value: "4 + 4",
+    const editor = monaco.editor.create(document.getElementById("editor"), {
+      value: "til 10",
       language: "kdb/q",
       theme: "kdb",
       minimap: {
