@@ -3,7 +3,7 @@
 
 const path = require("path");
 const amdLoader = require("monaco-editor/min/vs/loader");
-const { syntax, keywords } = require("./syntax");
+const syntax = require("./syntax");
 const theme = require("./theme");
 const amdRequire = amdLoader.require;
 
@@ -33,7 +33,7 @@ module.exports = new Promise((resolve) => {
     // Register a completion item provider for the new language
     monaco.languages.registerCompletionItemProvider("kdb/q", {
       provideCompletionItems: () => ({
-        suggestions: keywords.map((keyword) => ({
+        suggestions: syntax.keywords.map((keyword) => ({
           label: keyword,
           kind: monaco.languages.CompletionItemKind.Text,
           insertText: keyword,
