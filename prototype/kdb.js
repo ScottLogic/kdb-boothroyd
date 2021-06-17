@@ -20,6 +20,7 @@
             ],
             selectServer: 'local',
             toggleServers: false,
+            toggleEditServer: false,
             resultJSON: '',
             resultHTML: '',
           };
@@ -35,7 +36,14 @@
             const res = await _send();
             this.resultJSON = res.j;
             this.resultHTML = res.h;
-          }
+          },
+          async editServer(serverName) {
+            console.log("We're going to edit " + serverName);
+            this.toggleEditServer = true;
+          },
+          async deleteServer(serverName) {
+            console.log("We're going to delete " + serverName);
+          },         
         }
     });
 
