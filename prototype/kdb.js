@@ -10,18 +10,25 @@
             query: '',
             servers: [
                 {
-                    text: 'local',
-                    value: 'localhost:5005'
-                }
+                    name: 'local',
+                    connStr: 'localhost:5005'
+                },
+                {
+                    name: 'another',
+                    connStr: 'notahost:8443'
+                },               
             ],
-            selectServer: 'localhost:5005',
+            selectServer: 'local',
+            toggleServers: false,
             resultJSON: '',
-            resultHTML: ''
+            resultHTML: '',
           };
         },
         methods: {
           async connect() {
-            let [host, port] = this.selectServer.split(':');
+            const server = this.servers.find( ({name}) => name === this.selectServer);
+            let [host, port] = server.connStr.split(':');
+            console.log(host, port);
             await _connect(host, parseInt(port));
           },
           async send() {
@@ -31,6 +38,7 @@
           }
         }
     });
+
     app.mount('#v-app');
 
     const editor = await require("./editor/editor");
@@ -97,8 +105,8 @@
             // }
 
         }
-        // console.log(resultJSON);
-        // console.log(outputHTML);
+        console.log(resultJSON);
+        console.log(outputHTML);
         return {j: resultJSON, h: outputHTML};
     }
 

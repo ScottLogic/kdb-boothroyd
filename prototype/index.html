@@ -24,13 +24,24 @@
     <div id="v-app">
         <div id="connect">
             <select v-model="selectServer">
-                <option v-for="option in servers" :value="option.value">
-                    {{ option.text }}
+                <option v-for="option in servers" :value="option.name">
+                    {{ option.name }}
                 </option>
             </select>
             <span style="padding: 10px;">{{ selectServer }}</span>
             <button class="btn" v-on:click="connect">Connect</button>
+            <button class="btn" v-on:click="toggleServers = !toggleServers">Servers</button>
             <button class="btn" v-on:click="send">Go</button>
+            <div id="show-servers" v-show="toggleServers">
+                <ul>
+                    <li v-for="srv in servers">
+                        {{ srv.name }}: {{ srv.connStr }}
+                    </li>
+                </ul>
+            </div>
+            <!-- <div id="edit-server" v-show="toggleEditServer"> -->
+
+            <!-- </div> -->
         </div>
         <div id="editor"></div>
         <div id="txtOutput" v-html="resultJSON"></div>
