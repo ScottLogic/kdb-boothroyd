@@ -50,12 +50,6 @@
         }
     });
 
-    app.component('edit-server', {
-        template:
-        /*html*/
-        `<div> class="server-edit"`
-    }
-
     app.mount('#v-app');
 
     const editor = await require("./editor/editor");
