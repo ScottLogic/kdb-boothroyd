@@ -26,6 +26,10 @@
             text-align: left;
             margin-bottom: 10px;
         }
+        li {
+            display:inline;
+            border: 1px solid gray;
+        }
     </style>
 </head>
 <body>
@@ -42,7 +46,7 @@
             <button class="btn" v-on:click="toggleServers = !toggleServers">Servers</button>
             <button class="btn" v-on:click="send">Go</button>
             <div id="show-servers" v-show="toggleServers">
-                <table id="server-table" style="border:1px">
+                <!-- <table id="server-table" style="border:1px">
                     <tr>
                         <th>Name</th>
                         <th>Host:Port</th>
@@ -57,14 +61,17 @@
                         <td><button v-on:click="editServer(index)">Edit</button></td>
                         <td><button v-on:click="deleteServer(index)">Delete</button></td>
                     </tr>
-                </table>
-                <button class="btn" @click="addServer">Add New</button>
+                </table> -->
+                <div v-for="srv in servers"> 
+                    <server-item :server="srv"></server-item>
+                </div>
+                <button class="btn" @click="addServer()">Add New</button>
             </div>
-            <div id="edit-server" v-show="toggleEditServer">
+            <!-- <div id="edit-server" v-show="toggleEditServer">
                 <p>Editing...</p>
                 <button class="btn" @click="toggleEditServer = false">Cancel</button>
                 <button class="btn" @click="toggleEditServer = false">Save</button>
-            </div>
+            </div> -->
         </div>
         <div id="editor"></div>
         <div id="txtOutput" v-html="resultJSON"></div>
