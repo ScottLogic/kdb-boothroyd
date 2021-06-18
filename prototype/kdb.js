@@ -10,15 +10,17 @@
             query: '',
             servers: [
                 {
+                    id: 0,
                     name: 'local',
                     connStr: 'localhost:5005'
                 },
                 {
+                    id: 1,
                     name: 'another',
                     connStr: 'notahost:8443'
                 },               
             ],
-            selectServer: 'local',
+            selectServer: 0,
             toggleServers: false,
             toggleEditServer: false,
             resultJSON: '',
@@ -27,7 +29,8 @@
         },
         methods: {
           async connect() {
-            const server = this.servers.find( ({name}) => name === this.selectServer);
+            // const server = this.servers.find( ({name}) => name === this.selectServer);
+            const server = this.servers[this.selectServer];
             let [host, port] = server.connStr.split(':');
             console.log(host, port);
             await _connect(host, parseInt(port));
@@ -47,6 +50,12 @@
         }
     });
 
+    app.component('edit-server', {
+        template:
+        /*html*/
+        `<div> class="server-edit"`
+    }
+
     app.mount('#v-app');
 
     const editor = await require("./editor/editor");
@@ -58,15 +67,6 @@
             resolve(res);
         });
     })
-
-
-    // const input=document.getElementById("txtInput");
-    // const output=document.getElementById("txtOutput");
-    // const result=document.getElementById("txtResult");
-
-    // document.getElementById("cmdConnect").addEventListener("click", connect);
-    // document.getElementById("cmdInput").addEventListener("click", send);
-
 
     async function _connect(h, p) {
         conn = await promisify(nodeq.connect)({host: h, port: p});
