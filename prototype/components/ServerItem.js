@@ -1,5 +1,3 @@
-const { boolean } = require("node-q");
-
 const serverEditComponent = {
     props: {
         server: {
