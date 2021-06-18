@@ -33,11 +33,11 @@
     <div id="v-app">
         <div id="connect">
             <select v-model="selectServer">
-                <option v-for="srv in servers" :value="srv.name">
+                <option v-for="srv in servers" :value="srv.id">
                     {{ srv.name }}
                 </option>
             </select>
-            <span style="padding: 10px;">{{ selectServer }}</span>
+            <span style="padding: 10px;">{{ servers[selectServer].name }}</span>
             <button class="btn" v-on:click="connect">Connect</button>
             <button class="btn" v-on:click="toggleServers = !toggleServers">Servers</button>
             <button class="btn" v-on:click="send">Go</button>
@@ -50,12 +50,12 @@
                         <th> </th>
                         <th> </th>
                     </tr>
-                    <tr v-for="srv in servers">
+                    <tr v-for="(srv, index) in servers" :key="srv.id">
                         <td>{{ srv.name }}</td>
                         <td>{{ srv.connStr }}</td>
                         <td>N/A</td>
-                        <td><button v-on:click="editServer(srv.name)">Edit</button></td>
-                        <td><button v-on:click="deleteServer(srv.name)">Delete</button></td>
+                        <td><button v-on:click="editServer(index)">Edit</button></td>
+                        <td><button v-on:click="deleteServer(index)">Delete</button></td>
                     </tr>
                 </table>
                 <button class="btn" @click="addServer">Add New</button>
@@ -75,6 +75,6 @@
 </body>
 <link href="node_modules/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
 <script type="text/javascript" src="node_modules/tabulator-tables/dist/js/tabulator.min.js"></script>
-<script src="vue/vue.global.js"></script>
+<script src="node_modules/vue/dist/vue.global.js"></script>
 <script src="kdb.js"></script>
 </html>
