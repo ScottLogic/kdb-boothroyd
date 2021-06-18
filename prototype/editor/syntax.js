@@ -1,6 +1,3 @@
-// Create your own language definition here
-// You can safely look at other samples without losing modifications.
-// Modifications are not saved on browser refresh/close though -- copy often!
 module.exports = {
   // Set defaultToken to invalid to see what you do not tokenize yet
   defaultToken: "",
