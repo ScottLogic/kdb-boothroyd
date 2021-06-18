@@ -3,7 +3,9 @@
     const nodeq = require("node-q");
     const promisify = require('util').promisify;
     let conn;
-
+ 
+    const serverItemComponent = await require('./components/ServerItem');
+    
     const app = Vue.createApp({
         data() {
           return {
@@ -22,7 +24,7 @@
             ],
             selectServer: 0,
             toggleServers: false,
-            toggleEditServer: false,
+            // toggleEditServer: false,
             resultJSON: '',
             resultHTML: '',
           };
@@ -40,16 +42,23 @@
             this.resultJSON = res.j;
             this.resultHTML = res.h;
           },
-          async editServer(serverName) {
-            console.log("We're going to edit " + serverName);
-            this.toggleEditServer = true;
-          },
-          async deleteServer(serverName) {
-            console.log("We're going to delete " + serverName);
-          },         
+        //   async editServer(serverName) {
+        //     console.log("We're going to edit " + serverName);
+        //     this.toggleEditServer = true;
+        //   },
+        //   async deleteServer(serverName) {
+        //     console.log("We're going to delete " + serverName);
+        //   },  
+          async addServer() {
+              console.log("We're going to add a server");
+          }       
+        },
+        components: {
+            'server-item': serverItemComponent,
         }
     });
 
+    
     app.mount('#v-app');
 
     const editor = await require("./editor/editor");
