@@ -2,26 +2,52 @@
 
     const nodeq = require("node-q");
     const promisify = require('util').promisify;
+
+    // Deal with persisting server data
+    const os = require('os');
+    const path = require('path');
+    const fs = require('fs');
+    const storage = require('electron-json-storage');
+    //TODO: at the moment this is WINDOWS ONLY
+    const storageDir = path.join(os.homedir(), 'AppData','Local', 'kdb studio 2' );
+    if (! fs.existsSync(storageDir)) {
+        fs.mkdirSync(storageDir);
+    }
+    storage.setDataPath(storageDir);
+    console.log('storage path: ' + storageDir);
+
     let conn;
  
+    //TODO: Read server data from persistent storage - and add auth stuff etc
     const serverItemComponent = await require('./components/ServerItem');
     
     const app = Vue.createApp({
         data() {
           return {
             query: '',
-            servers: [
-                {
-                    id: 0,
-                    name: 'local',
-                    connStr: 'localhost:5005'
-                },
-                {
-                    id: 1,
-                    name: 'another',
-                    connStr: 'notahost:8443'
-                },               
-            ],
+            servers: 
+                //  _getServersFromStorage(),
+                [
+                    {
+                        id: 0,
+                        name: 'local',
+                        host: 'localhost',
+                        port: '5005',
+                        username: '',
+                        password: '', //TODO: work out how to store password
+                        connType: 'standard',
+                        colorScheme: '',
+                    },
+                    {
+                        id: 1,
+                        name: 'another',
+                        host: 'notahost',
+                        port: '8443',
+                        username: '',
+                        password: '', 
+                        colorScheme: '',                  
+                    },               
+                ],
             selectServer: 0,
             toggleServers: false,
             resultJSON: '',
@@ -32,9 +58,9 @@
           async connect() {
             // const server = this.servers.find( ({name}) => name === this.selectServer);
             const server = this.servers[this.selectServer];
-            let [host, port] = server.connStr.split(':');
-            console.log(host, port);
-            await _connect(host, parseInt(port));
+            // let [host, port] = server.connStr.split(':');
+            console.log(server.host, server.port);
+            await _connect(server.host, parseInt(server.port));
           },
           async send() {
             const res = await _send();
@@ -43,7 +69,14 @@
           }, 
           async addServer() {
               console.log("We're going to add a server");
-          }       
+          },
+          async saveServer(cs) {
+            console.log("We're going to save server details: " + JSON.stringify(cs));
+            const key = String('server.' + cs.id.toString());
+              storage.set(key, cs, (error) => {
+                  if (error) throw error;
+              });
+          }   
         },
         components: {
             'server-item': serverItemComponent,
@@ -126,5 +159,25 @@
         }
         tableHTML += '</table>';
         return tableHTML;
+    }
+
+    ///TODO: get this working - may need to use preload module
+    function _getServersFromStorage() {
+        const allKeys = storage.keys((error, allKeys) => {
+            if (error) throw error;
+            for (let key of allKeys) {
+                console.log('key ' + key);
+            }          
+        });
+        console.log(allKeys);
+        for (let key of allKeys) {
+            console.log('key ' + key);
+        }
+        // Get server keys
+        const serverKeys = allKeys.filter(k => String(k).startsWith('server.'));
+        const allServers = storage.getMany(serverKeys, (error) => {
+            if (error) throw error;
+        });
+        return allServers;
     }
 })()
