@@ -1,3 +1,5 @@
+const { data } = require("./components/ServerItem");
+
 (async () => {
 
     const nodeq = require("node-q");
@@ -21,12 +23,16 @@
     //TODO: Read server data from persistent storage - and add auth stuff etc
     const serverItemComponent = await require('./components/ServerItem');
     
+    // let allServers;
+    // await _getServersFromStorage();
+    // console.log(JSON.stringify(allServers));
+
     const app = Vue.createApp({
         data() {
+
           return {
             query: '',
-            servers: 
-                //  _getServersFromStorage(),
+            servers: // Needs to be initialised with valid dummy data or else render won't work
                 [
                     {
                         id: 0,
@@ -38,15 +44,7 @@
                         connType: 'standard',
                         colorScheme: '',
                     },
-                    {
-                        id: 1,
-                        name: 'another',
-                        host: 'notahost',
-                        port: '8443',
-                        username: '',
-                        password: '', 
-                        colorScheme: '',                  
-                    },               
+             
                 ],
             selectServer: 0,
             toggleServers: false,
@@ -55,6 +53,11 @@
           };
         },
         methods: {
+          async loadServers() {
+              let servers = await _getServersFromStorage();
+              console.log(JSON.stringify(servers));
+              this.servers = servers;
+          },
           async connect() {
             // const server = this.servers.find( ({name}) => name === this.selectServer);
             const server = this.servers[this.selectServer];
@@ -73,10 +76,16 @@
           async saveServer(cs) {
             console.log("We're going to save server details: " + JSON.stringify(cs));
             const key = String('server.' + cs.id.toString());
-              storage.set(key, cs, (error) => {
-                  if (error) throw error;
-              });
+            storage.set(key, cs, (error) => {
+                if (error) throw error;
+            });
+            this.loadServers();
           }   
+        },
+        mounted() {
+            this.$nextTick(function() { // Ensures all child components have been mounted 
+                this.loadServers();
+            })
         },
         components: {
             'server-item': serverItemComponent,
@@ -85,6 +94,22 @@
 
     
     app.mount('#v-app');
+
+    const _getServersFromStorage = () => new Promise((resolve, reject) => {
+        storage.keys((error, allKeys) => {
+            if (error) reject(error);
+            for (let key of allKeys) {
+                console.log('key ' + key);             
+            }   
+            const serverKeys = allKeys.filter(k => String(k).startsWith('server.'));
+
+            storage.getMany(serverKeys, (error, data) => {
+                if (error) reject(error);
+                console.log(JSON.stringify(data));
+                resolve(data.server);  // For some reason we are getting an object {"server": [...]}
+            })
+        });
+    })
 
     const editor = await require("./editor/editor");
  
@@ -159,25 +184,5 @@
         }
         tableHTML += '</table>';
         return tableHTML;
-    }
-
-    ///TODO: get this working - may need to use preload module
-    function _getServersFromStorage() {
-        const allKeys = storage.keys((error, allKeys) => {
-            if (error) throw error;
-            for (let key of allKeys) {
-                console.log('key ' + key);
-            }          
-        });
-        console.log(allKeys);
-        for (let key of allKeys) {
-            console.log('key ' + key);
-        }
-        // Get server keys
-        const serverKeys = allKeys.filter(k => String(k).startsWith('server.'));
-        const allServers = storage.getMany(serverKeys, (error) => {
-            if (error) throw error;
-        });
-        return allServers;
     }
 })()
