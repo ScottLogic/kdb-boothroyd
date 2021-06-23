@@ -74,7 +74,7 @@ const serverItemComponent = {
             console.log("Deleting "+ s.name);
         },
         async handleDone(cs) {
-            console.log(cs.host); //TEMP to check we get edited value here
+            this.toggleEdit = false;
             if (cs !== null) {
                 this.$emit('save', cs)
             }
