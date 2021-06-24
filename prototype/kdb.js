@@ -1,3 +1,4 @@
+const { listeners } = require("process");
 const { data } = require("./components/ServerItem");
 
 (async () => {
@@ -21,11 +22,7 @@ const { data } = require("./components/ServerItem");
     let conn;
  
     //TODO: Read server data from persistent storage - and add auth stuff etc
-    const serverItemComponent = await require('./components/ServerItem');
-    
-    // let allServers;
-    // await _getServersFromStorage();
-    // console.log(JSON.stringify(allServers));
+    const {serverItemComponent, serverEditComponent } = await require('./components/ServerItem');
 
     const app = Vue.createApp({
         data() {
@@ -43,11 +40,12 @@ const { data } = require("./components/ServerItem");
                         password: '', //TODO: work out how to store password
                         connType: 'standard',
                         colorScheme: '',
-                    },
-             
+                    }               
                 ],
+            nextServerId: 1,
             selectServer: 0,
             toggleServers: false,
+            toggleAddServer: false,
             resultJSON: '',
             resultHTML: '',
           };
@@ -55,8 +53,9 @@ const { data } = require("./components/ServerItem");
         methods: {
           async loadServers() {
               let servers = await _getServersFromStorage();
-              console.log(JSON.stringify(servers));
+              console.log(JSON.stringify(servers));        
               this.servers = servers;
+              this.nextServerId = Math.max(...servers.map(s => s.id), 0) + 1;
           },
           async connect() {
             // const server = this.servers.find( ({name}) => name === this.selectServer);
@@ -72,15 +71,48 @@ const { data } = require("./components/ServerItem");
           }, 
           async addServer() {
               console.log("We're going to add a server");
+              toggleAddServer = true;
           },
           async saveServer(cs) {
             console.log("We're going to save server details: " + JSON.stringify(cs));
+            const isNew = (! 'id' in cs || cs.id == undefined);
+            if (isNew) {
+                // We need to give new server an unused id
+                cs.id = this.nextServerId;
+            }
             const key = String('server.' + cs.id.toString());
             storage.set(key, cs, (error) => {
                 if (error) throw error;
             });
-            this.loadServers();
-          }   
+
+            if (isNew) {
+                this.servers.push(cs);
+            }
+            else {
+                this.servers.splice(this.servers.findIndex(item => item.id === cs.id), 1, cs)
+            }
+          },
+          async deleteServer(cs) {
+              console.log("We're going to delete server: " + cs.id.toString());
+              const key = String('server.' + cs.id.toString());
+              storage.remove(key, (error) => {
+                  if (error) throw error;
+              })
+
+              // don't delete last entry
+              if (this.servers.length <= 1) {
+                console.log("Don't delete server if only one");
+              }
+              else {
+                this.servers.splice(this.servers.findIndex(item => item.id === cs.id), 1);
+              }
+          },
+          async handleDoneNew(cs) {
+            this.toggleAddServer = false;
+            if (cs !== null) {
+                await this.saveServer(cs);
+            }
+        }   
         },
         mounted() {
             this.$nextTick(function() { // Ensures all child components have been mounted 
@@ -89,6 +121,7 @@ const { data } = require("./components/ServerItem");
         },
         components: {
             'server-item': serverItemComponent,
+            'server-edit': serverEditComponent,
         }
     });
 
@@ -103,10 +136,12 @@ const { data } = require("./components/ServerItem");
             }   
             const serverKeys = allKeys.filter(k => String(k).startsWith('server.'));
 
+            console.log(JSON.stringify(serverKeys));
+
             storage.getMany(serverKeys, (error, data) => {
                 if (error) reject(error);
                 console.log(JSON.stringify(data));
-                resolve(data.server);  // For some reason we are getting an object {"server": [...]}
+                resolve(data.server.filter(k => k !== null));  // For some reason we are getting an object {"server": [...]}
             })
         });
     })

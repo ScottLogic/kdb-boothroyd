@@ -2,7 +2,7 @@ const serverEditComponent = {
     props: {
         server: {
             type: Object,
-            required: true
+            required: false
         },
     },
 
@@ -12,6 +12,8 @@ const serverEditComponent = {
         <input v-model="serverEdit.name" placeholder="Name"/>
         <input v-model="serverEdit.host" placeholder="Host"/>
         <input v-model="serverEdit.port" placeholder="Port"/>
+        <input v-model="serverEdit.username" placeholder="Username"/>
+        <input type="password" v-model="serverEdit.password" placeholder="Password"/>
         <button class="btn" @click="cancel">Cancel</button>
         <button class="btn" @click="save">Save</button>
     </div>`,
@@ -72,6 +74,7 @@ const serverItemComponent = {
         },
         async deleteServer(s) {
             console.log("Deleting "+ s.name);
+            this.$emit('delete', s);
         },
         async handleDone(cs) {
             this.toggleEdit = false;
@@ -81,7 +84,7 @@ const serverItemComponent = {
         }
     },
     
-    emits: ['save']
+    emits: ['save', 'delete']
 };
 
-module.exports = serverItemComponent;
+module.exports = { serverItemComponent, serverEditComponent };

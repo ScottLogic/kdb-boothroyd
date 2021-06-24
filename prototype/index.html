@@ -46,10 +46,13 @@
             <button class="btn" v-on:click="toggleServers = !toggleServers">Servers</button>
             <button class="btn" v-on:click="send">Go</button>
             <div id="show-servers" v-if="toggleServers">
-                <div v-for="srv in servers"> 
-                    <server-item :server="srv" @save=saveServer></server-item>
+                <div v-for="srv in servers" :key="srv.id"> 
+                    <server-item :server="srv" @save=saveServer @delete=deleteServer></server-item>
                 </div>
-                <button class="btn" @click="addServer()">Add New</button>
+                <button class="btn" @click="toggleAddServer = true">Add New</button>
+                <div id="add-server" v-if="toggleAddServer">
+                    <server-edit @done="handleDoneNew"></server-edit>
+                </div>
             </div>
 
         </div>
