@@ -1,5 +1,3 @@
-const { listeners } = require("process");
-const { data } = require("./components/ServerItem");
 
 (async () => {
 
@@ -21,7 +19,7 @@ const { data } = require("./components/ServerItem");
 
     let conn;
  
-    //TODO: Read server data from persistent storage - and add auth stuff etc
+    //TODO: add auth stuff etc
     const {serverItemComponent, serverEditComponent } = await require('./components/ServerItem');
 
     const app = Vue.createApp({
@@ -53,14 +51,14 @@ const { data } = require("./components/ServerItem");
         methods: {
           async loadServers() {
               let servers = await _getServersFromStorage();
-              console.log(JSON.stringify(servers));        
-              this.servers = servers;
-              this.nextServerId = Math.max(...servers.map(s => s.id), 0) + 1;
+              if (servers) {
+                console.log(JSON.stringify(servers));        
+                this.servers = servers;
+              }  
+              this.nextServerId = Math.max(...this.servers.map(s => s.id), 0) + 1;
           },
           async connect() {
-            // const server = this.servers.find( ({name}) => name === this.selectServer);
             const server = this.servers[this.selectServer];
-            // let [host, port] = server.connStr.split(':');
             console.log(server.host, server.port);
             await _connect(server.host, parseInt(server.port));
           },
@@ -95,15 +93,15 @@ const { data } = require("./components/ServerItem");
           async deleteServer(cs) {
               console.log("We're going to delete server: " + cs.id.toString());
               const key = String('server.' + cs.id.toString());
-              storage.remove(key, (error) => {
-                  if (error) throw error;
-              })
 
               // don't delete last entry
               if (this.servers.length <= 1) {
                 console.log("Don't delete server if only one");
               }
               else {
+                storage.remove(key, (error) => {
+                    if (error) throw error;
+                })
                 this.servers.splice(this.servers.findIndex(item => item.id === cs.id), 1);
               }
           },
@@ -141,7 +139,9 @@ const { data } = require("./components/ServerItem");
             storage.getMany(serverKeys, (error, data) => {
                 if (error) reject(error);
                 console.log(JSON.stringify(data));
-                resolve(data.server.filter(k => k !== null));  // For some reason we are getting an object {"server": [...]}
+                if ('server' in data) {
+                    resolve(data.server.filter(k => k !== null));  // For some reason we are getting an object {"server": [...]}
+                }
             })
         });
     })
