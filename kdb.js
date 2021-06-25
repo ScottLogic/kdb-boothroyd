@@ -7,6 +7,7 @@ const storage = require("./storage");
 const editor = require("./editor/editor");
 
 storage.init();
+
 let connection;
 
 const app = Vue.createApp({
@@ -22,29 +23,28 @@ const app = Vue.createApp({
     };
   },
   methods: {
-    async loadServers() {
-      let servers = await storage.getServers();
-      if (servers) {
-        console.log(JSON.stringify(servers));
-        this.servers = servers;
-      }
-    },
     async connect() {
       const server = this.servers[this.selectServer];
       console.log(server.host, server.port);
-      connection = await KdbConnection.connect(
-        server.host,
-        parseInt(server.port)
-      );
+
+      try {
+        connection = await KdbConnection.connect(
+          server.host,
+          parseInt(server.port)
+        );
+      } catch (e) {
+        connection = undefined;
+        console.error("server connection error", e);
+      }
     },
     async send() {
+      if (!connection) return;
       const input = await editor.then((e) => e.getValue());
       const res = await connection.send(input);
       this.resultJSON = res.j;
       this.resultHTML = res.h;
     },
     async addServer() {
-      console.log("We're going to add a server");
       toggleAddServer = true;
     },
     async saveServer(cs) {
@@ -78,8 +78,13 @@ const app = Vue.createApp({
       }
     },
   },
-  mounted() {
-    this.loadServers();
+  async mounted() {
+    this.servers = await storage.getServers();
+    // automatically connect to the first server in the list
+    if (this.servers.length) {
+      this.selectServer = 0;
+      await this.connect();
+    }
   },
   components: {
     "server-item": serverItemComponent,
