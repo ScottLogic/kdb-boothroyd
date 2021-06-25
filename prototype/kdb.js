@@ -9,10 +9,9 @@
     const path = require('path');
     const fs = require('fs');
     const storage = require('electron-json-storage');
-    //TODO: at the moment this is WINDOWS ONLY
     const storageDir = path.join(os.homedir(), 'AppData','Local', 'kdb studio 2' );
     if (! fs.existsSync(storageDir)) {
-        fs.mkdirSync(storageDir);
+        fs.mkdirSync(storageDir, { recursive: true });
     }
     storage.setDataPath(storageDir);
     console.log('storage path: ' + storageDir);
