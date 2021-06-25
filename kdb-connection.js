@@ -1,19 +1,20 @@
 const nodeq = require("node-q");
-const promisify = require('util').promisify;
+const promisify = require("util").promisify;
 
- // not sure why util.promisify doesn't work here?
- const qSend = (conn, value) => new Promise((resolve, reject) => {
-  conn.k(value, function(err, res) {
+// not sure why util.promisify doesn't work here?
+const qSend = (conn, value) =>
+  new Promise((resolve, reject) => {
+    conn.k(value, function (err, res) {
       if (err) reject(err);
       resolve(res);
+    });
   });
-})
 
 class KdbConnection {
   #connection;
 
   constructor(connection) {
-    this.#connection = connection
+    this.#connection = connection;
   }
 
   static async connect(host, port) {
@@ -22,7 +23,6 @@ class KdbConnection {
   }
 
   async send(message) {
-    
     const data = await qSend(this.#connection, message);
     const resultJSON = JSON.stringify(data, null, 2);
 
@@ -60,18 +60,19 @@ class KdbConnection {
   }
 }
 
-function generateTableHTML(data){
+function generateTableHTML(data) {
   /* we will iterate through the object wrapping it in the HTML table tags */
   let tableHTML = '<table border="1"><tr>';
   if (typeof data[0] == "object") {
-      tableHTML += data[0].map(x => `<th>${x}</th>`);
-      tableHTML += '</tr>';
-      tableHTML += data.map(row => data[0].map(col => `<td>${row[col]}</td>`));
+    tableHTML += data[0].map((x) => `<th>${x}</th>`);
+    tableHTML += "</tr>";
+    tableHTML += data.map((row) =>
+      data[0].map((col) => `<td>${row[col]}</td>`)
+    );
+  } else {
+    tableHTML += data.map((x) => `<td>${x}</td>`).join("");
   }
-  else {
-      tableHTML += data.map(x => `<td>${x}</td>`).join('');
-  }
-  tableHTML += '</table>';
+  tableHTML += "</table>";
   return tableHTML;
 }
 
