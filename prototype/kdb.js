@@ -1,14 +1,16 @@
+const os = require('os');
+const path = require('path');
+const fs = require('fs');
+const storage = require('electron-json-storage');
+const nodeq = require("node-q");
+const promisify = require('util').promisify;
+
+const { serverItemComponent, serverEditComponent } = require('./components/ServerItem');
 
 (async () => {
 
-    const nodeq = require("node-q");
-    const promisify = require('util').promisify;
-
+    
     // Deal with persisting server data
-    const os = require('os');
-    const path = require('path');
-    const fs = require('fs');
-    const storage = require('electron-json-storage');
     const storageDir = path.join(os.homedir(), 'AppData','Local', 'kdb studio 2' );
     if (! fs.existsSync(storageDir)) {
         fs.mkdirSync(storageDir, { recursive: true });
@@ -19,11 +21,9 @@
     let conn;
  
     //TODO: add auth stuff etc
-    const {serverItemComponent, serverEditComponent } = await require('./components/ServerItem');
-
+    
     const app = Vue.createApp({
         data() {
-
           return {
             query: '',
             servers: // Needs to be initialised with valid dummy data or else render won't work
