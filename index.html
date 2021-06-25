@@ -41,7 +41,7 @@
                     {{ srv.name }}
                 </option>
             </select>
-            <span style="padding: 10px;">{{ servers[selectServer].name }}</span>
+            <span v-if="selectServer != -1" style="padding: 10px;">{{ servers[selectServer - 1].name }}</span>
             <button class="btn" v-on:click="connect">Connect</button>
             <button class="btn" v-on:click="toggleServers = !toggleServers">Servers</button>
             <button class="btn" v-on:click="send">Go</button>
