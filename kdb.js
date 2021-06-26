@@ -19,7 +19,7 @@ const app = Vue.createApp({
       selectServer: -1,
       toggleServers: false,
       toggleAddServer: false,
-      queryResult: "",
+      queryResult: undefined,
     };
   },
   methods: {

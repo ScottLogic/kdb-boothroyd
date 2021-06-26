@@ -25,7 +25,7 @@ const queryResults = {
 
   methods: {
     convertToHTML(result) {
-      if (result.type === "success") {
+      if (result && result.type === "success") {
         const data = result.data;
         let outputHTML = "";
         if (typeof data == "object") {
@@ -40,8 +40,6 @@ const queryResults = {
           outputHTML = data;
         }
         return outputHTML;
-      }
-      if (result.type === "error") {
       }
     },
   },
