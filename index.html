@@ -83,18 +83,10 @@
         </div>
       </div>
       <div id="editor"></div>
-      <div id="txtOutput" v-html="resultJSON"></div>
-      <div id="txtResult" v-html="resultHTML"></div>
+      <div id="txtOutput" v-html="JSON.stringify(queryResult)"></div>
+      <query-results v-bind:result="queryResult"></query-results>
     </div>
   </body>
-  <link
-    href="node_modules/tabulator-tables/dist/css/tabulator.min.css"
-    rel="stylesheet"
-  />
-  <script
-    type="text/javascript"
-    src="node_modules/tabulator-tables/dist/js/tabulator.min.js"
-  ></script>
   <script src="node_modules/vue/dist/vue.global.js"></script>
   <script src="kdb.js"></script>
 </html>

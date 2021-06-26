@@ -2,6 +2,7 @@ const {
   serverItemComponent,
   serverEditComponent,
 } = require("./components/server-item.js");
+const { queryResults } = require("./components/query-results.js");
 const KdbConnection = require("./kdb-connection.js");
 const storage = require("./storage");
 const editor = require("./editor/editor");
@@ -18,8 +19,7 @@ const app = Vue.createApp({
       selectServer: -1,
       toggleServers: false,
       toggleAddServer: false,
-      resultJSON: "",
-      resultHTML: "",
+      queryResult: "",
     };
   },
   methods: {
@@ -40,9 +40,7 @@ const app = Vue.createApp({
     async send() {
       if (!connection) return;
       const input = await editor.then((e) => e.getValue());
-      const res = await connection.send(input);
-      this.resultJSON = res.j;
-      this.resultHTML = res.h;
+      this.queryResult = await connection.send(input);
     },
     async addServer() {
       toggleAddServer = true;
@@ -89,6 +87,7 @@ const app = Vue.createApp({
   components: {
     "server-item": serverItemComponent,
     "server-edit": serverEditComponent,
+    "query-results": queryResults,
   },
 });
 
