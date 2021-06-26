@@ -23,7 +23,18 @@ class KdbConnection {
   }
 
   async send(message) {
-    return await qSend(this.#connection, message);
+    try {
+      const data = await qSend(this.#connection, message);
+      return {
+        type: "success",
+        data,
+      };
+    } catch (e) {
+      return {
+        type: "error",
+        data: e.toString(),
+      };
+    }
   }
 }
 

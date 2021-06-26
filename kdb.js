@@ -31,7 +31,10 @@ const app = Vue.createApp({
         connection = await KdbConnection.connect(server.host, server.port);
       } catch (e) {
         connection = undefined;
-        console.error("server connection error", e);
+        this.queryResult = {
+          type: "error",
+          data: "failed to connect to server",
+        };
       }
     },
     async send() {

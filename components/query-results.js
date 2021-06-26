@@ -24,22 +24,25 @@ const queryResults = {
   props: ["result"],
 
   methods: {
-    convertToHTML(data) {
-      let outputHTML = "";
-      if (typeof data == "object") {
-        /* if an object, then message must be a table or a dictionary */
-        if (data.length) {
-          outputHTML = generateTableHTML(data);
-        } else {
-          for (let x in data) {
-            outputHTML += x + " | " + data[x] + "<br />";
+    convertToHTML(result) {
+      if (result.type === "success") {
+        const data = result.data;
+        let outputHTML = "";
+        if (typeof data == "object") {
+          if (data.length) {
+            outputHTML = generateTableHTML(data);
+          } else {
+            for (let x in data) {
+              outputHTML += x + " | " + data[x] + "<br />";
+            }
           }
+        } else {
+          outputHTML = data;
         }
-      } else {
-        outputHTML = data;
+        return outputHTML;
       }
-
-      return outputHTML;
+      if (result.type === "error") {
+      }
     },
   },
 
