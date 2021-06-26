@@ -11,7 +11,7 @@ const serverEditComponent = {
     `<div>
         <input v-model="serverEdit.name" placeholder="Name"/>
         <input v-model="serverEdit.host" placeholder="Host"/>
-        <input v-model="serverEdit.port" placeholder="Port"/>
+        <input v-model.number="serverEdit.port" placeholder="Port"/>
         <input v-model="serverEdit.username" placeholder="Username"/>
         <input type="password" v-model="serverEdit.password" placeholder="Password"/>
         <button class="btn" @click="cancel">Cancel</button>
