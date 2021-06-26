@@ -60,7 +60,7 @@
     <div id="v-app">
       <div id="connect">
         <select v-model="selectServer" v-on:change="connect">
-          <option v-for="(srv, index) in servers" :value="index">
+          <option v-for="srv in servers.values()" :value="srv.id">
             {{ srv.name }}
           </option>
         </select>
@@ -69,7 +69,7 @@
         </button>
         <button class="btn" v-on:click="send">Go</button>
         <div id="show-servers" v-if="toggleServers">
-          <div v-for="srv in servers" :key="srv.id">
+          <div v-for="srv in servers.values()" :key="srv.id">
             <server-item
               :server="srv"
               @save="saveServer"

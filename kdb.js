@@ -15,7 +15,7 @@ const app = Vue.createApp({
   data() {
     return {
       query: "",
-      servers: [],
+      servers: new Map(),
       selectServer: -1,
       toggleServers: false,
       toggleAddServer: false,
@@ -24,7 +24,7 @@ const app = Vue.createApp({
   },
   methods: {
     async connect() {
-      const server = this.servers[this.selectServer];
+      const server = this.servers.get(this.selectServer);
       console.log(server.host, server.port);
 
       try {
@@ -46,17 +46,8 @@ const app = Vue.createApp({
       toggleAddServer = true;
     },
     async saveServer(cs) {
-      const isNew = !cs.id;
       storage.saveServer(cs);
-      if (isNew) {
-        this.servers.push(cs);
-      } else {
-        this.servers.splice(
-          this.servers.findIndex((item) => item.id === cs.id),
-          1,
-          cs
-        );
-      }
+      this.servers.set(cs.id, cs);
     },
     async deleteServer(cs) {
       if (this.servers.length <= 1) {
@@ -64,10 +55,7 @@ const app = Vue.createApp({
         return;
       }
       storage.deleteServer(cs.id);
-      this.servers.splice(
-        this.servers.findIndex((item) => item.id === cs.id),
-        1
-      );
+      this.servers.delete(cs.id);
     },
     async handleDoneNew(cs) {
       this.toggleAddServer = false;
@@ -77,10 +65,15 @@ const app = Vue.createApp({
     },
   },
   async mounted() {
-    this.servers = await storage.getServers();
+    const servers = await storage.getServers();
+    this.servers = servers.reduce((map, s) => {
+      map.set(s.id, s);
+      return map;
+    }, new Map());
+
     // automatically connect to the first server in the list
-    if (this.servers.length) {
-      this.selectServer = 0;
+    if (servers.length) {
+      this.selectServer = servers[0].id;
       await this.connect();
     }
   },
