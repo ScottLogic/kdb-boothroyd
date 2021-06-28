@@ -2,6 +2,11 @@
 <html>
   <head>
     <title>KDB Studio2 Prototype</title>
+    <link
+      rel="stylesheet"
+      href="node_modules/element-ui/lib/theme-chalk/index.css"
+    />
+
     <style>
       /* define some CSS styling on page elements */
       #editor {
@@ -11,13 +16,10 @@
         margin-bottom: 10px;
         border: 1px solid gray;
       }
-      .btn {
-        margin-left: 10px;
-        margin-bottom: 10px;
-        width: 80px;
-        height: 30px;
-        font-weight: bold;
+      body {
+        font-family: "Helvetica Neue", Helvetica;
       }
+
       #txtOutput {
         width: 100%;
         height: 120px;
@@ -58,35 +60,38 @@
   </head>
   <body>
     <div id="v-app">
+      <el-dialog title="Edit Server" :visible.sync="dialog.visible" width="50%">
+        <span>This is a message</span>
+        <server-edit
+          @confirm="confirm"
+          @cancel="cancel"
+          :server="dialog.server"
+        ></server-edit>
+      </el-dialog>
+
       <div id="connect">
-        <select v-model="selectServer" v-on:change="connect">
-          <option v-for="srv in servers.values()" :value="srv.id">
-            {{ srv.name }}
-          </option>
-        </select>
-        <button class="btn" v-on:click="toggleServers = !toggleServers">
-          Servers
-        </button>
-        <button class="btn" v-on:click="send">Go</button>
-        <div id="show-servers" v-if="toggleServers">
-          <div v-for="srv in servers.values()" :key="srv.id">
-            <server-item
-              :server="srv"
-              @save="saveServer"
-              @delete="deleteServer"
-            ></server-item>
-          </div>
-          <button class="btn" @click="toggleAddServer = true">Add New</button>
-          <div id="add-server" v-if="toggleAddServer">
-            <server-edit @done="handleDoneNew"></server-edit>
-          </div>
-        </div>
+        <el-select
+          size="small"
+          v-model="selectServer"
+          placeholder="Select server"
+        >
+          <el-option
+            v-for="srv in servers.values()"
+            :key="srv.id"
+            :label="srv.name"
+            :value="srv.id"
+          >
+          </el-option>
+        </el-select>
+        <el-button size="mini" v-on:click="send">Go</el-button>
+        <el-button size="mini" @click="editServer">Edit</el-button>
       </div>
       <div id="editor"></div>
       <div id="txtOutput" v-html="JSON.stringify(queryResult)"></div>
       <query-results v-bind:result="queryResult"></query-results>
     </div>
   </body>
-  <script src="node_modules/vue/dist/vue.global.js"></script>
+  <script src="node_modules/vue/dist/vue.js"></script>
+  <script src="node_modules/element-ui/lib/index.js"></script>
   <script src="kdb.js"></script>
 </html>

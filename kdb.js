@@ -1,25 +1,28 @@
-const {
-  serverItemComponent,
-  serverEditComponent,
-} = require("./components/server-item.js");
+const serverEdit = require("./components/server-edit.js");
 const { queryResults } = require("./components/query-results.js");
 const KdbConnection = require("./kdb-connection.js");
 const storage = require("./storage");
 const editor = require("./editor/editor");
+const ElementUI = require("element-ui");
 
 storage.init();
 
 let connection;
 
-const app = Vue.createApp({
+Vue.use(ElementUI);
+
+new Vue({
+  el: "#v-app",
   data() {
     return {
       query: "",
       servers: new Map(),
       selectServer: -1,
-      toggleServers: false,
-      toggleAddServer: false,
       queryResult: undefined,
+      dialog: {
+        visible: false,
+        server: undefined,
+      },
     };
   },
   methods: {
@@ -42,9 +45,6 @@ const app = Vue.createApp({
       const input = await editor.then((e) => e.getValue());
       this.queryResult = await connection.send(input);
     },
-    async addServer() {
-      toggleAddServer = true;
-    },
     async saveServer(cs) {
       storage.saveServer(cs);
       this.servers.set(cs.id, cs);
@@ -57,11 +57,18 @@ const app = Vue.createApp({
       storage.deleteServer(cs.id);
       this.servers.delete(cs.id);
     },
-    async handleDoneNew(cs) {
-      this.toggleAddServer = false;
-      if (cs !== null) {
-        await this.saveServer(cs);
-      }
+    editServer() {
+      this.dialog.server = { ...this.servers.get(this.selectServer) };
+      this.dialog.visible = true;
+    },
+    async confirm() {
+      this.servers.set(this.dialog.id, this.dialog.server);
+      await this.saveServer(this.dialog.server);
+      this.dialog.visible = false;
+    },
+    async cancel() {
+      this.dialog.server = undefined;
+      this.dialog.visible = false;
     },
   },
   async mounted() {
@@ -78,10 +85,7 @@ const app = Vue.createApp({
     }
   },
   components: {
-    "server-item": serverItemComponent,
-    "server-edit": serverEditComponent,
+    "server-edit": serverEdit,
     "query-results": queryResults,
   },
 });
-
-app.mount("#v-app");
