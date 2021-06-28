@@ -6,6 +6,8 @@
       rel="stylesheet"
       href="node_modules/element-ui/lib/theme-chalk/index.css"
     />
+    <script src="node_modules/vue/dist/vue.js"></script>
+    <script src="node_modules/element-ui/lib/index.js"></script>
 
     <style>
       /* define some CSS styling on page elements */
@@ -60,8 +62,11 @@
   </head>
   <body>
     <div id="v-app">
-      <el-dialog title="Edit Server" :visible.sync="dialog.visible" width="50%">
-        <span>This is a message</span>
+      <el-dialog
+        v-bind:title="dialogTitle"
+        :visible.sync="dialog.visible"
+        width="50%"
+      >
         <server-edit
           @confirm="confirm"
           @cancel="cancel"
@@ -73,7 +78,7 @@
         <el-select
           size="small"
           v-model="selectServer"
-          placeholder="Select server"
+          placeholder="Select a server"
         >
           <el-option
             v-for="srv in servers.values()"
@@ -83,15 +88,25 @@
           >
           </el-option>
         </el-select>
-        <el-button size="mini" v-on:click="send">Go</el-button>
-        <el-button size="mini" @click="editServer">Edit</el-button>
+        <el-button type="primary" size="mini" v-on:click="send">Go</el-button>
+
+        <el-button-group>
+          <el-button type="primary" size="mini" @click="editServer"
+            >Edit</el-button
+          >
+          <el-button type="primary" size="mini" @click="addServer"
+            >Add</el-button
+          >
+          <el-button type="primary" size="mini" @click="deleteServer"
+            >Delete</el-button
+          >
+        </el-button-group>
       </div>
       <div id="editor"></div>
       <div id="txtOutput" v-html="JSON.stringify(queryResult)"></div>
       <query-results v-bind:result="queryResult"></query-results>
     </div>
   </body>
-  <script src="node_modules/vue/dist/vue.js"></script>
-  <script src="node_modules/element-ui/lib/index.js"></script>
+
   <script src="kdb.js"></script>
 </html>

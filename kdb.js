@@ -15,13 +15,13 @@ new Vue({
   el: "#v-app",
   data() {
     return {
-      query: "",
       servers: new Map(),
-      selectServer: -1,
+      selectServer: undefined,
       queryResult: undefined,
       dialog: {
+        editMode: true,
         visible: false,
-        server: undefined,
+        server: {},
       },
     };
   },
@@ -45,29 +45,29 @@ new Vue({
       const input = await editor.then((e) => e.getValue());
       this.queryResult = await connection.send(input);
     },
-    async saveServer(cs) {
-      storage.saveServer(cs);
-      this.servers.set(cs.id, cs);
-    },
-    async deleteServer(cs) {
-      if (this.servers.length <= 1) {
-        console.log("Don't delete server if only one");
-        return;
-      }
-      storage.deleteServer(cs.id);
-      this.servers.delete(cs.id);
+    addServer() {
+      this.dialog.editMode = false;
+      this.dialog.server = {};
+      this.dialog.visible = true;
     },
     editServer() {
+      this.dialog.editMode = true;
       this.dialog.server = { ...this.servers.get(this.selectServer) };
       this.dialog.visible = true;
     },
+    deleteServer() {
+      const server = this.servers.get(this.selectServer);
+      this.servers.delete(this.selectServer);
+      storage.deleteServer(server.id);
+      this.selectServer = undefined;
+    },
     async confirm() {
-      this.servers.set(this.dialog.id, this.dialog.server);
-      await this.saveServer(this.dialog.server);
+      await storage.saveServer(this.dialog.server);
+      this.servers.set(this.dialog.server.id, this.dialog.server);
       this.dialog.visible = false;
     },
-    async cancel() {
-      this.dialog.server = undefined;
+    cancel() {
+      this.dialog.server = {};
       this.dialog.visible = false;
     },
   },
@@ -83,6 +83,11 @@ new Vue({
       this.selectServer = servers[0].id;
       await this.connect();
     }
+  },
+  computed: {
+    dialogTitle: function () {
+      return this.dialog.editMode ? "Edit server details" : "Add new server";
+    },
   },
   components: {
     "server-edit": serverEdit,
