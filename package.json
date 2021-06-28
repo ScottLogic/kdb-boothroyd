@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
     "build": "electron-packager . kdb-studio-2-proto --platform win32 --arch x64 --out dist/ --overwrite",
-    "setup": "electron-installer-windows --src dist/app-win32-x64/ --dest dist/installers/"
+    "setup": "electron-installer-windows --src dist/app-win32-x64/ --dest dist/installers/",
+    "prettier": "prettier --write *",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -27,13 +29,17 @@
   "devDependencies": {
     "electron": "^13.1.2",
     "electron-installer-windows": "^3.0.0",
-    "electron-packager": "^15.2.0"
+    "electron-packager": "^15.2.0",
+    "husky": "^6.0.0",
+    "prettier": "^2.3.1",
+    "pretty-quick": "^3.1.1"
   },
   "dependencies": {
     "electron-json-storage": "^4.5.0",
+    "element-ui": "^2.15.2",
     "monaco-editor": "^0.23.0",
     "node-q": "^2.5.0",
-    "tabulator-tables": "^4.9.3",
-    "vue": "^3.1.1"
+    "uuid": "^8.3.2",
+    "vue": "^2.6.14"
   }
 }
