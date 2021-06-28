@@ -1,17 +1,12 @@
 const serverEdit = require("./components/server-edit.js");
 const { queryResults } = require("./components/query-results.js");
-const KdbConnection = require("./kdb-connection.js");
-const storage = require("./storage");
+const KdbConnection = require("./server/kdb-connection.js");
+const storage = require("./storage/storage");
 const editor = require("./editor/editor");
-const ElementUI = require("element-ui");
-
-storage.init();
 
 let connection;
 
-Vue.use(ElementUI);
-
-new Vue({
+module.exports = {
   el: "#v-app",
   data() {
     return {
@@ -93,4 +88,4 @@ new Vue({
     "server-edit": serverEdit,
     "query-results": queryResults,
   },
-});
+};
