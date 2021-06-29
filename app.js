@@ -3,6 +3,7 @@ const { queryResults } = require("./components/query-results.js");
 const KdbConnection = require("./server/kdb-connection.js");
 const storage = require("./storage/storage");
 const editor = require("./editor/editor");
+const { createReadStream } = require("original-fs");
 
 let connection;
 
@@ -36,7 +37,12 @@ module.exports = {
       }
     },
     async send() {
-      if (!connection) return;
+      if (!connection) {
+        connection = await this.connect();
+        if (!connection) {
+          return;
+        }
+      }
       const input = await editor.then((e) => e.getValue());
       this.queryResult = await connection.send(input);
     },

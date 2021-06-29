@@ -39,6 +39,7 @@
     "element-ui": "^2.15.2",
     "monaco-editor": "^0.23.0",
     "node-q": "^2.5.0",
+    "splitpanes": "^2.3.6",
     "uuid": "^8.3.2",
     "vue": "^2.6.14"
   }
