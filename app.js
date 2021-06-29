@@ -4,6 +4,7 @@ const KdbConnection = require("./server/kdb-connection.js");
 const storage = require("./storage/storage");
 const editor = require("./editor/editor");
 const { createReadStream } = require("original-fs");
+const { Splitpanes, Pane } = require("splitpanes");
 
 let connection;
 
@@ -93,5 +94,7 @@ module.exports = {
   components: {
     "server-edit": serverEdit,
     "query-results": queryResults,
+    splitpanes: Splitpanes,
+    pane: Pane,
   },
 };

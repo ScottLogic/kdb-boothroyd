@@ -8,6 +8,7 @@
     />
     <script src="node_modules/vue/dist/vue.js"></script>
     <script src="node_modules/element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="node_modules/splitpanes/dist/splitpanes.css" />
 
     <style>
       /* define some CSS styling on page elements */
@@ -23,43 +24,23 @@
       #editor {
         width: 100%;
         min-height: 200px;
-        /* float: left; */
-        /* margin-bottom: 10px; */
         border: 1px solid gray;
-        flex: 1 1 auto;
-        /* resize: vertical; */
+        /* flex: 1 1 auto; */
       }
       #connect {
-        /* margin-bottom: 10px; */
-        flex: none;
+        flex: auto;
       }
       body {
         font-family: "Helvetica Neue", Helvetica;
       }
-
       #txtOutput {
-        /* width: 100%; */
-        /* height: 120px; */
         font-family: "Courier New";
         font-size: smaller;
-        /* padding: 10px; */
         border: 1px solid gray;
-        /* margin-top: 10px; */
-        /* margin-bottom: 10px; */
         overflow: auto;
         flex: auto;
+        /* flex-grow: 1; */
       }
-      /* #txtResult {
-        width: 100%;
-        height: 200px;
-        font-family: "Courier New";
-        padding: 10px;
-        border: 1px solid gray;
-        margin-top: 10px;
-        margin-bottom: 10px; 
-        overflow: auto;
-        flex: 2 1 auto;
-      }  */
       table,
       th,
       td {
@@ -87,8 +68,10 @@
         ></server-edit>
       </el-dialog>
 
-      <div id="container">
-        <div id="connect">
+      <!-- <div id="container"> -->
+      <splitpanes class="default-theme" horizontal style="height: 95vh">
+        <!-- <div id="connect"> -->
+        <pane id="connect" size="10" min-size="10" max-size="10">
           <el-select
             size="mini"
             v-model="selectServer"
@@ -132,11 +115,20 @@
               >
             </el-popconfirm>
           </el-button-group>
-        </div>
+        </pane>
+        <!-- </div> -->
 
-        <div id="editor"></div>
-        <div id="txtOutput" v-html="JSON.stringify(queryResult)"></div>
-      </div>
+        <!-- <div id="editor"></div> -->
+        <pane id="editor" size="40" min-size="20" max-size="70"></pane>
+        <!-- <div id="txtOutput" v-html="JSON.stringify(queryResult)"></div> -->
+        <pane
+          id="txtOutput"
+          min-size="30"
+          size="50"
+          v-html="JSON.stringify(queryResult)"
+        ></pane>
+      </splitpanes>
+      <!-- </div> -->
 
       <query-results v-bind:result="queryResult"></query-results>
     </div>
