@@ -42,10 +42,39 @@ const queryResults = {
         return outputHTML;
       }
     },
+    formatResult(result, resType) {
+      //TODO: Wed - finish this off
+      if (typeof result != "string") {
+        const jsonPretty =
+          "<pre>" + JSON.stringify(result, undefined, 2) + "</pre>";
+        if (resType === "json") {
+          return jsonPretty;
+        } else if (resType === "raw") {
+          return typeof result;
+        }
+      } else {
+        return result;
+      }
+    },
+    handleClick(tab, event) {
+      console.log(`Hook for click on tab: ${tab.label}`);
+      if (tab.label === "Raw") {
+        console.log(this.result);
+      }
+    },
   },
 
-  template: `<div v-html="convertToHTML(result)">
-    </div>`,
+  // template: `<div v-html="convertToHTML(result)">
+  //   </div>`,
+
+  template:
+    /*html*/
+    `<el-tabs type="card" @tab-click="handleClick">
+    <el-tab-pane label="Table"><div v-html="convertToHTML(result)"></div></el-tab-pane>
+    <el-tab-pane label="JSON"><div v-html="formatResult(result, 'json')"></div></el-tab-pane>
+    <el-tab-pane label="Raw"><div v-html="formatResult(result, 'raw')"></div></el-tab-pane>
+    <el-tab-pane label="Message">Placeholder for errors</el-tab-pane>
+  </el-tabs>`,
 };
 
 module.exports = { queryResults };

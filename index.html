@@ -23,19 +23,21 @@
       }
       #editor {
         width: 100%;
-        min-height: 200px;
         border: 1px solid gray;
         /* flex: 1 1 auto; */
       }
       #connect {
-        flex: auto;
+        /* flex: initial; */
+        flex: initial;
+        margin-bottom: 10px;
       }
       body {
         font-family: "Helvetica Neue", Helvetica;
       }
-      #txtOutput {
-        font-family: "Courier New";
+      #results {
+        /* font-family: "Courier New"; */
         font-size: smaller;
+        background-color: white;
         border: 1px solid gray;
         overflow: auto;
         flex: auto;
@@ -68,10 +70,8 @@
         ></server-edit>
       </el-dialog>
 
-      <!-- <div id="container"> -->
-      <splitpanes class="default-theme" horizontal style="height: 95vh">
-        <!-- <div id="connect"> -->
-        <pane id="connect" size="10" min-size="10" max-size="10">
+      <div id="container">
+        <div id="connect">
           <el-select
             size="mini"
             v-model="selectServer"
@@ -115,22 +115,23 @@
               >
             </el-popconfirm>
           </el-button-group>
-        </pane>
-        <!-- </div> -->
-
-        <!-- <div id="editor"></div> -->
-        <pane id="editor" size="40" min-size="20" max-size="70"></pane>
-        <!-- <div id="txtOutput" v-html="JSON.stringify(queryResult)"></div> -->
-        <pane
-          id="txtOutput"
-          min-size="30"
-          size="50"
-          v-html="JSON.stringify(queryResult)"
-        ></pane>
-      </splitpanes>
-      <!-- </div> -->
-
-      <query-results v-bind:result="queryResult"></query-results>
+        </div>
+        <splitpanes class="default-theme" horizontal style="flex-grow: 1">
+          <!-- <div id="editor"></div> -->
+          <pane id="editor" size="50" min-size="10" max-size="90"></pane>
+          <!-- <div id="txtOutput" v-html="JSON.stringify(queryResult)"></div> -->
+          <!-- <pane
+            id="results"
+            min-size="10"
+            max-size="90"
+            size="50"
+            v-html="JSON.stringify(queryResult)" 
+          > -->
+          <pane id="results" min-size="10" max-size="90" size="50">
+            <query-results v-bind:result="queryResult"></query-results>
+          </pane>
+        </splitpanes>
+      </div>
     </div>
   </body>
 

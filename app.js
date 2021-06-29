@@ -45,7 +45,14 @@ module.exports = {
         }
       }
       const input = await editor.then((e) => e.getValue());
-      this.queryResult = await connection.send(input);
+      try {
+        this.queryResult = await connection.send(input);
+      } catch (e) {
+        this.queryResult = {
+          type: "error",
+          data: "failed to get results from server",
+        };
+      }
     },
     addServer() {
       this.dialog.editMode = false;
