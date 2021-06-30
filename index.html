@@ -11,12 +11,10 @@
     <link rel="stylesheet" href="node_modules/splitpanes/dist/splitpanes.css" />
 
     <style>
-      /* define some CSS styling on page elements */
       #container {
         display: flex;
         flex-direction: column;
         height: 95vh;
-        /* border: 1px solid orange; */
       }
       .monaco-editor {
         position: absolute;
@@ -24,10 +22,9 @@
       #editor {
         width: 100%;
         border: 1px solid gray;
-        /* flex: 1 1 auto; */
+        flex: auto;
       }
       #connect {
-        /* flex: initial; */
         flex: initial;
         margin-bottom: 10px;
       }
@@ -35,13 +32,10 @@
         font-family: "Helvetica Neue", Helvetica;
       }
       #results {
-        /* font-family: "Courier New"; */
-        font-size: smaller;
         background-color: white;
         border: 1px solid gray;
         overflow: auto;
         flex: auto;
-        /* flex-grow: 1; */
       }
       table,
       th,
@@ -117,17 +111,8 @@
           </el-button-group>
         </div>
         <splitpanes class="default-theme" horizontal style="flex-grow: 1">
-          <!-- <div id="editor"></div> -->
           <pane id="editor" size="50" min-size="10" max-size="90"></pane>
-          <!-- <div id="txtOutput" v-html="JSON.stringify(queryResult)"></div> -->
-          <!-- <pane
-            id="results"
-            min-size="10"
-            max-size="90"
-            size="50"
-            v-html="JSON.stringify(queryResult)" 
-          > -->
-          <pane id="results" min-size="10" max-size="90" size="50">
+          <pane id="results" size="50" min-size="10" max-size="90">
             <query-results v-bind:result="queryResult"></query-results>
           </pane>
         </splitpanes>

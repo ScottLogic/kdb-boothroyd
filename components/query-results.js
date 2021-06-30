@@ -23,39 +23,16 @@ function generateTableHTML(data) {
 const queryResults = {
   props: ["result"],
 
+  data() {
+    return {
+      activeTab: "tbl",
+      resText: "",
+      resHTML: "",
+      resMsg: "",
+    };
+  },
+
   methods: {
-    convertToHTML(result) {
-      if (result && result.type === "success") {
-        const data = result.data;
-        let outputHTML = "";
-        if (typeof data == "object") {
-          if (data.length) {
-            outputHTML = generateTableHTML(data);
-          } else {
-            for (let x in data) {
-              outputHTML += x + " | " + data[x] + "<br />";
-            }
-          }
-        } else {
-          outputHTML = data;
-        }
-        return outputHTML;
-      }
-    },
-    formatResult(result, resType) {
-      //TODO: Wed - finish this off
-      if (typeof result != "string") {
-        const jsonPretty =
-          "<pre>" + JSON.stringify(result, undefined, 2) + "</pre>";
-        if (resType === "json") {
-          return jsonPretty;
-        } else if (resType === "raw") {
-          return typeof result;
-        }
-      } else {
-        return result;
-      }
-    },
     handleClick(tab, event) {
       console.log(`Hook for click on tab: ${tab.label}`);
       if (tab.label === "Raw") {
@@ -64,16 +41,48 @@ const queryResults = {
     },
   },
 
-  // template: `<div v-html="convertToHTML(result)">
-  //   </div>`,
+  watch: {
+    result: function (res, oldRes) {
+      console.log("watcher called");
+      if (typeof res !== "object") {
+        this.resMsg = `ERROR: cannot process result of type ${typeof res}`;
+      } else {
+        if ("type" in res) {
+          if (res.type === "success") {
+            this.resMsg = "Success";
+            const data = res.data;
+            let outputHTML = "";
+            if (typeof data == "object") {
+              this.resText =
+                "<pre>" + JSON.stringify(res.data, undefined, 2) + "</pre>";
+              if (data.length) {
+                outputHTML = generateTableHTML(data);
+              } else {
+                for (let x in data) {
+                  outputHTML += x + " | " + data[x] + "<br />";
+                }
+              }
+              this.activeTab = "tbl";
+            } else {
+              this.resText = data;
+              this.activeTab = "txt";
+            }
+            this.resHTML = outputHTML;
+          } else {
+            this.resMsg = `${res.type}: ${res.data}`;
+            this.activeTab = "msg";
+          }
+        }
+      }
+    },
+  },
 
   template:
     /*html*/
-    `<el-tabs type="card" @tab-click="handleClick">
-    <el-tab-pane label="Table"><div v-html="convertToHTML(result)"></div></el-tab-pane>
-    <el-tab-pane label="JSON"><div v-html="formatResult(result, 'json')"></div></el-tab-pane>
-    <el-tab-pane label="Raw"><div v-html="formatResult(result, 'raw')"></div></el-tab-pane>
-    <el-tab-pane label="Message">Placeholder for errors</el-tab-pane>
+    `<el-tabs v-model="activeTab" type="card" @tab-click="handleClick">
+    <el-tab-pane label="Table" name="tbl"><div v-html="resHTML"></div></el-tab-pane>
+    <el-tab-pane label="Text" name="txt"><div v-html="resText"></div></el-tab-pane>
+    <el-tab-pane label="Message" name="msg">{{ resMsg }}</el-tab-pane>
   </el-tabs>`,
 };
 
