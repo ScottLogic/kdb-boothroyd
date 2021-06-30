@@ -23,29 +23,57 @@ function generateTableHTML(data) {
 const queryResults = {
   props: ["result"],
 
-  methods: {
-    convertToHTML(result) {
-      if (result && result.type === "success") {
-        const data = result.data;
-        let outputHTML = "";
-        if (typeof data == "object") {
-          if (data.length) {
-            outputHTML = generateTableHTML(data);
-          } else {
-            for (let x in data) {
-              outputHTML += x + " | " + data[x] + "<br />";
+  data() {
+    return {
+      activeTab: "tbl",
+      resText: "",
+      resHTML: "",
+      resMsg: "",
+    };
+  },
+
+  watch: {
+    result: function (res) {
+      if (typeof res !== "object") {
+        this.resMsg = `ERROR: cannot process result of type ${typeof res}`;
+      } else {
+        if ("type" in res) {
+          if (res.type === "success") {
+            this.resMsg = "Success";
+            const data = res.data;
+            let outputHTML = "";
+            if (typeof data == "object") {
+              this.resText =
+                "<pre>" + JSON.stringify(res.data, undefined, 2) + "</pre>";
+              if (data.length) {
+                outputHTML = generateTableHTML(data);
+              } else {
+                for (let x in data) {
+                  outputHTML += x + " | " + data[x] + "<br />";
+                }
+              }
+              this.activeTab = "tbl";
+            } else {
+              this.resText = data;
+              this.activeTab = "txt";
             }
+            this.resHTML = outputHTML;
+          } else {
+            this.resMsg = `${res.type}: ${res.data}`;
+            this.activeTab = "msg";
           }
-        } else {
-          outputHTML = data;
         }
-        return outputHTML;
       }
     },
   },
 
-  template: `<div v-html="convertToHTML(result)">
-    </div>`,
+  template:
+    /*html*/
+    `<el-tabs v-model="activeTab" type="card">
+    <el-tab-pane label="Table" name="tbl"><div v-html="resHTML"></div></el-tab-pane>
+    <el-tab-pane label="Text" name="txt"><div v-html="resText"></div></el-tab-pane>
+    <el-tab-pane label="Message" name="msg">{{ resMsg }}</el-tab-pane>
+  </el-tabs>`,
 };
 
 module.exports = { queryResults };

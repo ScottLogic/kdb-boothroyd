@@ -8,40 +8,35 @@
     />
     <script src="node_modules/vue/dist/vue.js"></script>
     <script src="node_modules/element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="node_modules/splitpanes/dist/splitpanes.css" />
 
     <style>
-      /* define some CSS styling on page elements */
+      #container {
+        display: flex;
+        flex-direction: column;
+        height: 95vh;
+      }
+      .monaco-editor {
+        position: absolute;
+      }
       #editor {
         width: 100%;
-        height: 200px;
-        float: left;
+      }
+      #connect {
+        flex: initial;
         margin-bottom: 10px;
-        border: 1px solid gray;
+      }
+      #main-area {
+        flex: auto;
+        border: 1px solid lightgray;
       }
       body {
         font-family: "Helvetica Neue", Helvetica;
       }
-
-      #txtOutput {
-        width: 100%;
-        height: 120px;
-        font-family: "Courier New";
-        font-size: smaller;
-        padding: 10px;
-        border: 1px solid gray;
-        margin-top: 10px;
-        margin-bottom: 10px;
+      #results {
+        background-color: rgb(240, 240, 240);
         overflow: auto;
-      }
-      #txtResult {
-        width: 100%;
-        height: 200px;
-        font-family: "Courier New";
-        padding: 10px;
-        border: 1px solid gray;
-        margin-top: 10px;
-        margin-bottom: 10px;
-        overflow: auto;
+        /* flex: auto; */
       }
       table,
       th,
@@ -53,10 +48,6 @@
         font-family: "Lucida Sans";
         text-align: left;
         margin-bottom: 10px;
-      }
-      li {
-        display: inline;
-        border: 1px solid gray;
       }
     </style>
   </head>
@@ -74,37 +65,62 @@
         ></server-edit>
       </el-dialog>
 
-      <div id="connect">
-        <el-select
-          size="small"
-          v-model="selectServer"
-          placeholder="Select a server"
-        >
-          <el-option
-            v-for="srv in servers.values()"
-            :key="srv.id"
-            :label="srv.name"
-            :value="srv.id"
+      <div id="container">
+        <div id="connect">
+          <el-select
+            size="mini"
+            v-model="selectServer"
+            placeholder="Select a server"
+            no-data-text="Use Add to set up a server"
           >
-          </el-option>
-        </el-select>
-        <el-button type="primary" size="mini" v-on:click="send">Go</el-button>
+            <el-option
+              v-for="srv in servers.values()"
+              :key="srv.id"
+              :label="srv.name"
+              :value="srv.id"
+            >
+            </el-option>
+          </el-select>
 
-        <el-button-group>
-          <el-button type="primary" size="mini" @click="editServer"
-            >Edit</el-button
-          >
-          <el-button type="primary" size="mini" @click="addServer"
-            >Add</el-button
-          >
-          <el-button type="primary" size="mini" @click="deleteServer"
-            >Delete</el-button
-          >
-        </el-button-group>
+          <el-button type="primary" size="mini" v-on:click="send">Go</el-button>
+
+          <el-button-group>
+            <el-button
+              type="primary"
+              size="mini"
+              @click="editServer"
+              :disabled="!selectServer"
+              >Edit</el-button
+            >
+            <el-button type="primary" size="mini" @click="addServer"
+              >Add</el-button
+            >
+            <el-popconfirm
+              title="Are you sure you want to delete this server?"
+              confirm-button-text="OK"
+              cancel-button-text="Cancel"
+              @confirm="deleteServer"
+            >
+              <el-button
+                slot="reference"
+                type="danger"
+                size="mini"
+                :disabled="!selectServer"
+                >Delete</el-button
+              >
+            </el-popconfirm>
+          </el-button-group>
+        </div>
+
+        <div id="main-area">
+          <splitpanes class="default-theme" horizontal>
+            <pane id="editor" size="50" min-size="10" max-size="90"></pane>
+            <pane id="results" size="50" min-size="10" max-size="90">
+              <query-results v-bind:result="queryResult"></query-results>
+            </pane>
+          </splitpanes>
+        </div>
       </div>
-      <div id="editor"></div>
-      <div id="txtOutput" v-html="JSON.stringify(queryResult)"></div>
-      <query-results v-bind:result="queryResult"></query-results>
     </div>
   </body>
 

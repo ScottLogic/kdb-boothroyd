@@ -3,6 +3,8 @@ const { queryResults } = require("./components/query-results.js");
 const KdbConnection = require("./server/kdb-connection.js");
 const storage = require("./storage/storage");
 const editor = require("./editor/editor");
+const { createReadStream } = require("original-fs");
+const { Splitpanes, Pane } = require("splitpanes");
 
 let connection;
 
@@ -36,9 +38,21 @@ module.exports = {
       }
     },
     async send() {
-      if (!connection) return;
+      if (!connection) {
+        connection = await this.connect();
+        if (!connection) {
+          return;
+        }
+      }
       const input = await editor.then((e) => e.getValue());
-      this.queryResult = await connection.send(input);
+      try {
+        this.queryResult = await connection.send(input);
+      } catch (e) {
+        this.queryResult = {
+          type: "error",
+          data: "failed to get results from server",
+        };
+      }
     },
     addServer() {
       this.dialog.editMode = false;
@@ -87,5 +101,7 @@ module.exports = {
   components: {
     "server-edit": serverEdit,
     "query-results": queryResults,
+    splitpanes: Splitpanes,
+    pane: Pane,
   },
 };

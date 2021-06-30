@@ -31,12 +31,13 @@ module.exports = new Promise((resolve) => {
     monaco.editor.defineTheme("kdb", theme);
 
     const editor = monaco.editor.create(document.getElementById("editor"), {
-      value: "til 10",
+      value: "([] c1:1000+til 6; c2:`a`b`c`a`b`a; c3:10*1+til 6)",
       language: "kdb/q",
       theme: "kdb",
       minimap: {
         enabled: false,
       },
+      automaticLayout: true,
     });
     resolve(editor);
   });
