@@ -21,21 +21,22 @@
       }
       #editor {
         width: 100%;
-        border: 1px solid gray;
-        flex: auto;
       }
       #connect {
         flex: initial;
         margin-bottom: 10px;
       }
+      #main-area {
+        flex: auto;
+        border: 1px solid lightgray;
+      }
       body {
         font-family: "Helvetica Neue", Helvetica;
       }
       #results {
-        background-color: white;
-        border: 1px solid gray;
+        background-color: rgb(240, 240, 240);
         overflow: auto;
-        flex: auto;
+        /* flex: auto; */
       }
       table,
       th,
@@ -110,12 +111,15 @@
             </el-popconfirm>
           </el-button-group>
         </div>
-        <splitpanes class="default-theme" horizontal style="flex-grow: 1">
-          <pane id="editor" size="50" min-size="10" max-size="90"></pane>
-          <pane id="results" size="50" min-size="10" max-size="90">
-            <query-results v-bind:result="queryResult"></query-results>
-          </pane>
-        </splitpanes>
+
+        <div id="main-area">
+          <splitpanes class="default-theme" horizontal>
+            <pane id="editor" size="50" min-size="10" max-size="90"></pane>
+            <pane id="results" size="50" min-size="10" max-size="90">
+              <query-results v-bind:result="queryResult"></query-results>
+            </pane>
+          </splitpanes>
+        </div>
       </div>
     </div>
   </body>

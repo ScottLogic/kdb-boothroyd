@@ -32,18 +32,8 @@ const queryResults = {
     };
   },
 
-  methods: {
-    handleClick(tab, event) {
-      console.log(`Hook for click on tab: ${tab.label}`);
-      if (tab.label === "Raw") {
-        console.log(this.result);
-      }
-    },
-  },
-
   watch: {
-    result: function (res, oldRes) {
-      console.log("watcher called");
+    result: function (res) {
       if (typeof res !== "object") {
         this.resMsg = `ERROR: cannot process result of type ${typeof res}`;
       } else {
@@ -79,7 +69,7 @@ const queryResults = {
 
   template:
     /*html*/
-    `<el-tabs v-model="activeTab" type="card" @tab-click="handleClick">
+    `<el-tabs v-model="activeTab" type="card">
     <el-tab-pane label="Table" name="tbl"><div v-html="resHTML"></div></el-tab-pane>
     <el-tab-pane label="Text" name="txt"><div v-html="resText"></div></el-tab-pane>
     <el-tab-pane label="Message" name="msg">{{ resMsg }}</el-tab-pane>
