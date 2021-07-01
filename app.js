@@ -90,8 +90,17 @@ module.exports = {
     // automatically connect to the first server in the list
     if (servers.length) {
       this.selectServer = servers[0].id;
-      await this.connect();
+      try {
+        await this.connect();
+      } catch (e) {
+        this.queryResult = {
+          type: "error",
+          data: "failed to connect to server",
+        };
+      }
     }
+
+    console.log(JSON.stringify(this.servers.get(this.selectServer))); //TODO: remove
   },
   computed: {
     dialogTitle: function () {
