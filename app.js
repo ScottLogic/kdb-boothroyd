@@ -1,5 +1,5 @@
 const serverEdit = require("./components/server-edit.js");
-const { queryResults } = require("./components/query-results.js");
+const queryResults = require("./components/query-results.js");
 const KdbConnection = require("./server/kdb-connection.js");
 const storage = require("./storage/storage");
 const editor = require("./editor/editor");
@@ -14,12 +14,14 @@ module.exports = {
     return {
       servers: new Map(),
       selectServer: undefined,
-      queryResult: undefined,
+      queryResult: [],
       dialog: {
         editMode: true,
         visible: false,
         server: {},
       },
+      resultsPaneSize: 50,
+      resultsPaneHeight: 0,
     };
   },
   methods: {
@@ -79,6 +81,13 @@ module.exports = {
       this.dialog.server = {};
       this.dialog.visible = false;
     },
+    handlePaneResize(e) {
+      console.log(JSON.stringify(e));
+      this.resultsPaneSize = e[1].size;
+      this.resultsPaneHeight =
+        (this.$refs.mainArea.clientHeight * this.resultsPaneSize) / 100;
+      console.log("Results pane height: " + this.resultsPaneHeight);
+    },
   },
   async mounted() {
     const servers = await storage.getServers();
@@ -99,6 +108,10 @@ module.exports = {
         };
       }
     }
+
+    // Calculate required height of results pane
+    this.resultsPaneHeight =
+      (this.$refs.mainArea.clientHeight * this.resultsPaneSize) / 100;
 
     console.log(JSON.stringify(this.servers.get(this.selectServer))); //TODO: remove
   },

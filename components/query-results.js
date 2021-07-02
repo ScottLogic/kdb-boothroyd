@@ -1,3 +1,5 @@
+const { autoUpdater } = require("electron");
+
 function generateTableHTML(data) {
   let tableHTML = '<table border="1"><tr>';
   if (typeof data[0] == "object") {
@@ -21,7 +23,16 @@ function generateTableHTML(data) {
 }
 
 const queryResults = {
-  props: ["result"],
+  props: {
+    result: {
+      // type: Array,
+      required: true,
+    },
+    paneHeight: {
+      type: Number,
+      required: true,
+    },
+  },
 
   data() {
     return {
@@ -29,9 +40,21 @@ const queryResults = {
       resText: "",
       resHTML: "",
       resMsg: "",
-      columns: [{ id: "1", label: "placeholder", prop: "col" }],
-      tableData: [{ col: "lorem ipsum" }],
+      columns: [],
+      tableData: [],
+
+      tabHeight: 62, //TODO: work this out
     };
+  },
+
+  computed: {
+    textDivStyle() {
+      return {
+        maxHeight: this.paneHeight - this.tabHeight,
+        overflow: "auto",
+        backgroundColor: "white",
+      };
+    },
   },
 
   watch: {
@@ -56,7 +79,7 @@ const queryResults = {
                   return {
                     prop: c,
                     label: c,
-                    minWidth: "180px",
+                    minWidth: "20px",
                   };
                 });
               } else {
@@ -67,7 +90,6 @@ const queryResults = {
               this.activeTab = "tbl";
               console.log("column defs are: " + JSON.stringify(this.columns));
               console.log("tableData is " + JSON.stringify(this.tableData));
-              this.tableData = [{ col1: "lorem ipsum" }]; //TODO: temp
             } else {
               this.resText = data;
               this.activeTab = "txt";
@@ -89,21 +111,26 @@ const queryResults = {
     <template>
       <el-table 
         :data="tableData"
+        size="mini"
+        border
+        :max-height="paneHeight - tabHeight"
+        empty-text="No Data"
         style="width: 100%;">
         <el-table-column v-for="column in columns" 
                         :key="column.id"
                         :prop="column.prop"
                         :label="column.label"
+                        sortable
                         :min-width="column.minWidth">
         </el-table-column>
       </el-table>
     </template>
     </el-tab-pane>
     <el-tab-pane label="Text" name="txt">
-      <div v-html="resText"></div>
+      <div :style="textDivStyle" v-html="resText"></div>
       </el-tab-pane>
     <el-tab-pane label="Message" name="msg">{{ resMsg }}</el-tab-pane>
   </el-tabs>`,
 };
 
-module.exports = { queryResults };
+module.exports = queryResults;

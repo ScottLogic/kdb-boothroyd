@@ -6,8 +6,7 @@
       rel="stylesheet"
       href="node_modules/element-ui/lib/theme-chalk/index.css"
     />
-    <script src="node_modules/vue/dist/vue.js"></script>
-    <script src="node_modules/element-ui/lib/index.js"></script>
+
     <link rel="stylesheet" href="node_modules/splitpanes/dist/splitpanes.css" />
 
     <style>
@@ -28,6 +27,9 @@
       }
       #main-area {
         flex: auto;
+        /* min-height: 90vh;
+        max-height: 90vh; */
+        height: 50%;
         border: 1px solid lightgray;
       }
       body {
@@ -112,11 +114,28 @@
           </el-button-group>
         </div>
 
-        <div id="main-area">
-          <splitpanes class="default-theme" horizontal>
-            <pane id="editor" size="50" min-size="10" max-size="90"></pane>
-            <pane id="results" size="50" min-size="10" max-size="90">
-              <query-results v-bind:result="queryResult"></query-results>
+        <div id="main-area" ref="mainArea">
+          <splitpanes
+            class="default-theme"
+            @resize="handlePaneResize($event)"
+            horizontal
+          >
+            <pane
+              id="editor"
+              :size="100 - resultsPaneSize"
+              min-size="10"
+              max-size="90"
+            ></pane>
+            <pane
+              id="results"
+              :size="resultsPaneSize"
+              min-size="10"
+              max-size="90"
+            >
+              <query-results
+                v-bind:result="queryResult"
+                :pane-height="resultsPaneHeight"
+              ></query-results>
             </pane>
           </splitpanes>
         </div>
@@ -124,5 +143,7 @@
     </div>
   </body>
 
+  <script src="node_modules/vue/dist/vue.js"></script>
+  <script src="node_modules/element-ui/lib/index.js"></script>
   <script src="bootstrap.js"></script>
 </html>
