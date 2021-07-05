@@ -1,27 +1,5 @@
 const { autoUpdater } = require("electron");
 
-function generateTableHTML(data) {
-  let tableHTML = '<table border="1"><tr>';
-  if (typeof data[0] == "object") {
-    tableHTML += Object.keys(data[0])
-      .map((x) => `<th>${x}</th>`)
-      .join("");
-    tableHTML += "</tr>";
-    tableHTML += data
-      .map(
-        (row) =>
-          `<tr>${Object.values(row)
-            .map((cell) => `<td>${cell}</td>`)
-            .join("")}</tr>`
-      )
-      .join("");
-  } else {
-    tableHTML += data.map((x) => `<td>${x}</td>`).join("");
-  }
-  tableHTML += "</table>";
-  return tableHTML;
-}
-
 const queryResults = {
   props: {
     result: {
@@ -48,6 +26,7 @@ const queryResults = {
   },
 
   computed: {
+    //TODO: work out why this isn't working (div doesn't scroll, only the entire tab pane)
     textDivStyle() {
       return {
         maxHeight: this.paneHeight - this.tabHeight,

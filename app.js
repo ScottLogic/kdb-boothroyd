@@ -112,8 +112,6 @@ module.exports = {
     // Calculate required height of results pane
     this.resultsPaneHeight =
       (this.$refs.mainArea.clientHeight * this.resultsPaneSize) / 100;
-
-    console.log(JSON.stringify(this.servers.get(this.selectServer))); //TODO: remove
   },
   computed: {
     dialogTitle: function () {
