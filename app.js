@@ -27,8 +27,6 @@ module.exports = {
   methods: {
     async connect() {
       const server = this.servers.get(this.selectServer);
-      console.log(server.host, server.port);
-
       try {
         connection = await KdbConnection.connect(server.host, server.port);
       } catch (e) {
@@ -82,11 +80,9 @@ module.exports = {
       this.dialog.visible = false;
     },
     handlePaneResize(e) {
-      console.log(JSON.stringify(e));
       this.resultsPaneSize = e[1].size;
       this.resultsPaneHeight =
         (this.$refs.mainArea.clientHeight * this.resultsPaneSize) / 100;
-      console.log("Results pane height: " + this.resultsPaneHeight);
     },
   },
   async mounted() {

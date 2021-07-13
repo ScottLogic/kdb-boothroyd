@@ -50,8 +50,6 @@ const queryResults = {
               this.resText =
                 "<pre>" + JSON.stringify(res.data, undefined, 2) + "</pre>";
               if (data.length) {
-                // outputHTML = generateTableHTML(data);
-                console.log("About to set table cols/data");
                 const colnames = Object.keys(data[0]);
                 this.tableData = data;
                 this.columns = colnames.map((c) => {
@@ -67,8 +65,6 @@ const queryResults = {
                 }
               }
               this.activeTab = "tbl";
-              console.log("column defs are: " + JSON.stringify(this.columns));
-              console.log("tableData is " + JSON.stringify(this.tableData));
             } else {
               this.resText = data;
               this.activeTab = "txt";
