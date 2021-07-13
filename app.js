@@ -3,8 +3,8 @@ const queryResults = require("./components/query-results.js");
 const KdbConnection = require("./server/kdb-connection.js");
 const storage = require("./storage/storage");
 const editor = require("./editor/editor");
-const { createReadStream } = require("original-fs");
 const { Splitpanes, Pane } = require("splitpanes");
+const { ipcRenderer } = require("electron");
 
 let connection;
 
@@ -12,6 +12,7 @@ module.exports = {
   el: "#v-app",
   data() {
     return {
+      filename: "",
       servers: new Map(),
       selectServer: undefined,
       queryResult: [],
@@ -83,6 +84,14 @@ module.exports = {
       this.resultsPaneSize = e[1].size;
       this.resultsPaneHeight =
         (this.$refs.mainArea.clientHeight * this.resultsPaneSize) / 100;
+    },
+    async saveAs() {
+      const input = await editor.then((e) => e.getValue());
+      ipcRenderer.send("save-query", input);
+    },
+    async load() {
+      const input = ipcRenderer.sendSync("load-query");
+      await editor.then((e) => e.setValue(input));
     },
   },
   async mounted() {

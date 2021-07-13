@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>KDB Studio2 Prototype</title>
     <link
       rel="stylesheet"
       href="node_modules/element-ui/lib/theme-chalk/index.css"
@@ -111,6 +110,12 @@
                 >Delete</el-button
               >
             </el-popconfirm>
+          </el-button-group>
+          <el-button-group>
+            <el-button type="primary" size="mini" @click="saveAs"
+              >Save As</el-button
+            >
+            <el-button type="primary" size="mini" @click="load">Load</el-button>
           </el-button-group>
         </div>
 
