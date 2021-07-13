@@ -1,5 +1,5 @@
 const serverEdit = require("./components/server-edit.js");
-const { queryResults } = require("./components/query-results.js");
+const queryResults = require("./components/query-results.js");
 const KdbConnection = require("./server/kdb-connection.js");
 const storage = require("./storage/storage");
 const editor = require("./editor/editor");
@@ -14,19 +14,19 @@ module.exports = {
     return {
       servers: new Map(),
       selectServer: undefined,
-      queryResult: undefined,
+      queryResult: [],
       dialog: {
         editMode: true,
         visible: false,
         server: {},
       },
+      resultsPaneSize: 50,
+      resultsPaneHeight: 0,
     };
   },
   methods: {
     async connect() {
       const server = this.servers.get(this.selectServer);
-      console.log(server.host, server.port);
-
       try {
         connection = await KdbConnection.connect(server.host, server.port);
       } catch (e) {
@@ -79,6 +79,11 @@ module.exports = {
       this.dialog.server = {};
       this.dialog.visible = false;
     },
+    handlePaneResize(e) {
+      this.resultsPaneSize = e[1].size;
+      this.resultsPaneHeight =
+        (this.$refs.mainArea.clientHeight * this.resultsPaneSize) / 100;
+    },
   },
   async mounted() {
     const servers = await storage.getServers();
@@ -90,8 +95,19 @@ module.exports = {
     // automatically connect to the first server in the list
     if (servers.length) {
       this.selectServer = servers[0].id;
-      await this.connect();
+      try {
+        await this.connect();
+      } catch (e) {
+        this.queryResult = {
+          type: "error",
+          data: "failed to connect to server",
+        };
+      }
     }
+
+    // Calculate required height of results pane
+    this.resultsPaneHeight =
+      (this.$refs.mainArea.clientHeight * this.resultsPaneSize) / 100;
   },
   computed: {
     dialogTitle: function () {

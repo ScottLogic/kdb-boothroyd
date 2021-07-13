@@ -1,27 +1,16 @@
-function generateTableHTML(data) {
-  let tableHTML = '<table border="1"><tr>';
-  if (typeof data[0] == "object") {
-    tableHTML += Object.keys(data[0])
-      .map((x) => `<th>${x}</th>`)
-      .join("");
-    tableHTML += "</tr>";
-    tableHTML += data
-      .map(
-        (row) =>
-          `<tr>${Object.values(row)
-            .map((cell) => `<td>${cell}</td>`)
-            .join("")}</tr>`
-      )
-      .join("");
-  } else {
-    tableHTML += data.map((x) => `<td>${x}</td>`).join("");
-  }
-  tableHTML += "</table>";
-  return tableHTML;
-}
+const { autoUpdater } = require("electron");
 
 const queryResults = {
-  props: ["result"],
+  props: {
+    result: {
+      // type: Array,
+      required: true,
+    },
+    paneHeight: {
+      type: Number,
+      required: true,
+    },
+  },
 
   data() {
     return {
@@ -29,7 +18,22 @@ const queryResults = {
       resText: "",
       resHTML: "",
       resMsg: "",
+      columns: [],
+      tableData: [],
+
+      tabHeight: 62, //TODO: work this out
     };
+  },
+
+  computed: {
+    //TODO: work out why this isn't working (div doesn't scroll, only the entire tab pane)
+    textDivStyle() {
+      return {
+        maxHeight: this.paneHeight - this.tabHeight,
+        overflow: "auto",
+        backgroundColor: "white",
+      };
+    },
   },
 
   watch: {
@@ -46,7 +50,15 @@ const queryResults = {
               this.resText =
                 "<pre>" + JSON.stringify(res.data, undefined, 2) + "</pre>";
               if (data.length) {
-                outputHTML = generateTableHTML(data);
+                const colnames = Object.keys(data[0]);
+                this.tableData = data;
+                this.columns = colnames.map((c) => {
+                  return {
+                    prop: c,
+                    label: c,
+                    minWidth: "20px",
+                  };
+                });
               } else {
                 for (let x in data) {
                   outputHTML += x + " | " + data[x] + "<br />";
@@ -70,10 +82,30 @@ const queryResults = {
   template:
     /*html*/
     `<el-tabs v-model="activeTab" type="card">
-    <el-tab-pane label="Table" name="tbl"><div v-html="resHTML"></div></el-tab-pane>
-    <el-tab-pane label="Text" name="txt"><div v-html="resText"></div></el-tab-pane>
+    <el-tab-pane label="Table" name="tbl">
+    <template>
+      <el-table 
+        :data="tableData"
+        size="mini"
+        border
+        :max-height="paneHeight - tabHeight"
+        empty-text="No Data"
+        style="width: 100%;">
+        <el-table-column v-for="column in columns" 
+                        :key="column.id"
+                        :prop="column.prop"
+                        :label="column.label"
+                        sortable
+                        :min-width="column.minWidth">
+        </el-table-column>
+      </el-table>
+    </template>
+    </el-tab-pane>
+    <el-tab-pane label="Text" name="txt">
+      <div :style="textDivStyle" v-html="resText"></div>
+      </el-tab-pane>
     <el-tab-pane label="Message" name="msg">{{ resMsg }}</el-tab-pane>
   </el-tabs>`,
 };
 
-module.exports = { queryResults };
+module.exports = queryResults;

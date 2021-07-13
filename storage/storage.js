@@ -12,7 +12,6 @@ const getServers = () =>
       if (error) reject(error);
 
       const serverKeys = allKeys.filter((k) => k.startsWith(PREFIX));
-      console.log(serverKeys);
 
       storage.getMany(serverKeys, (error, data) => {
         if (error) reject(error);
@@ -22,7 +21,6 @@ const getServers = () =>
   });
 
 const saveServer = (cs) => {
-  console.log("We're going to save server details: " + JSON.stringify(cs));
   // create a unique id for this server
   if (!cs.id) {
     cs.id = uuid.v4();
@@ -44,11 +42,9 @@ const init = () => {
     fs.mkdirSync(storageDir, { recursive: true });
   }
   storage.setDataPath(storageDir);
-  console.log("storage path: " + storageDir);
 };
 
 const deleteServer = (serverId) => {
-  console.log("We're going to delete server: " + serverId);
   storage.remove(PREFIX + serverId, (error) => {
     if (error) throw error;
   });

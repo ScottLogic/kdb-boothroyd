@@ -31,7 +31,7 @@ module.exports = new Promise((resolve) => {
     monaco.editor.defineTheme("kdb", theme);
 
     const editor = monaco.editor.create(document.getElementById("editor"), {
-      value: "([] c1:1000+til 6; c2:`a`b`c`a`b`a; c3:10*1+til 6)",
+      value: "([] c1:1000+til 100; c2:100?`a`b`c; c3:10*1+til 100)",
       language: "kdb/q",
       theme: "kdb",
       minimap: {
