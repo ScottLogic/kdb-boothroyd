@@ -39,6 +39,12 @@ class KdbConnection {
   async send(message) {
     try {
       const data = await qSend(this.#connection, message);
+      if (data === null) {
+        return {
+          type: "success",
+          data: message,
+        };
+      }
       return {
         type: "success",
         data,
