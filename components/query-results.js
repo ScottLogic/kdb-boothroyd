@@ -1,4 +1,17 @@
 const { autoUpdater } = require("electron");
+const { dates } = require("node-q");
+
+const formatData = (colnames, data) => {
+  // Reformat dates as strings, in-place
+  data.forEach((r) => {
+    colnames.forEach((c) => {
+      if (r[c] instanceof Date) {
+        r[c] = r[c].toISOString().replaceAll(/[TZ]/g, " ");
+      }
+    });
+  });
+  return data;
+};
 
 const queryResults = {
   props: {
@@ -51,7 +64,7 @@ const queryResults = {
                 "<pre>" + JSON.stringify(res.data, undefined, 2) + "</pre>";
               if (data.length) {
                 const colnames = Object.keys(data[0]);
-                this.tableData = data;
+                this.tableData = formatData(colnames, data);
                 this.columns = colnames.map((c) => {
                   return {
                     prop: c,

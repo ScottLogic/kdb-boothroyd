@@ -29,6 +29,7 @@ module.exports = {
       const server = this.servers.get(this.selectServer);
       try {
         connection = await KdbConnection.connect(server.host, server.port);
+        return connection;
       } catch (e) {
         connection = undefined;
         this.queryResult = {
@@ -38,20 +39,23 @@ module.exports = {
       }
     },
     async send() {
+      if (connection && !connection.isConnected()) {
+        // The connection has dropped
+        connection = undefined;
+      }
       if (!connection) {
         connection = await this.connect();
-        if (!connection) {
-          return;
-        }
       }
-      const input = await editor.then((e) => e.getValue());
-      try {
-        this.queryResult = await connection.send(input);
-      } catch (e) {
-        this.queryResult = {
-          type: "error",
-          data: "failed to get results from server",
-        };
+      if (connection) {
+        const input = await editor.then((e) => e.getValue());
+        try {
+          this.queryResult = await connection.send(input);
+        } catch (e) {
+          this.queryResult = {
+            type: "error",
+            data: "failed to get results from server",
+          };
+        }
       }
     },
     addServer() {
