@@ -1,4 +1,17 @@
 const { autoUpdater } = require("electron");
+const { dates } = require("node-q");
+
+const formatData = (colnames, data) => {
+  // Reformat dates as strings, in-place
+  data.forEach((r) => {
+    colnames.forEach((c) => {
+      if (r[c] instanceof Date) {
+        r[c] = r[c].toISOString().replaceAll(/[TZ]/g, " ");
+      }
+    });
+  });
+  return data;
+};
 
 const queryResults = {
   props: {
@@ -50,23 +63,34 @@ const queryResults = {
               this.resText =
                 "<pre>" + JSON.stringify(res.data, undefined, 2) + "</pre>";
               if (data.length) {
-                const colnames = Object.keys(data[0]);
-                this.tableData = data;
-                this.columns = colnames.map((c) => {
-                  return {
-                    prop: c,
-                    label: c,
-                    minWidth: "20px",
-                  };
-                });
-              } else {
-                for (let x in data) {
-                  outputHTML += x + " | " + data[x] + "<br />";
+                if (data[0] instanceof Object) {
+                  const colnames = Object.keys(data[0]);
+                  this.tableData = formatData(colnames, data);
+                  this.columns = colnames.map((c) => {
+                    return {
+                      prop: c,
+                      label: c,
+                      minWidth: "20px",
+                    };
+                  });
+                } else {
+                  // Handle non-tabulated results: treat as a single column of data
+                  this.columns = [
+                    { prop: "value", label: "value", minWidth: "80px" },
+                  ];
+                  this.tableData = data.map((v) => {
+                    return {
+                      value: v,
+                    };
+                  });
                 }
               }
               this.activeTab = "tbl";
             } else {
-              this.resText = data;
+              const dt = new Date();
+              this.resText = `<pre>${dt
+                .toISOString()
+                .replaceAll(/(T|\.\d+Z$)/g, " ")}<br>${data}</pre>`;
               this.activeTab = "txt";
             }
             this.resHTML = outputHTML;

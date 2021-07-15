@@ -19,12 +19,32 @@ class KdbConnection {
 
   static async connect(host, port) {
     const connection = await promisify(nodeq.connect)({ host, port });
-    return new KdbConnection(connection);
+    const kconn = new KdbConnection(connection);
+    connection.on("error", (e) => {
+      console.log("Connection has gone away");
+      kconn.reset();
+    });
+
+    return kconn;
+  }
+
+  reset() {
+    this.#connection = undefined;
+  }
+
+  isConnected() {
+    return this.#connection !== undefined;
   }
 
   async send(message) {
     try {
       const data = await qSend(this.#connection, message);
+      if (data === null) {
+        return {
+          type: "success",
+          data: message,
+        };
+      }
       return {
         type: "success",
         data,
