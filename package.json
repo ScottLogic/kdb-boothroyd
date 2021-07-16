@@ -1,5 +1,5 @@
 {
-  "name": "electron-react-ts",
+  "name": "kdb-studio-2",
   "version": "1.0.0",
   "description": "New Electron app",
   "main": "./dist/main.js",

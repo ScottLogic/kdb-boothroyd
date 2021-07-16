@@ -18,6 +18,8 @@ class KdbConnection {
   }
 
   static async connect(host: string, port: number) {
+    console.log("connnected to KDB server", host, port);
+
     // @ts-ignore - something strange going on with the types here
     const connection = (await promisify(nodeq.connect)({
       host,

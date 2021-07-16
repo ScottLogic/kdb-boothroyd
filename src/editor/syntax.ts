@@ -1,4 +1,6 @@
-const syntax = {
+import { languages } from "monaco-editor";
+
+const syntax: languages.IMonarchLanguage = {
   // Set defaultToken to invalid to see what you do not tokenize yet
   defaultToken: "",
 

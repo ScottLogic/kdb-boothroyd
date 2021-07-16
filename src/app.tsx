@@ -1,4 +1,4 @@
-import React, { CSSProperties, FormEvent, RefObject } from "react";
+import React, { FormEvent, RefObject } from "react";
 import ReactDom from "react-dom";
 import { initializeIcons } from "@fluentui/font-icons-mdl2";
 import {
@@ -6,15 +6,6 @@ import {
   CommandBar,
   IComboBoxOption,
   ICommandBarItemProps,
-  IComboBoxStyles,
-  ICommandBarStyles,
-  Modal,
-  Dialog,
-  DialogFooter,
-  PrimaryButton,
-  DefaultButton,
-  Stack,
-  TextField,
   IComboBox,
 } from "@fluentui/react";
 import {
@@ -25,26 +16,17 @@ import {
   Server,
 } from "./storage/storage";
 import KdbConnection from "./server/kdb-connection";
-import init from "./editor/editor";
+import initEditor from "./editor/editor";
+import ServerEdit from "./server-edit";
+import * as style from "./style";
+import { editor } from "monaco-editor";
 
 initializeIcons();
 
 const mainElement = document.createElement("div");
 document.body.appendChild(mainElement);
 
-const customStyles: Partial<ICommandBarStyles> = {
-  root: {
-    height: "30px",
-  },
-};
-
-const customStyles2: Partial<IComboBoxStyles> = {
-  root: {
-    height: "30px",
-  },
-};
-
-interface MyAppState {
+interface AppState {
   servers: Map<string, Server>;
   selectedServer?: string;
   result: string;
@@ -52,87 +34,10 @@ interface MyAppState {
   editServer?: Server;
 }
 
-const containerGrid: CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "1fr",
-  gridTemplateRows: "30px 1fr 1fr",
-  gridAutoFlow: "row",
-  height: "100vh",
-};
-
-let connection: KdbConnection;
-
-interface ServerEditState extends Server {}
-
-interface ServerEditProps {
-  open: boolean;
-  onClose: (ok: boolean, s?: Server) => void;
-  server?: Server;
-}
-
-class ServerEdit extends React.Component<ServerEditProps, ServerEditState> {
-  constructor(props: ServerEditProps) {
-    super(props);
-
-    this.state = props.server || {
-      name: "",
-      host: "",
-      port: 0,
-    };
-  }
-
-  componentWillReceiveProps(props: ServerEditProps) {
-    this.setState(
-      Object.assign(
-        {},
-        props.server || {
-          name: "",
-          host: "",
-          port: 0,
-        }
-      )
-    );
-  }
-
-  render() {
-    const { name, host, port } = this.state;
-    const { open, onClose } = this.props;
-
-    return (
-      <Dialog title="Connection Details" hidden={!open}>
-        <Stack>
-          <TextField
-            label="Name"
-            value={name}
-            onChange={(_, newValue) => this.setState({ name: newValue! })}
-          />
-          <TextField
-            label="Host"
-            value={host}
-            onChange={(_, newValue) => this.setState({ host: newValue! })}
-          />
-          <TextField
-            label="Port"
-            value={port.toString()}
-            onChange={(_, newValue) =>
-              this.setState({ port: parseInt(newValue!) })
-            }
-          />
-        </Stack>
-        <DialogFooter>
-          <PrimaryButton text="OK" onClick={() => onClose(true, this.state)} />
-          <DefaultButton
-            text="Cancel"
-            onClick={() => onClose(false, this.state)}
-          />
-        </DialogFooter>
-      </Dialog>
-    );
-  }
-}
-
-class MyApp extends React.Component<unknown, MyAppState> {
+class MyApp extends React.Component<unknown, AppState> {
   myRef: RefObject<HTMLDivElement>;
+  connection?: KdbConnection;
+  editor?: editor.IStandaloneCodeEditor;
 
   constructor(props: unknown) {
     super(props);
@@ -166,7 +71,10 @@ class MyApp extends React.Component<unknown, MyAppState> {
       if (selectedServer) {
         const server = serverMap.get(selectedServer)!;
         try {
-          connection = await KdbConnection.connect(server.host, server.port);
+          this.connection = await KdbConnection.connect(
+            server.host,
+            server.port
+          );
         } catch {}
       }
 
@@ -179,14 +87,21 @@ class MyApp extends React.Component<unknown, MyAppState> {
   }
 
   componentDidMount() {
-    init(this.myRef.current!);
+    this.editor = initEditor(this.myRef.current!);
   }
 
-  selectedServerChanged(
-    e: FormEvent<IComboBox>,
+  async selectedServerChanged(
+    _: FormEvent<IComboBox>,
     option: IComboBoxOption | undefined
   ) {
-    this.setState({ selectedServer: option!.key as string });
+    const selectedServer = option!.key as string;
+
+    try {
+      const server = this.state.servers.get(selectedServer)!;
+      this.connection = await KdbConnection.connect(server.host, server.port);
+    } catch {}
+
+    this.setState({ selectedServer });
   }
 
   async editClose(ok: boolean, server?: Server) {
@@ -209,56 +124,72 @@ class MyApp extends React.Component<unknown, MyAppState> {
 
     const items: ICommandBarItemProps[] = [
       {
-        key: "edit",
-        text: "Edit",
-        onClick: () => {
-          if (!this.state.selectedServer) return;
-          this.setState({
-            editorVisible: true,
-            editServer: this.state.servers.get(this.state.selectedServer)!,
-          });
+        key: "server",
+        text: "Server",
+        iconProps: { iconName: "Database" },
+        subMenuProps: {
+          items: [
+            {
+              key: "edit",
+              text: "Edit",
+              onClick: () => {
+                if (!this.state.selectedServer) return;
+                this.setState({
+                  editorVisible: true,
+                  editServer: this.state.servers.get(
+                    this.state.selectedServer
+                  )!,
+                });
+              },
+              iconProps: { iconName: "Edit" },
+            },
+            {
+              key: "add",
+              text: "Add",
+              onClick: () => {
+                this.setState({
+                  editorVisible: true,
+                  editServer: undefined,
+                });
+              },
+              iconProps: { iconName: "Edit" },
+            },
+            {
+              key: "delete",
+              text: "Delete",
+              onClick: () => {
+                if (!this.state.selectedServer) return;
+                this.state.servers.delete(this.state.selectedServer);
+                deleteServer(this.state.selectedServer);
+                this.setState({
+                  servers: this.state.servers,
+                  selectedServer: undefined,
+                });
+              },
+              iconProps: { iconName: "Delete" },
+            },
+          ],
         },
       },
+
       {
-        key: "add",
-        text: "Add",
-        onClick: () => {
-          this.setState({
-            editorVisible: true,
-            editServer: undefined,
-          });
-        },
-      },
-      {
-        key: "delete",
-        text: "Delete",
-        onClick: () => {
-          if (!this.state.selectedServer) return;
-          this.state.servers.delete(this.state.selectedServer);
-          deleteServer(this.state.selectedServer);
-          this.setState({
-            servers: this.state.servers,
-            selectedServer: undefined,
-          });
-        },
-      },
-      {
-        key: "newItem2",
+        key: "combo",
         onRender: () => (
           <ComboBox
             options={comboOptions}
             selectedKey={selectedServer}
-            styles={customStyles2}
+            styles={style.combo}
             onChange={this.selectedServerChanged}
           />
         ),
       },
       {
-        key: "newItem",
+        key: "go",
         text: "Go",
         onClick: () => {
           (async () => {
-            const res = await connection.send("til 10");
+            const input = this.editor!.getValue();
+            const res = await this.connection!.send(input);
             this.setState({ result: JSON.stringify(res.data) });
           })();
         },
@@ -267,14 +198,14 @@ class MyApp extends React.Component<unknown, MyAppState> {
     ];
 
     return (
-      <div style={containerGrid}>
+      <div style={style.container}>
         <ServerEdit
           open={editorVisible}
           onClose={this.editClose}
           server={editServer}
         />
         <div style={{ gridRow: 1 }}>
-          <CommandBar items={items} styles={customStyles} />
+          <CommandBar items={items} styles={style.commandBar} />
         </div>
         <div ref={this.myRef} style={{ gridRow: 2 }} />
         <pre style={{ gridRow: 3 }}>{result}</pre>

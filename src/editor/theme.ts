@@ -1,4 +1,6 @@
-const theme =  {
+import { editor } from "monaco-editor";
+
+const theme: editor.IStandaloneThemeData = {
   base: "vs",
   inherit: false,
   rules: [
@@ -12,6 +14,7 @@ const theme =  {
     { token: "string", foreground: "#13CC25" },
     { token: "number", foreground: "#3569FF" },
   ],
+  colors: {},
 };
 
 export default theme;
