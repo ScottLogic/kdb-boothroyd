@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
 module.exports = {
   resolve: {
@@ -18,19 +19,26 @@ module.exports = {
           loader: "babel-loader",
         },
       },
+      {
+				test: /\.css$/,
+				use: ['style-loader', 'css-loader']
+			},
+			{
+				test: /\.ttf$/,
+				use: ['file-loader']
+			}
     ],
   },
   devServer: {
-    contentBase: path.join(__dirname, "../dist/renderer"),
+    contentBase: __dirname + "/dist/",
     historyApiFallback: true,
     compress: true,
     hot: true,
     port: 4000,
-    publicPath: "/",
   },
   output: {
-    path: path.resolve(__dirname, "dist"),
-    filename: "js/[name].js",
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'app.js'
   },
-  plugins: [new HtmlWebpackPlugin()],
+  plugins: [new HtmlWebpackPlugin(),new MonacoWebpackPlugin()],
 };
