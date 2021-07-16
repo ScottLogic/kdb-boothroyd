@@ -1,16 +1,20 @@
-const { autoUpdater } = require("electron");
-const { dates } = require("node-q");
+// const AgGridVue = require("ag-grid-vue");
+const { doc } = require("prettier");
 
 const formatData = (colnames, data) => {
-  // Reformat dates as strings, in-place
+  // Reformat dates as strings
+  let newData = [];
   data.forEach((r) => {
+    let newRow = {};
     colnames.forEach((c) => {
-      if (r[c] instanceof Date) {
-        r[c] = r[c].toISOString().replaceAll(/[TZ]/g, " ");
-      }
+      newRow[c] =
+        r[c] instanceof Date
+          ? r[c].toISOString().replaceAll(/[TZ]/g, " ")
+          : r[c];
     });
+    newData.push(newRow);
   });
-  return data;
+  return newData;
 };
 
 const queryResults = {
@@ -33,18 +37,25 @@ const queryResults = {
       resMsg: "",
       columns: [],
       tableData: [],
-
+      gridOptions: undefined,
       tabHeight: 62, //TODO: work this out
     };
   },
 
+  async beforeUnmount() {
+    if (this.gridOptions) {
+      this.gridOptions.api.destroy();
+    }
+  },
+
   computed: {
-    //TODO: work out why this isn't working (div doesn't scroll, only the entire tab pane)
     textDivStyle() {
       return {
         maxHeight: this.paneHeight - this.tabHeight,
+        height: `${this.paneHeight - this.tabHeight}px`,
         overflow: "auto",
         backgroundColor: "white",
+        width: "100%",
       };
     },
   },
@@ -60,24 +71,30 @@ const queryResults = {
             const data = res.data;
             let outputHTML = "";
             if (typeof data == "object") {
+              let agGridColumns;
               this.resText =
                 "<pre>" + JSON.stringify(res.data, undefined, 2) + "</pre>";
               if (data.length) {
                 if (data[0] instanceof Object) {
                   const colnames = Object.keys(data[0]);
                   this.tableData = formatData(colnames, data);
-                  this.columns = colnames.map((c) => {
-                    return {
-                      prop: c,
-                      label: c,
-                      minWidth: "20px",
-                    };
-                  });
+                  this.columns = colnames.map((c) => ({
+                    prop: c,
+                    label: c,
+                    minWidth: "20px",
+                  }));
+                  agGridColumns = colnames.map((c) => ({
+                    field: c,
+                    sortable: true,
+                    resizable: true,
+                    minWidth: 20,
+                  }));
                 } else {
                   // Handle non-tabulated results: treat as a single column of data
                   this.columns = [
                     { prop: "value", label: "value", minWidth: "80px" },
                   ];
+                  agGridColumns = [{ field: "value", sortable: true }];
                   this.tableData = data.map((v) => {
                     return {
                       value: v,
@@ -85,6 +102,18 @@ const queryResults = {
                   });
                 }
               }
+              if (
+                this.gridOptions instanceof Object &&
+                "columnDefs" in this.gridOptions
+              ) {
+                this.gridOptions.api.destroy();
+              }
+              this.gridOptions = {
+                columnDefs: agGridColumns,
+                rowData: this.tableData,
+              };
+              const eGridDiv = document.querySelector("#ag-grid");
+              new agGrid.Grid(eGridDiv, this.gridOptions);
               this.activeTab = "tbl";
             } else {
               const dt = new Date();
@@ -100,6 +129,11 @@ const queryResults = {
           }
         }
       }
+    },
+    paneHeight: function (height) {
+      const eGridDiv = document.querySelector("#ag-grid");
+      this.paneHeight = height;
+      eGridDiv.setAttribute("height", height - this.tabHeight);
     },
   },
 
@@ -123,6 +157,11 @@ const queryResults = {
                         :min-width="column.minWidth">
         </el-table-column>
       </el-table>
+    </template>
+    </el-tab-pane>
+    <el-tab-pane label="AG Grid" name="aggrid">
+    <template>
+      <div id="ag-grid" class="ag-theme-balham" :style="textDivStyle"></div>
     </template>
     </el-tab-pane>
     <el-tab-pane label="Text" name="txt">
