@@ -1,13 +1,20 @@
-import os from 'os';
-import path from 'path';
-import fs from 'fs';
-import uuid from 'uuid';
-import storage from 'electron-json-storage';
+import os from "os";
+import path from "path";
+import fs from "fs";
+import uuid from "uuid";
+import storage from "electron-json-storage";
 
-const PREFIX = 'server-';
+const PREFIX = "server-";
 
-const getServers = () =>
-  new Promise((resolve, reject) => {
+export interface Server {
+  name: string;
+  host: string;
+  port: number;
+  id?: string;
+}
+
+export function getServers() {
+  return new Promise((resolve, reject) => {
     storage.keys((error, allKeys) => {
       if (error) reject(error);
 
@@ -19,8 +26,9 @@ const getServers = () =>
       });
     });
   });
+}
 
-const saveServer = (cs) => {
+export function saveServer(cs: Server) {
   // create a unique id for this server
   if (!cs.id) {
     cs.id = uuid.v4();
@@ -28,31 +36,24 @@ const saveServer = (cs) => {
   storage.set(PREFIX + cs.id, cs, (error) => {
     if (error) throw error;
   });
-};
+}
 
-const init = () => {
+export function initStorage() {
   // Deal with persisting server data
   const storageDir = path.join(
     os.homedir(),
-    'AppData',
-    'Local',
-    'kdb studio 2'
+    "AppData",
+    "Local",
+    "kdb studio 2"
   );
   if (!fs.existsSync(storageDir)) {
     fs.mkdirSync(storageDir, { recursive: true });
   }
   storage.setDataPath(storageDir);
-};
+}
 
-const deleteServer = (serverId) => {
+export function deleteServer(serverId: string) {
   storage.remove(PREFIX + serverId, (error) => {
     if (error) throw error;
   });
-};
-
-export default {
-  getServers,
-  saveServer,
-  init,
-  deleteServer,
-};
+}

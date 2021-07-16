@@ -1,8 +1,8 @@
-import nodeq from 'node-q';
-import { promisify } from 'util';
+import nodeq, { Connection } from "node-q";
+import { promisify } from "util";
 
 // not sure why util.promisify doesn't work here?
-const qSend = (conn, value) =>
+const qSend = (conn: Connection, value: string) =>
   new Promise((resolve, reject) => {
     conn.k(value, function (err, res) {
       if (err) reject(err);
@@ -11,17 +11,21 @@ const qSend = (conn, value) =>
   });
 
 class KdbConnection {
-  connection;
+  connection: Connection | undefined;
 
-  constructor(connection) {
+  constructor(connection: Connection) {
     this.connection = connection;
   }
 
-  static async connect(host, port) {
-    const connection = await promisify(nodeq.connect)({ host, port });
+  static async connect(host: string, port: number) {
+    // @ts-ignore - something strange going on with the types here
+    const connection = (await promisify(nodeq.connect)({
+      host,
+      port,
+    })) as Connection;
     const kconn = new KdbConnection(connection);
-    connection.on('error', (e) => {
-      console.log('Connection has gone away');
+    connection!.on("error", (e) => {
+      console.log("Connection has gone away");
       kconn.reset();
     });
 
@@ -36,22 +40,22 @@ class KdbConnection {
     return this.connection !== undefined;
   }
 
-  async send(message) {
+  async send(message: string) {
     try {
-      const data = await qSend(this.connection, message);
+      const data = await qSend(this.connection!, message);
       if (data === null) {
         return {
-          type: 'success',
+          type: "success",
           data: message,
         };
       }
       return {
-        type: 'success',
+        type: "success",
         data,
       };
     } catch (e) {
       return {
-        type: 'error',
+        type: "error",
         data: e.toString(),
       };
     }
