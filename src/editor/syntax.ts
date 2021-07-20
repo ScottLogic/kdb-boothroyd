@@ -1,6 +1,6 @@
-import { languages } from "monaco-editor";
+import { monaco } from "react-monaco-editor";
 
-const syntax: languages.IMonarchLanguage = {
+const syntax: monaco.languages.IMonarchLanguage = {
   // Set defaultToken to invalid to see what you do not tokenize yet
   defaultToken: "",
 
