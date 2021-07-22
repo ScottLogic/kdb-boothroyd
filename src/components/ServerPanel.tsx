@@ -1,41 +1,65 @@
 import { 
   CommandBar, 
   ICommandBarItemProps,
-  IComboBoxOption,
   Nav, 
   INavLink, 
-  INavStyles, 
-  INavLinkGroup
+  INavLinkGroup,
+  Stack,
+  Dialog,
+  DialogFooter,
+  PrimaryButton,
+  DefaultButton,
+  DialogType
 } from "@fluentui/react"
-import React, { FunctionComponent, useState } from "react"
-import ServerEdit from "./server-edit"
-
+import React, { FunctionComponent, useContext, useEffect, useState } from "react"
+import { useDispatch, useSelector } from "react-redux"
 import { panel, serverPanel } from "../style"
+import { RootState } from "../store"
+import { deleteServer, loadServers, Server } from "../store/servers"
+import { ManageServerContext } from "./ManageServers"
+import { set } from "electron-json-storage"
 
 const ServerPanel:FunctionComponent = () => {
 
-  const [editorVisible, setEditorVisible] = useState(false)
-  const [server, setServer] = useState<String | undefined>(undefined)
-  
-  const servers = [
-    "Server 1",
-    "Server 2",
-    "Server 3"
-  ]
+  const context = useContext(ManageServerContext)
+  const dispatch = useDispatch()
+    
+  const servers:{[key: string]: Server} = useSelector((state:RootState) => state.servers.servers)
+  const [hideDeleteConfirmation, setHideDeleteConfirmation] = useState(true)
+  const [navLinkGroups, setNavLinkGroups] = useState<INavLinkGroup[]>([])
 
-  const navLinkGroups: INavLinkGroup[] = [
-    {
-      links: servers.map((s) => {
-        return {
-          name: s,
-          url: s,
-          expandAriaLabel: 'Show Tables',
-          collapseAriaLabel: 'Hide Tables',
-          isExpanded: server === s
-        }
+  useEffect(() => {
+
+    // Put servers into added order with earliest first
+    const sorted = (Object.values(servers) as [Server])
+      .sort((a,b) => {
+        if (a.id == b.id)
+          return 0
+        else
+          return (a.id! < b.id!) ? 1 : -1
       })
-    }
-  ]
+
+    const links = Array.from(sorted, (s) => {
+      return {
+        key: s.id,
+        name: s.name,
+        url: s.id,
+        expandAriaLabel: 'Show Tables',
+        collapseAriaLabel: 'Hide Tables'
+      } as INavLink
+    })
+
+    setNavLinkGroups([
+      {
+        links
+      }
+    ])
+
+  }, [servers])
+
+  useEffect(() => {
+    dispatch(loadServers())
+  }, [])
 
   const items: ICommandBarItemProps[] = [
     {
@@ -43,77 +67,64 @@ const ServerPanel:FunctionComponent = () => {
       text: "Add",
       iconProps: { iconName: "Add" },
       onClick: () => {
-        setEditorVisible(true)
-        setServer(undefined)
+        context.setServer(undefined)
       },
-    },
-    {
-      key: "edit",
-      text: "Edit",
-      disabled: !server,
-      onClick: () => {
-        if (!server)
-          return;
-
-        setEditorVisible(true)
-      },
-      iconProps: { iconName: "Edit" },
     },
     {
       key: "delete",
       text: "Delete",
-      disabled: !server,
+      disabled: !context.server,
       onClick: () => {
-        if (!server)
+        if (!context.server)
           return;
 
-        //servers.delete(this.state.selectedServer);
-        
-        /*deleteServer(this.state.selectedServer);
-        this.setState({
-          servers: this.state.servers,
-          selectedServer: undefined,
-        });*/
+        setHideDeleteConfirmation(false)
       },
       iconProps: { iconName: "Delete" },
     }
   ]
 
-  function editClose() {
-
-  }
-
+  // Select a server and update the context
   function serverSelected(e?: React.MouseEvent<HTMLElement>, item?: INavLink) {
     e && e.preventDefault()
-    console.log('ITEM', item)
     if (item)
-      setServer(item.url)
+      context.setServer(item.key)
   }
 
-
+  // Perform actual delete operation after confiration
+  function doDelete() {
+    dispatch(deleteServer(context.server!))
+    context.setServer(undefined)
+    setHideDeleteConfirmation(true)
+  }
 
   return (
-    <>
-      <ServerEdit
-          open={editorVisible}
-          onClose={editClose}
-          server={server}
-        />
-      <div style={{
-        ...panel,
-        ...serverPanel 
-      }}>
-        <CommandBar 
-          items={items}
-          style={{ gridRow: 1 }}/>
-        <Nav
-          onLinkClick={serverSelected}
-          selectedKey="server1"
-          ariaLabel="Server List"
-          groups={navLinkGroups}
-        />
-      </div>
-    </>
+    <Stack grow={false} style={{...serverPanel}}>
+      <CommandBar 
+        items={items}
+        style={{ gridRow: 1 }}/>
+      <Nav
+        onLinkClick={serverSelected}
+        selectedKey={context.server || ""}
+        ariaLabel="Server List"
+        groups={navLinkGroups}
+      />
+      <Dialog
+        hidden={hideDeleteConfirmation}
+        onDismiss={() => setHideDeleteConfirmation(true)}
+        dialogContentProps = {{
+          type: DialogType.normal,
+          title: 'Delete Server',
+          closeButtonAriaLabel: 'Close',
+          subText: 'Are you sure you want to delete this server?',
+        }}
+      >
+        <DialogFooter>
+          <PrimaryButton onClick={doDelete} text="Delete" />
+          <DefaultButton onClick={() => setHideDeleteConfirmation(true)} text="Cancel" />
+        </DialogFooter>
+      </Dialog>
+    </Stack>
   )
 }
 
