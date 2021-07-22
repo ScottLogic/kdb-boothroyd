@@ -8,7 +8,7 @@ import ServerPanel from "./ServerPanel"
 type ManageServerContextProps = {
   server: string | undefined,
   setServer: (server?:string) => void,
-  closeModal: () => void
+  closeModal: (server?:string) => void
 }
 
 export const ManageServerContext = React.createContext<ManageServerContextProps>({

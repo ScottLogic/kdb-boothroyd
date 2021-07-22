@@ -1,20 +1,35 @@
-import React, { FunctionComponent, useState } from 'react'
+import React, { createRef, FunctionComponent, useContext, useEffect, useRef, useState } from 'react'
 import MonacoEditor from 'react-monaco-editor';
 import electron from 'electron'
 
 import { 
   CommandBar, 
   ICommandBarItemProps,
+  Stack,
 } from "@fluentui/react"
 
 import syntax from '../editor/syntax';
 import theme from '../editor/theme';
-import { editorWindow, panel } from '../style'
+import { editorWindow, panel, stackTokens } from '../style'
+import { MainContext } from './MainInterface';
+import ResultsWindow from './ResultsWindow';
 
 const EditorWindow:FunctionComponent = () => {
 
+  const context = useContext(MainContext)
+  const currentServer = context.currentServer
+  const connections = context.connections
+  const [scripts, setScripts] = useState<{[key:string]:string}>({})
+  const [currentScript, setCurrentScript] = useState("")
+  const [results, setResults] = useState<Array<string | {}>>([])
   const nativeTheme = electron.remote.nativeTheme
   let [isDarkMode, setIsDarkMode] = useState(nativeTheme.shouldUseDarkColors)
+
+  const goRef = createRef<HTMLButtonElement>()
+  useEffect(() => {
+    if (currentServer)
+      setCurrentScript(scripts[currentServer] || "")
+  }, [currentServer])
 
   nativeTheme.on("updated", () => {
     setIsDarkMode(nativeTheme.shouldUseDarkColors)
@@ -37,13 +52,40 @@ const EditorWindow:FunctionComponent = () => {
     }
   }
 
+  function editorDidMount(editor:any, monaco:any) {
+    editor._domElement.style.maxWidth="100%"
+    editor.layout()
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, function() {
+      if (goRef && goRef.current)
+        goRef.current.click()
+    })
+  }
+
+  function updateScripts(newValue:string) {
+    const list = {...scripts}
+    list[currentServer!] = newValue
+    setScripts(list)
+    setCurrentScript(newValue)
+  }
+
+  async function runScript(server:string|undefined = currentServer) {
+    console.log("RUNNING SCRIPT", currentServer)
+    if (server) {
+      try {
+        const res = await connections[server].send(currentScript)
+        setResults(res.data as {}[])
+      } catch (e) {}
+    }
+  }
+
   const items: ICommandBarItemProps[] = [
     {
       key: "go",
       title: "Run script",
       iconProps: { iconName: "Play" },
+      elementRef: goRef,
       onClick: () => {
-        console.log("GO CLICKED")
+        runScript()
       }
     },
     {
@@ -134,22 +176,27 @@ const EditorWindow:FunctionComponent = () => {
 
 
   return (
-    <div style={ {...panel, ...editorWindow }}>
-      <CommandBar 
-          items={items}
-          overflowItems={overflowItems}
-          farItems={rightItems}
-          style={{
-            flex: "0" 
-          }}/>
-      <MonacoEditor
-        language="kbd/q"
-        theme={(isDarkMode) ? "vs-dark" : "vs-light"}
-        value="([] c1:1000+til 100; c2:100?`a`b`c; c3:10*1+til 100)"
-        options={editorOptions}
-        editorWillMount={editorWillMount}
-      />
-    </div>
+    <>
+      <Stack style={ { ...editorWindow }}>
+        <CommandBar 
+            items={items}
+            overflowItems={overflowItems}
+            farItems={rightItems}
+            style={{
+              flex: "0" 
+            }}/>
+        <MonacoEditor
+          language="kbd/q"
+          theme={(isDarkMode) ? "vs-dark" : "vs-light"}
+          value={currentScript}
+          options={editorOptions}
+          editorWillMount={editorWillMount}
+          editorDidMount={editorDidMount}
+          onChange={updateScripts}
+        />
+      </Stack>
+      <ResultsWindow results={results}/>
+    </>
   )
 }
 

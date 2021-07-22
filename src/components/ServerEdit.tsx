@@ -78,7 +78,7 @@ const ServerEdit:FC = () => {
   function connect() {
     if (server && server.id) {
       dispatch(connectServer(server.id))
-      context.closeModal()
+      context.closeModal(server.id)
     }
   }
 

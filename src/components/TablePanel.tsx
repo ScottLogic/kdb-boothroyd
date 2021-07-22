@@ -4,13 +4,15 @@ import {
   Nav, 
   INavLink, 
   INavLinkGroup,
+  Stack,
 } from "@fluentui/react"
-import React, { FunctionComponent, useEffect, useState } from "react"
+import React, { FunctionComponent, useContext, useEffect, useState } from "react"
 
-import { panel, serverPanel } from "../style"
+import { panel, serverPanel, stackTokens } from "../style"
 import { useSelector } from "react-redux"
 import { RootState } from "../store"
 import KdbConnection from "../server/kdb-connection"
+import { MainContext } from "./MainInterface"
 
 type TablePanelProps = {
   toggleServerModal: (display:boolean) => void
@@ -18,20 +20,14 @@ type TablePanelProps = {
 
 const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:TablePanelProps) => {
 
+  const context = useContext(MainContext)
+  const currentServer = context.currentServer
+  const connections = context.connections
   const [table, setTable] = useState<string | undefined>(undefined)
   const servers = useSelector((state:RootState) => state.servers.servers)
   const connectedServers = useSelector((state:RootState) => state.servers.connectedServers)
   const [navLinkGroups, setNavLinkGroups] = useState<INavLinkGroup[]>([])
-  const [currentServer, setCurrentServer] = useState<string|undefined>(undefined)
   const [tables, setTables] = useState<{[key:string]: {[key:string]:string[]}}>({})
-  const [connections, setConnections] = useState<{[key: string]:KdbConnection}>({})
-
-  useEffect(() => {
-    
-    // Split into seperate function to manage async
-    updateConnections()
-
-  }, [connectedServers])
 
   useEffect(() => {
 
@@ -67,24 +63,6 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
     }
     
   }, [tables, currentServer])
-
-  async function updateConnections() {
-    const conns = {...connections}
-
-    for (let i = 0; i < connectedServers.length; i++) {
-      const s:string = connectedServers[i]
-
-      if (!conns[s] && servers[s]) {
-        conns[s] = await KdbConnection.connect(
-          servers[s].host,
-          servers[s].port
-        )
-      }
-    }
-
-    setConnections(conns)
-    setCurrentServer(connectedServers[connectedServers.length - 1])
-  }
 
   async function updateTables() {
 
@@ -127,13 +105,12 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
     e && e.preventDefault()
     if (item) {
       setTable(item.key)
-
     }
   }
 
   return (
     <>
-      <div style={{
+      <Stack tokens={stackTokens} style={{
         ...panel,
         ...serverPanel
       }}>
@@ -146,7 +123,7 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
           ariaLabel="Table List"
           groups={navLinkGroups}
         />
-      </div>
+      </Stack>
     </>
   )
 }
