@@ -1,5 +1,4 @@
 import { IStyle, Modal, Pivot, PivotItem, Stack } from '@fluentui/react'
-import { connect } from 'node-q'
 import React, { FC, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import KdbConnection from '../server/kdb-connection'
@@ -8,7 +7,6 @@ import { RootState } from '../store'
 import { container, pivots, serverModal, stackTokens } from '../style'
 import EditorWindow from './EditorWindow'
 import ManageServers from './ManageServers'
-import ResultsWindow from './ResultsWindow'
 import TablePanel from './TablePanel'
 
 type MainContextType = {
@@ -66,7 +64,7 @@ const MainInterface:FC = () => {
         isOpen={showServerModal}
         styles={{ "main": serverModal as IStyle }}
         onDismiss={() => toggleServerModal(false,)}
-        isBlocking={true}
+        isBlocking={connectedServers.length === 0}
       >
         <ManageServers closeModal={(server?:string) => toggleServerModal(false, server)}/>
       </Modal>

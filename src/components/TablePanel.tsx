@@ -8,11 +8,10 @@ import {
 } from "@fluentui/react"
 import React, { FunctionComponent, useContext, useEffect, useState } from "react"
 
-import { panel, serverPanel, stackTokens } from "../style"
-import { useSelector } from "react-redux"
-import { RootState } from "../store"
-import KdbConnection from "../server/kdb-connection"
+import { tablePanel, stackTokens } from "../style"
 import { MainContext } from "./MainInterface"
+import { storeResults } from "../store/servers"
+import { useDispatch } from "react-redux"
 
 type TablePanelProps = {
   toggleServerModal: (display:boolean) => void
@@ -20,12 +19,11 @@ type TablePanelProps = {
 
 const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:TablePanelProps) => {
 
+  const dispatch = useDispatch()
   const context = useContext(MainContext)
   const currentServer = context.currentServer
   const connections = context.connections
   const [table, setTable] = useState<string | undefined>(undefined)
-  const servers = useSelector((state:RootState) => state.servers.servers)
-  const connectedServers = useSelector((state:RootState) => state.servers.connectedServers)
   const [navLinkGroups, setNavLinkGroups] = useState<INavLinkGroup[]>([])
   const [tables, setTables] = useState<{[key:string]: {[key:string]:string[]}}>({})
 
@@ -101,18 +99,22 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
     }
   ]
 
-  function tableSelected(e?: React.MouseEvent<HTMLElement>, item?: INavLink) {
+  async function tableSelected(e?: React.MouseEvent<HTMLElement>, item?: INavLink) {
     e && e.preventDefault()
     if (item) {
       setTable(item.key)
+      const res = await connections[currentServer!].send(item.key!)
+      dispatch(storeResults({
+        server: currentServer!,
+        results: res.data
+      }))
     }
   }
 
   return (
     <>
       <Stack tokens={stackTokens} style={{
-        ...panel,
-        ...serverPanel
+        ...tablePanel
       }}>
         <CommandBar 
           items={items}

@@ -17,12 +17,14 @@ const PREFIX = "server-"
 // INITIAL STATE
 type ServerState = {
   servers: {[key: string]: Server},
-  connectedServers: string[]
+  connectedServers: string[],
+  results: {[key: string]: any}
 }
 
 const initialState:ServerState = {
   servers: {},
-  connectedServers:[]
+  connectedServers:[],
+  results: {}
 }
 
 // REDUCERS
@@ -51,6 +53,9 @@ const reducers = {
       const i = state.connectedServers.indexOf(action.payload)
       state.connectedServers.splice(i,1)
     }
+  },
+  storeResults: (state:any, action:PayloadAction<{server:string,results:any}>) => {
+    state.results[action.payload.server] = action.payload.results
   }
 }
 
@@ -91,7 +96,8 @@ export const {
   editServer,
   deleteServer,
   connectServer,
-  disconnectServer
+  disconnectServer,
+  storeResults,
 } = serversSlice.actions
 export const serversReducer = serversSlice.reducer
 

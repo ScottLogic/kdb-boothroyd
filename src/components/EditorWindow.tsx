@@ -10,18 +10,21 @@ import {
 
 import syntax from '../editor/syntax';
 import theme from '../editor/theme';
-import { editorWindow, panel, stackTokens } from '../style'
+import { editorWindow } from '../style'
 import { MainContext } from './MainInterface';
 import ResultsWindow from './ResultsWindow';
+import { useDispatch, useSelector } from 'react-redux';
+import { storeResults } from '../store/servers';
+import { RootState } from '../store';
 
 const EditorWindow:FunctionComponent = () => {
 
+  const dispatch = useDispatch()
   const context = useContext(MainContext)
   const currentServer = context.currentServer
   const connections = context.connections
   const [scripts, setScripts] = useState<{[key:string]:string}>({})
   const [currentScript, setCurrentScript] = useState("")
-  const [results, setResults] = useState<Array<string | {}>>([])
   const nativeTheme = electron.remote.nativeTheme
   let [isDarkMode, setIsDarkMode] = useState(nativeTheme.shouldUseDarkColors)
 
@@ -68,12 +71,14 @@ const EditorWindow:FunctionComponent = () => {
     setCurrentScript(newValue)
   }
 
-  async function runScript(server:string|undefined = currentServer) {
-    console.log("RUNNING SCRIPT", currentServer)
-    if (server) {
+  async function runScript() {
+    if (currentServer) {
       try {
-        const res = await connections[server].send(currentScript)
-        setResults(res.data as {}[])
+        const res = await connections[currentServer].send(currentScript)
+        dispatch(storeResults({
+          server: currentServer,
+          results: res.data
+        }))
       } catch (e) {}
     }
   }
@@ -195,7 +200,7 @@ const EditorWindow:FunctionComponent = () => {
           onChange={updateScripts}
         />
       </Stack>
-      <ResultsWindow results={results}/>
+      <ResultsWindow />
     </>
   )
 }
