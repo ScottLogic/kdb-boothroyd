@@ -1,5 +1,7 @@
-import React, { FunctionComponent, useEffect } from 'react'
+import React, { FunctionComponent, useState } from 'react'
 import MonacoEditor from 'react-monaco-editor';
+import electron from 'electron'
+
 import { 
   CommandBar, 
   ICommandBarItemProps,
@@ -11,8 +13,12 @@ import { editorWindow, panel } from '../style'
 
 const EditorWindow:FunctionComponent = () => {
 
-  //const [editor, setEditor] = useState<(null)
-  const myRef = React.createRef();
+  const nativeTheme = electron.remote.nativeTheme
+  let [isDarkMode, setIsDarkMode] = useState(nativeTheme.shouldUseDarkColors)
+
+  nativeTheme.on("updated", () => {
+    setIsDarkMode(nativeTheme.shouldUseDarkColors)
+  });
 
   const editorOptions = {
     minimap: {
@@ -138,7 +144,7 @@ const EditorWindow:FunctionComponent = () => {
           }}/>
       <MonacoEditor
         language="kbd/q"
-        theme="vs-light"
+        theme={(isDarkMode) ? "vs-dark" : "vs-light"}
         value="([] c1:1000+til 100; c2:100?`a`b`c; c3:10*1+til 100)"
         options={editorOptions}
         editorWillMount={editorWillMount}

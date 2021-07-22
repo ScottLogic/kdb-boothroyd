@@ -1,4 +1,4 @@
-import { IComboBoxOptionStyles, ICommandBarStyles } from "@fluentui/react";
+import { IComboBoxOptionStyles, ICommandBarStyles, IStackTokens } from "@fluentui/react";
 import { CSSProperties } from "react";
 
 export const commandBar: Partial<ICommandBarStyles> = {
@@ -15,17 +15,17 @@ export const combo: Partial<IComboBoxOptionStyles> = {
 
 export const container: CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "1.5fr 3.5fr",
+  gridTemplateColumns: "1fr 4fr",
   gridTemplateRows: "repeat(2, 1fr)",
   height: "100vh",
-  backgroundColor: "#ccc",
+  //backgroundColor: "#ccc",
   padding: "5px",
   boxSizing: "border-box"
 };
 
 export const panel: CSSProperties = {
   margin: "5px",
-  backgroundColor: "#fff",
+  //backgroundColor: "#fff",
   display: "flex",
   flexDirection: "column",
   justifyContent: "flex-start"
@@ -48,4 +48,14 @@ export const resultsWindow: CSSProperties = {
   gridRow: 2,
   gridColumnStart: 2,
   gridColumnEnd: 5
+}
+
+export const serverModal: CSSProperties = {
+  width: "75%",
+  height: "75%"
+}
+
+export const stackTokens:IStackTokens = {
+  childrenGap: 10,
+  padding: 10,
 }
