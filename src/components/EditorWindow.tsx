@@ -11,18 +11,16 @@ import {
 import syntax from '../editor/syntax';
 import theme from '../editor/theme';
 import { editorWindow } from '../style'
-import { MainContext } from './MainInterface';
 import ResultsWindow from './ResultsWindow';
-import { useDispatch, useSelector } from 'react-redux';
-import { storeResults } from '../store/servers';
-import { RootState } from '../store';
+import { MainContext } from '../contexts/main';
 
 const EditorWindow:FunctionComponent = () => {
 
-  const dispatch = useDispatch()
   const context = useContext(MainContext)
   const currentServer = context.currentServer
   const connections = context.connections
+  const updateResults = context.updateResults
+
   const [scripts, setScripts] = useState<{[key:string]:string}>({})
   const [currentScript, setCurrentScript] = useState("")
   const nativeTheme = electron.remote.nativeTheme
@@ -75,10 +73,7 @@ const EditorWindow:FunctionComponent = () => {
     if (currentServer) {
       try {
         const res = await connections[currentServer].send(currentScript)
-        dispatch(storeResults({
-          server: currentServer,
-          results: res.data
-        }))
+       updateResults(currentServer, res.data)
       } catch (e) {}
     }
   }

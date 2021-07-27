@@ -1,6 +1,5 @@
 import { Stack } from "@fluentui/react"
 import React, { FC, useState } from "react"
-import { Server } from "../store/servers"
 import { stackTokens } from "../style"
 import ServerEdit from "./ServerEdit"
 import ServerPanel from "./ServerPanel"

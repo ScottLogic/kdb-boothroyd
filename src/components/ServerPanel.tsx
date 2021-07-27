@@ -12,19 +12,18 @@ import {
   DialogType
 } from "@fluentui/react"
 import React, { FunctionComponent, useContext, useEffect, useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { panel, serverPanel } from "../style"
-import { RootState } from "../store"
-import { deleteServer, loadServers, Server } from "../store/servers"
+import { serverPanel } from "../style"
+import Server from "../types/server"
 import { ManageServerContext } from "./ManageServers"
-import { set } from "electron-json-storage"
+import { MainContext } from "../contexts/main"
 
 const ServerPanel:FunctionComponent = () => {
 
   const context = useContext(ManageServerContext)
-  const dispatch = useDispatch()
-    
-  const servers:{[key: string]: Server} = useSelector((state:RootState) => state.servers.servers)
+  const mainContext = useContext(MainContext)
+  const deleteServer = mainContext.deleteServer
+  const servers = mainContext.servers
+
   const [hideDeleteConfirmation, setHideDeleteConfirmation] = useState(true)
   const [navLinkGroups, setNavLinkGroups] = useState<INavLinkGroup[]>([])
 
@@ -56,10 +55,6 @@ const ServerPanel:FunctionComponent = () => {
     ])
 
   }, [servers])
-
-  useEffect(() => {
-    dispatch(loadServers())
-  }, [])
 
   const items: ICommandBarItemProps[] = [
     {
@@ -93,7 +88,7 @@ const ServerPanel:FunctionComponent = () => {
 
   // Perform actual delete operation after confiration
   function doDelete() {
-    dispatch(deleteServer(context.server!))
+    deleteServer(context.server!)
     context.setServer(undefined)
     setHideDeleteConfirmation(true)
   }

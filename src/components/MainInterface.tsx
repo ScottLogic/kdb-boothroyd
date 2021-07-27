@@ -1,50 +1,38 @@
 import { IStyle, Modal, Pivot, PivotItem, Stack } from '@fluentui/react'
 import React, { FC, useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
 import KdbConnection from '../server/kdb-connection'
+import uuid from "uuid"
 
-import { RootState } from '../store'
 import { container, pivots, serverModal, stackTokens } from '../style'
 import EditorWindow from './EditorWindow'
 import ManageServers from './ManageServers'
 import TablePanel from './TablePanel'
-
-type MainContextType = {
-  currentServer?: string,
-  connections: {[key:string]:KdbConnection}
-}
-
-export const MainContext = React.createContext<MainContextType>({
-  connections:{}
-})
+import { MainContext } from '../contexts/main'
+import Server, { SERVER_PREFIX } from '../types/server'
+import { deleteItem, getItems, saveItem } from '../storage/storage'
 
 const MainInterface:FC = () => {
 
   const [showServerModal, setShowServerModal] = useState(true)
-  const servers = useSelector((state:RootState) => state.servers.servers)
-  const connectedServers = useSelector((state:RootState) => state.servers.connectedServers)
+  const [servers, setServers] = useState<{[key: string]: Server}>({})
   const [currentServer, setCurrentServer] = useState<string | undefined>(undefined)
   const [connections, setConnections] = useState<{[key: string]:KdbConnection}>({})
-  
+  const [results, setResults] = useState<{[key: string]: any}>({})
+
   useEffect(() => {
-    updateConnections()
-  }, [connectedServers])
+    loadServers()
+  }, [])
 
-  async function updateConnections() {
-    const conns = {...connections}
-
-    for (let i = 0; i < connectedServers.length; i++) {
-      const s:string = connectedServers[i]
-
-      if (!conns[s] && servers[s]) {
-        conns[s] = await KdbConnection.connect(
-          servers[s].host,
-          servers[s].port
-        )
-      }
-    }
-
-    setConnections(conns)
+  async function loadServers() {
+    console.log("LOAD SERVERS")
+    const items = await getItems(SERVER_PREFIX)
+    const servers = new Map<string, Server>();
+    (items as Array<Server>).forEach((s) => {
+      if (s.id)
+        servers.set(s.id, s)
+    })
+    console.log("LOADED", servers)
+    setServers(Object.fromEntries(servers))
   }
 
   function toggleServerModal(display:boolean, server?:string) {
@@ -57,18 +45,76 @@ const MainInterface:FC = () => {
     setCurrentServer((item && item.props.itemKey) ? item.props.itemKey : undefined)
   }
 
+  async function connectToServer(serverID:string) {
+    const server = servers[serverID]
+    const currentConnections = {...connections}
+
+    if (server && !currentConnections[serverID]) {
+      currentConnections[serverID] = await KdbConnection.connect(
+        server.host,
+        server.port
+      )
+    }
+
+    setConnections(currentConnections)
+  }
+
+  function disconnectFromServer(sID:string) {
+    const currentConnections = {...connections}
+    if (currentConnections[sID]) {
+      currentConnections[sID].reset()
+      delete currentConnections[sID]
+    }
+
+    setConnections(currentConnections)
+  }
+
+  function saveServer(server: Server) {
+    const current = {...servers}
+    if (!server.id)
+      server.id = uuid.v4()
+
+    current[server.id] = server
+    setServers(current)
+    saveItem(SERVER_PREFIX, server)
+  }
+
+  function deleteServer(sID:string) {
+    const current = {...servers}
+    delete current[sID]
+    setServers(current)
+    deleteItem(SERVER_PREFIX, sID)
+  }
+
+  function updateResults(sID: string, data: any) {
+    const current = {...results}
+    current[sID] = data
+    setResults(current)
+  }
+
   return (
     <>
-      <Modal
-        titleAriaId="Manage Servers"
-        isOpen={showServerModal}
-        styles={{ "main": serverModal as IStyle }}
-        onDismiss={() => toggleServerModal(false,)}
-        isBlocking={connectedServers.length === 0}
-      >
-        <ManageServers closeModal={(server?:string) => toggleServerModal(false, server)}/>
-      </Modal>
-      <MainContext.Provider value={{currentServer, connections}}>
+      <MainContext.Provider value={{
+        currentServer, 
+        setCurrentServer,
+        connections,
+        connectToServer,
+        disconnectFromServer,
+        servers,
+        saveServer,
+        deleteServer,
+        results,
+        updateResults
+      }}>
+        <Modal
+          titleAriaId="Manage Servers"
+          isOpen={showServerModal}
+          styles={{ "main": serverModal as IStyle }}
+          onDismiss={() => toggleServerModal(false,)}
+          isBlocking={Object.keys(connections).length === 0}
+        >
+          <ManageServers closeModal={(server?:string) => toggleServerModal(false, server)}/>
+        </Modal>
         <Stack horizontal={true} tokens={stackTokens} style={container}>
           <TablePanel toggleServerModal={toggleServerModal}/>
           <Stack style={{flex:"1 1 auto", alignItems:"stretch", minWidth: 0}}>
@@ -76,7 +122,7 @@ const MainInterface:FC = () => {
               selectedKey={currentServer || ""}
               style={{...pivots}}
               onLinkClick={handlePivotClick}>
-              {connectedServers.map((s) => (
+              {Object.keys(connections).map((s) => (
                 <PivotItem itemKey={s} key={s} headerText={servers[s].name}/>
               ))}
             </Pivot>

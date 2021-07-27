@@ -8,37 +8,40 @@ import {
   TextField 
 } from '@fluentui/react'
 import uuid from "uuid"
-import { addServer, connectServer, editServer, Server } from '../store/servers'
-import { panel, stackTokens } from '../style'
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '../store'
-import { contextBridge } from 'electron'
+import { stackTokens } from '../style'
 import { ManageServerContext } from './ManageServers'
+import Server from '../types/server'
+import { MainContext } from '../contexts/main'
 
 const ServerEdit:FC = () => {
   
   const context = useContext(ManageServerContext)
-  console.log("Server", context.server)
+  const mainContext = useContext(MainContext)
 
-  const server:Server = useSelector((state:RootState) => {
+  const [server, setServer] = useState<Server>({
+    name: "",
+    host: "",
+    port: 0
+  })
+  const [name, setName] = useState("")
+  const [host, setHost] = useState("")
+  const [port, setPort] = useState(0)
+
+  useEffect(() => {
+    let server
     if (context.server) {
-      return state.servers.servers[context.server]
+      server = mainContext.servers[context.server]
     } else {
-      return {
+      server = {
         name: "",
         host: "",
         port: 0
       }
     }
-  })
-  const [name, setName] = useState("")
-  const [host, setHost] = useState("")
-  const [port, setPort] = useState(0)
-  const dispatch = useDispatch()
-  
+    setServer(server)
+  }, [context.server])
 
   useEffect(() => {
-    console.log("use effect", server)
 
     if (context.server) {
       setName(server!.name)
@@ -50,22 +53,19 @@ const ServerEdit:FC = () => {
       setPort(0)
     }
     
-  }, [context.server])
+  }, [server])
 
   function save() {
 
     if (!server!.id)
       server.id = uuid.v4()
     
-    dispatch(
-      editServer({
-        id: server!.id,
-        name,
-        host,
-        port
-      })
-    )
-    
+    mainContext.saveServer({
+      id: server!.id,
+      name,
+      host,
+      port
+    })    
     context.setServer(server.id!)
   }
 
@@ -77,7 +77,7 @@ const ServerEdit:FC = () => {
 
   function connect() {
     if (server && server.id) {
-      dispatch(connectServer(server.id))
+      mainContext.connectToServer(server.id)
       context.closeModal(server.id)
     }
   }

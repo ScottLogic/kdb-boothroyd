@@ -3,13 +3,13 @@ import ReactDom from "react-dom"
 import electron from "electron"
 import { ThemeProvider } from '@fluentui/react'
 import { initializeIcons } from "@fluentui/font-icons-mdl2"
-import { Provider } from 'react-redux'
-import store from "./store/index"
 
 import { darkTheme, lightTheme } from './themes'
 import MainInterface from './components/MainInterface'
+import { initStorage } from './storage/storage'
 
 initializeIcons()
+initStorage()
 
 const App:FunctionComponent = () => {
 
@@ -21,11 +21,9 @@ const App:FunctionComponent = () => {
   });
 
   return (
-    <Provider store={store}>
-      <ThemeProvider applyTo="body" theme={currentTheme}>
-        <MainInterface/>
-      </ThemeProvider>
-    </Provider>
+    <ThemeProvider applyTo="body" theme={currentTheme}>
+      <MainInterface/>
+    </ThemeProvider>
   )
 }
 
