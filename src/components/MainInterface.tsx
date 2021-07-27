@@ -9,6 +9,7 @@ import EditorWindow from './EditorWindow'
 import ManageServers from './ManageServers'
 import TablePanel from './TablePanel'
 
+// Set up our MainContext
 type MainContextType = {
   currentServer?: string,
   connections: {[key:string]:KdbConnection}
@@ -30,12 +31,14 @@ const MainInterface:FC = () => {
     updateConnections()
   }, [connectedServers])
 
+  // If the connected servers list changes update our list of connections
   async function updateConnections() {
     const conns = {...connections}
 
     for (let i = 0; i < connectedServers.length; i++) {
       const s:string = connectedServers[i]
 
+      // If we haven't already got a connection for this server, make one
       if (!conns[s] && servers[s]) {
         conns[s] = await KdbConnection.connect(
           servers[s].host,
@@ -46,7 +49,7 @@ const MainInterface:FC = () => {
 
     setConnections(conns)
   }
-
+  
   function toggleServerModal(display:boolean, server?:string) {
     setShowServerModal(display)
     if (server)

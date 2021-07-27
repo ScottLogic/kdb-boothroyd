@@ -37,8 +37,8 @@ const ServerEdit:FC = () => {
   const dispatch = useDispatch()
   
 
+  // If the server's been updated update our fields
   useEffect(() => {
-    console.log("use effect", server)
 
     if (context.server) {
       setName(server!.name)

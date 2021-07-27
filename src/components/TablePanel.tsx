@@ -37,6 +37,7 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
   useEffect(() => {
 
     if (currentServer && tables[currentServer]) {
+      // Create nested list of tables and columns
       const links = Object.keys(tables[currentServer]).map((t) => {
         return {
           key: t,
@@ -62,6 +63,7 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
     
   }, [tables, currentServer])
 
+  // If we have a new connection we need to go grab the schema for it
   async function updateTables() {
 
       const tbls = {...tables}

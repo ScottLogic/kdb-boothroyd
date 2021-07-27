@@ -13,31 +13,41 @@ import theme from '../editor/theme';
 import { editorWindow } from '../style'
 import { MainContext } from './MainInterface';
 import ResultsWindow from './ResultsWindow';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { storeResults } from '../store/servers';
-import { RootState } from '../store';
 
 const EditorWindow:FunctionComponent = () => {
 
   const dispatch = useDispatch()
+
+  // Get properties from MainContext
   const context = useContext(MainContext)
   const currentServer = context.currentServer
   const connections = context.connections
+
+  // Store a list of scripts against the server they're intended for
   const [scripts, setScripts] = useState<{[key:string]:string}>({})
   const [currentScript, setCurrentScript] = useState("")
+
+  // Find out if system is in dark mode so we can use the appropriate editor theme
   const nativeTheme = electron.remote.nativeTheme
   let [isDarkMode, setIsDarkMode] = useState(nativeTheme.shouldUseDarkColors)
 
+  // Store a reference we can use to target the run script button
   const goRef = createRef<HTMLButtonElement>()
+
+  // If current script changes switch out script in editor
   useEffect(() => {
     if (currentServer)
       setCurrentScript(scripts[currentServer] || "")
   }, [currentServer])
 
+  // Toggled editor theme to match system theme
   nativeTheme.on("updated", () => {
     setIsDarkMode(nativeTheme.shouldUseDarkColors)
   });
 
+  // Set some default options for the Monaco Editor
   const editorOptions = {
     minimap: {
       enabled: false
@@ -45,6 +55,7 @@ const EditorWindow:FunctionComponent = () => {
     automaticLayout: true
   }
 
+  // Before the editor mounts we need to register our q language
   function editorWillMount(monaco:any) {
     if (!monaco.languages.getLanguages().some(({ id }:any) => id === 'kbd/q')) {
       // Register a new language
@@ -55,15 +66,24 @@ const EditorWindow:FunctionComponent = () => {
     }
   }
 
+  // Once the editor is mounted we can manipulate it a bit
   function editorDidMount(editor:any, monaco:any) {
+    // Get round bug with editor and flex layouts where editor gets too big for it's boots, literally
     editor._domElement.style.maxWidth="100%"
     editor.layout()
+
+    // Bind a shortcut key to run current script
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, function() {
+      // As currentServer isn't necessarily set when we bind this and this ends up out of scope we
+      // can make the rest happen in React land by just triggering the click action on the play button.
+      // Yes it's a hack, and I don't like it, but it works
       if (goRef && goRef.current)
         goRef.current.click()
     })
   }
 
+  // As we write scripts we need to update our store of them so we don't lose stuff when switching to 
+  // another server
   function updateScripts(newValue:string) {
     const list = {...scripts}
     list[currentServer!] = newValue
@@ -71,6 +91,7 @@ const EditorWindow:FunctionComponent = () => {
     setCurrentScript(newValue)
   }
 
+  // Send our commands to the server
   async function runScript() {
     if (currentServer) {
       try {
@@ -83,6 +104,7 @@ const EditorWindow:FunctionComponent = () => {
     }
   }
 
+  // Set up our command bar items
   const items: ICommandBarItemProps[] = [
     {
       key: "go",

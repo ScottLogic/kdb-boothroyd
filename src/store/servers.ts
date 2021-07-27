@@ -1,9 +1,9 @@
 import uuid from "uuid";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit"
 
-import { ADD_SERVER, CONNECT_SERVER, DELETE_SERVER, DISCONNECT_SERVER, EDIT_SERVER, LOAD_SERVERS } from "./action-types"
 import { deleteItem, getItems, saveItem } from "../storage/storage";
 
+// Define a structure for the Server type
 export interface Server {
   name: string;
   host: string;
