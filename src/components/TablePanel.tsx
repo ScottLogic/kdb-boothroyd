@@ -21,6 +21,8 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
   const currentServer = context.currentServer
   const connections = context.connections
   const updateResults = context.updateResults
+  const setIsLoading = context.setIsLoading
+  
   const [table, setTable] = useState<string | undefined>(undefined)
   const [navLinkGroups, setNavLinkGroups] = useState<INavLinkGroup[]>([])
   const [tables, setTables] = useState<{[key:string]: {[key:string]:string[]}}>({})
@@ -103,6 +105,11 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
     e && e.preventDefault()
     if (item && currentServer) {
       setTable(item.key)
+
+      //Reset results and show loading dialog
+      setIsLoading(true)
+      updateResults(currentServer, null)
+
       const res = await connections[currentServer!].send(item.key!)
       updateResults(currentServer, res.data)
     }
