@@ -40,5 +40,9 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     filename: 'app.js'
   },
-  plugins: [new HtmlWebpackPlugin(),new MonacoWebpackPlugin()],
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: "KBD Studio 2"
+    })
+  ],
 };

@@ -4,23 +4,15 @@ import fs from "fs";
 import uuid from "uuid";
 import storage from "electron-json-storage";
 
-const PREFIX = "server-";
-
-export interface Server {
-  name: string;
-  host: string;
-  port: number;
-  id?: string;
-}
-
-export function getServers() {
+export function getItems(prefix:string): Promise<Array<{}>> {
   return new Promise((resolve, reject) => {
     storage.keys((error, allKeys) => {
       if (error) reject(error);
 
-      const serverKeys = allKeys.filter((k) => k.startsWith(PREFIX));
+      const matchingKeys = allKeys.filter((k) => k.startsWith(prefix));
+      storage.getMany(matchingKeys, (error, data) => {
 
-      storage.getMany(serverKeys, (error, data) => {
+        console.log('data', data)
         if (error) reject(error);
         resolve(Object.values(data));
       });
@@ -28,12 +20,19 @@ export function getServers() {
   });
 }
 
-export function saveServer(cs: Server) {
+export function saveItem(prefix: string, data: any) {
   // create a unique id for this server
-  if (!cs.id) {
-    cs.id = uuid.v4();
+  if (!data.id) {
+    data.id = uuid.v4();
   }
-  storage.set(PREFIX + cs.id, cs, (error) => {
+  storage.set(prefix + data.id, data, (error) => {
+    if (error) 
+      throw error;
+  });
+}
+
+export function deleteItem(prefix:string, id: string) {
+  storage.remove(prefix + id, (error) => {
     if (error) throw error;
   });
 }
@@ -50,10 +49,4 @@ export function initStorage() {
     fs.mkdirSync(storageDir, { recursive: true });
   }
   storage.setDataPath(storageDir);
-}
-
-export function deleteServer(serverId: string) {
-  storage.remove(PREFIX + serverId, (error) => {
-    if (error) throw error;
-  });
 }

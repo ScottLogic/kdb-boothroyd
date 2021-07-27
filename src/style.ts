@@ -1,4 +1,4 @@
-import { IComboBoxOptionStyles, ICommandBarStyles } from "@fluentui/react";
+import { IComboBoxOptionStyles, ICommandBarStyles, IStackTokens } from "@fluentui/react";
 import { CSSProperties } from "react";
 
 export const commandBar: Partial<ICommandBarStyles> = {
@@ -14,9 +14,55 @@ export const combo: Partial<IComboBoxOptionStyles> = {
 };
 
 export const container: CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "1fr",
-  gridTemplateRows: "30px 1fr 1fr",
-  gridAutoFlow: "row",
   height: "100vh",
+  maxHeight: "100vh",
+  width: "100vw",
+  maxWidth: "100vw",
+  //backgroundColor: "#ccc",
+  padding: "5px",
+  boxSizing: "border-box"
 };
+
+export const panel: CSSProperties = {
+  //margin: "5px",
+  //backgroundColor: "#fff",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "flex-start"
+}
+
+export const serverPanel: CSSProperties = {
+  flex:"0",
+  minWidth:"200px"
+}
+
+export const tablePanel: CSSProperties = {
+  flex: "0",
+  width: "20%"
+}
+
+export const pivots: CSSProperties = {
+  flex: "0 0 none",
+  height:"50px"
+}
+
+export const editorWindow: CSSProperties = {
+  flex:"1 1 auto",
+  maxWidth:"100%",
+  alignItems: "stretch"
+}
+
+export const resultsWindow: CSSProperties = {
+  flex:"1 1 auto",
+  height:"50%"
+}
+
+export const serverModal: CSSProperties = {
+  width: "75%",
+  height: "75%"
+}
+
+export const stackTokens:IStackTokens = {
+  childrenGap: 10,
+  padding: 10,
+}
