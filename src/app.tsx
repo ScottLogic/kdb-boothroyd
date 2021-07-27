@@ -13,10 +13,12 @@ initStorage()
 
 const App:FunctionComponent = () => {
 
+  // Get a link to the OS' native theme and set current theme based on if we're in dark mode
   const nativeTheme = electron.remote.nativeTheme
   const [currentTheme, setCurrentTheme] = useState((nativeTheme.shouldUseDarkColors) ? darkTheme : lightTheme)
 
   nativeTheme.on("updated", () => {
+    // System theme changed so so should we
     setCurrentTheme((nativeTheme.shouldUseDarkColors) ? darkTheme : lightTheme)
   });
 

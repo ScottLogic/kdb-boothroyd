@@ -35,12 +35,15 @@ const ResultsWindow:FunctionComponent = () => {
 
   }, [currentServer, allResults])
 
+// Format the results for display (needs extracting out)
   useEffect(() => {
     const cols:IColumn[] = []
     const data:{}[] = []
 
-    console.log("results", results)
+    // Check we have a type that needs tabulating
     if (results && typeof results != "string") {
+
+      //Make sure we actually have some results
       if (results.length > 0) {
         // Add index column
         cols.push({
@@ -60,8 +63,10 @@ const ResultsWindow:FunctionComponent = () => {
           isPadded: true
         })
 
+        // If we have an array of objects
         if (typeof results[0] === typeof {}) { 
 
+          // Set column headers
           Object.entries(results[0]).forEach(([k,v]) => {
             cols.push({
               key: k.toLowerCase(),
@@ -81,6 +86,7 @@ const ResultsWindow:FunctionComponent = () => {
             } as IColumn)
           })
 
+          // Add rows and add index field
           results.forEach((v:{}, i:number) =>{
             data.push({
               ...v,
@@ -101,6 +107,8 @@ const ResultsWindow:FunctionComponent = () => {
             data.push(row)
           })*/
         } else {
+
+          // Otherwise add a value column header
           cols.push({
             key: "value",
             name: "Value",
@@ -117,6 +125,8 @@ const ResultsWindow:FunctionComponent = () => {
             data: typeof results[0],
             isPadded: true
           })
+
+          // Add rows with extra index column
           results.forEach((v:any,i:number) => {
             data.push({
               value:v,

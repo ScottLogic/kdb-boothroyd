@@ -34,7 +34,7 @@ const MainInterface:FC = () => {
     console.log("LOADED", servers)
     setServers(Object.fromEntries(servers))
   }
-
+  
   function toggleServerModal(display:boolean, server?:string) {
     setShowServerModal(display)
     if (server)
@@ -49,6 +49,7 @@ const MainInterface:FC = () => {
     const server = servers[serverID]
     const currentConnections = {...connections}
 
+    // Check server data exists and we don't already have a connection to it
     if (server && !currentConnections[serverID]) {
       currentConnections[serverID] = await KdbConnection.connect(
         server.host,

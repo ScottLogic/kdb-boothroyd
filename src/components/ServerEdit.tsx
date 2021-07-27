@@ -41,6 +41,7 @@ const ServerEdit:FC = () => {
     setServer(server)
   }, [context.server])
 
+  // If the server's been updated update our fields
   useEffect(() => {
 
     if (context.server) {
