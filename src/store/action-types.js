@@ -1,6 +1,0 @@
-export const LOAD_SERVERS = "LOAD_SERVERS";
-export const CONNECT_SERVER = "CONNECT_SERVER";
-export const DISCONNECT_SERVER = "DISCONNECT_SERVER";
-export const ADD_SERVER = "ADD_SERVER";
-export const EDIT_SERVER = "EDIT_SERVER";
-export const DELETE_SERVER = "DELETE_SERVER";

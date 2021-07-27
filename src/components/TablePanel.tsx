@@ -9,9 +9,7 @@ import {
 import React, { FunctionComponent, useContext, useEffect, useState } from "react"
 
 import { tablePanel, stackTokens } from "../style"
-import { MainContext } from "./MainInterface"
-import { storeResults } from "../store/servers"
-import { useDispatch } from "react-redux"
+import { MainContext } from "../contexts/main"
 
 type TablePanelProps = {
   toggleServerModal: (display:boolean) => void
@@ -19,10 +17,10 @@ type TablePanelProps = {
 
 const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:TablePanelProps) => {
 
-  const dispatch = useDispatch()
   const context = useContext(MainContext)
   const currentServer = context.currentServer
   const connections = context.connections
+  const updateResults = context.updateResults
   const [table, setTable] = useState<string | undefined>(undefined)
   const [navLinkGroups, setNavLinkGroups] = useState<INavLinkGroup[]>([])
   const [tables, setTables] = useState<{[key:string]: {[key:string]:string[]}}>({})
@@ -103,13 +101,10 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
 
   async function tableSelected(e?: React.MouseEvent<HTMLElement>, item?: INavLink) {
     e && e.preventDefault()
-    if (item) {
+    if (item && currentServer) {
       setTable(item.key)
       const res = await connections[currentServer!].send(item.key!)
-      dispatch(storeResults({
-        server: currentServer!,
-        results: res.data
-      }))
+      updateResults(currentServer, res.data)
     }
   }
 

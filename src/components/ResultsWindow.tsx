@@ -12,19 +12,30 @@ import {
 } from "@fluentui/react"
 
 import { resultsWindow } from '../style'
-import { MainContext } from './MainInterface'
-import { useSelector } from 'react-redux'
-import { RootState } from '../store'
+import { MainContext } from '../contexts/main'
 
 const ResultsWindow:FunctionComponent = () => {
 
   const context = useContext(MainContext)
   const currentServer = context.currentServer
-  const results = useSelector((state:RootState) => state.servers.results[currentServer!])
+  const allResults = context.results
+  const [results,setResults] = useState<any>(null)
   const [columns, setColumns] = useState<IColumn[]>([])
   const [rows, setRows] = useState<Array<{}|string>>([])
 
-  // Format the results for display (needs extracting out)
+  console.log("results", allResults)
+  useEffect(() => {
+
+    console.log("GET RESULTS", allResults)
+    if (currentServer && allResults[currentServer]) {
+      setResults(allResults[currentServer])
+    } else {
+      setResults(null)
+    }
+
+  }, [currentServer, allResults])
+
+// Format the results for display (needs extracting out)
   useEffect(() => {
     const cols:IColumn[] = []
     const data:{}[] = []
