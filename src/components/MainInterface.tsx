@@ -18,6 +18,7 @@ const MainInterface:FC = () => {
   const [currentServer, setCurrentServer] = useState<string | undefined>(undefined)
   const [connections, setConnections] = useState<{[key: string]:KdbConnection}>({})
   const [results, setResults] = useState<{[key: string]: any}>({})
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     loadServers()
@@ -106,7 +107,9 @@ const MainInterface:FC = () => {
         saveServer,
         deleteServer,
         results,
-        updateResults
+        updateResults,
+        isLoading,
+        setIsLoading
       }}>
         <Modal
           titleAriaId="Manage Servers"

@@ -23,6 +23,7 @@ const EditorWindow:FunctionComponent = () => {
   const updateResults = context.updateResults
   const results = context.results
 
+  const setIsLoading = context.setIsLoading
 
   // Store a list of scripts against the server they're intended for
   const [scripts, setScripts] = useState<{[key:string]:string}>({})
@@ -94,9 +95,16 @@ const EditorWindow:FunctionComponent = () => {
   async function runScript() {
     if (currentServer) {
       try {
+        // Reset results to trigger loading animation
+        updateResults(currentServer, null)
+        setIsLoading(true)
+
+        // Load actual results
         const res = await connections[currentServer].send(currentScript)
         updateResults(currentServer, currentScript, res.data)
-      } catch (e) {}
+      } catch (e) {
+        // TODO: handle error
+      }
     }
   }
 
