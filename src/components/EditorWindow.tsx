@@ -41,8 +41,12 @@ const EditorWindow:FunctionComponent = () => {
 
   // If current script changes switch out script in editor
   useEffect(() => {
-    if (currentServer)
-      setCurrentScript(scripts[currentServer] || "")
+    if (currentServer) {
+      const script = scripts[currentServer] || ""
+      setCurrentScript(script)
+      if (editorRef && editorRef.current)
+        (editorRef.current as any).setValue(script)
+    }
   }, [currentServer])
 
   // Toggled editor theme to match system theme
@@ -219,7 +223,11 @@ const EditorWindow:FunctionComponent = () => {
       title: "Undo last change",
       iconProps: { iconName: "Undo" },
       onClick: () => {
-        console.log("UNDO CLICKED")
+        if (editorRef && editorRef.current) {
+          const editor = (editorRef.current as any)
+          editor.trigger('aaaa', 'undo', 'aaaa')
+          editor.focus()
+        }
       }
     },
     {
@@ -227,7 +235,11 @@ const EditorWindow:FunctionComponent = () => {
       title: "Redo last change",
       iconProps: { iconName: "Redo" },
       onClick: () => {
-        console.log("REDO CLICKED")
+        if (editorRef && editorRef.current) {
+          const editor = (editorRef.current as any)
+          editor.trigger('aaa', 'redo', 'aaa')
+          editor.focus()
+        }
       }
     }
   ]
@@ -246,7 +258,6 @@ const EditorWindow:FunctionComponent = () => {
         <MonacoEditor
           language="kbd/q"
           theme={(isDarkMode) ? "vs-dark" : "vs-light"}
-          value={currentScript}
           options={editorOptions}
           editorWillMount={editorWillMount}
           editorDidMount={editorDidMount}
