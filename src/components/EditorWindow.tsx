@@ -104,7 +104,6 @@ const EditorWindow:FunctionComponent = () => {
     if (currentServer) {
       try {
         // Reset results to trigger loading animation
-        updateResults(currentServer, null, null)
         setIsLoading(true)
 
         let selected
