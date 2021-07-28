@@ -36,6 +36,9 @@ const EditorWindow:FunctionComponent = () => {
   // Store a reference we can use to target the run script button
   const goRef = createRef<HTMLButtonElement>()
 
+  // Store a ref to the editor
+  const editorRef = useRef()
+
   // If current script changes switch out script in editor
   useEffect(() => {
     if (currentServer)
@@ -72,6 +75,7 @@ const EditorWindow:FunctionComponent = () => {
     editor._domElement.style.maxWidth="100%"
     editor.layout()
 
+    editorRef.current = editor
     // Bind a shortcut key to run current script
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, function() {
       // As currentServer isn't necessarily set when we bind this and this ends up out of scope we
@@ -99,10 +103,21 @@ const EditorWindow:FunctionComponent = () => {
         updateResults(currentServer, null, null)
         setIsLoading(true)
 
+        let selected
+        
+        // Get currently highlighted text
+        if (editorRef.current) {
+          const editor:any = editorRef.current!
+          selected = editor.getModel().getValueInRange(editor.getSelection())
+        }
+
+        // If selected text use that, otherwise send full script
+        const script = (selected && selected != "") ? selected : currentScript
+        
         // Load actual results
-        const res = await connections[currentServer].send(currentScript)
-        console.log("RESULTS", res)
-        updateResults(currentServer, currentScript, res.data)
+        const res = await connections[currentServer].send(script)
+        
+        updateResults(currentServer, script, res.data)
       } catch (e) {
         // TODO: handle error
       }
