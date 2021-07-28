@@ -98,10 +98,8 @@ const ServerEdit:FC = () => {
   }
 
   function connect() {
-    if (server && server.id) {
+    if (server && server.id)
       mainContext.connectToServer(server.id)
-      context.closeModal(server.id)
-    }
   }
 
   return (

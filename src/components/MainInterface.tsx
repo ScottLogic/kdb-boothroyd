@@ -57,6 +57,7 @@ const MainInterface:FC = () => {
     }
 
     setConnections(currentConnections)
+    setShowServerModal(false)
   }
 
   function disconnectFromServer(sID:string) {
