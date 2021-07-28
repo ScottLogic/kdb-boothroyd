@@ -26,6 +26,7 @@ const ServerEdit:FC = () => {
   const [name, setName] = useState("")
   const [host, setHost] = useState("")
   const [port, setPort] = useState(0)
+  const [canConnect, setCanConnect] = useState(false)
 
   useEffect(() => {
     let server
@@ -39,6 +40,7 @@ const ServerEdit:FC = () => {
       }
     }
     setServer(server)
+    setCanConnect(!!server.id)
   }, [context.server])
 
   // If the server's been updated update our fields
@@ -56,18 +58,37 @@ const ServerEdit:FC = () => {
     
   }, [server])
 
+  useEffect(() => {
+    if (
+      name != server.name ||
+      host != server.host ||
+      port != server.port
+    ) {
+      setCanConnect(false)
+    } else {
+      if (server.id)
+        setCanConnect(true)
+    }
+  }, [name, host, port])
+  
+
   function save() {
 
     if (!server!.id)
       server.id = uuid.v4()
-    
-    mainContext.saveServer({
+
+    const s = {
       id: server!.id,
       name,
       host,
       port
-    })    
+    }
+    
+    mainContext.saveServer(s)
+
     context.setServer(server.id!)
+    setServer(s)
+    setCanConnect(true)
   }
 
   function reset() {
@@ -113,7 +134,7 @@ const ServerEdit:FC = () => {
       <Stack horizontal={true} horizontalAlign="end" tokens={stackTokens}>
         <PrimaryButton 
           text="Connect" 
-          disabled={!server.id}
+          disabled={!canConnect}
           onClick={connect}/>
       </Stack>
     </Stack>
