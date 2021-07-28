@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useState } from 'react'
 import ReactDom from "react-dom"
-import electron from "electron"
+import { ipcRenderer } from "electron"
 import { ThemeProvider } from '@fluentui/react'
 import { initializeIcons } from "@fluentui/font-icons-mdl2"
 
@@ -13,14 +13,26 @@ initStorage()
 
 const App:FunctionComponent = () => {
 
-  // Get a link to the OS' native theme and set current theme based on if we're in dark mode
-  const nativeTheme = electron.remote.nativeTheme
-  const [currentTheme, setCurrentTheme] = useState((nativeTheme.shouldUseDarkColors) ? darkTheme : lightTheme)
+  const [currentTheme, setCurrentTheme] = useState(lightTheme)
 
-  nativeTheme.on("updated", () => {
+  // Check current theme
+  ipcRenderer
+    .invoke("is-dark-mode")
+    .then((isDarkMode) => {
+      setCurrentTheme(isDarkMode ? darkTheme : lightTheme)
+    })
+  
+  // Handle theme updates
+  ipcRenderer
+    .on("colour-scheme-changed", (_, isDarkMode) => {
+      setCurrentTheme(isDarkMode ? darkTheme : lightTheme)
+    })
+
+
+  /*nativeTheme.on("updated", () => {
     // System theme changed so so should we
     setCurrentTheme((nativeTheme.shouldUseDarkColors) ? darkTheme : lightTheme)
-  });
+  });*/
 
   return (
     <ThemeProvider applyTo="body" theme={currentTheme}>

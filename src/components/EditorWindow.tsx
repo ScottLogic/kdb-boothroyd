@@ -1,6 +1,6 @@
 import React, { createRef, FunctionComponent, useContext, useEffect, useRef, useState } from 'react'
 import MonacoEditor from 'react-monaco-editor';
-import electron from 'electron'
+import { ipcRenderer } from 'electron'
 
 import { 
   CommandBar, 
@@ -30,8 +30,20 @@ const EditorWindow:FunctionComponent = () => {
   const [currentScript, setCurrentScript] = useState("")
 
   // Find out if system is in dark mode so we can use the appropriate editor theme
-  const nativeTheme = electron.remote.nativeTheme
-  let [isDarkMode, setIsDarkMode] = useState(nativeTheme.shouldUseDarkColors)
+  let [isDarkMode, setIsDarkMode] = useState(false)
+
+  // Check current theme
+  ipcRenderer
+    .invoke("is-dark-mode")
+    .then((isDarkMode) => {
+      setIsDarkMode(isDarkMode)
+    })
+  
+  // Handle theme updates
+  ipcRenderer
+    .on("colour-scheme-changed", (_, isDarkMode) => {
+      setIsDarkMode(isDarkMode)
+    })
 
   // Store a reference we can use to target the run script button
   const goRef = createRef<HTMLButtonElement>()
@@ -48,11 +60,6 @@ const EditorWindow:FunctionComponent = () => {
         (editorRef.current as any).setValue(script)
     }
   }, [currentServer])
-
-  // Toggled editor theme to match system theme
-  nativeTheme.on("updated", () => {
-    setIsDarkMode(nativeTheme.shouldUseDarkColors)
-  });
 
   // Set some default options for the Monaco Editor
   const editorOptions = {

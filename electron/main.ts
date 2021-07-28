@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain, nativeTheme } from "electron";
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import * as path from "path";
 import * as url from "url";
@@ -13,7 +13,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      enableRemoteModule: true,
+      enableRemoteModule: false,
       webSecurity: false,
     },
   });
@@ -30,6 +30,17 @@ function createWindow() {
       })
     );
   }
+
+  ipcMain.handle("is-dark-mode", () => {
+    return nativeTheme.shouldUseDarkColors
+  })
+
+  nativeTheme.on("updated", () => {
+    mainWindow?.webContents.send(
+      "colour-scheme-changed", 
+      nativeTheme.shouldUseDarkColors
+    )
+  })
 
   mainWindow.on("closed", () => {
     mainWindow = null;
