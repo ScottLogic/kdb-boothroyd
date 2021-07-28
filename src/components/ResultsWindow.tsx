@@ -81,7 +81,10 @@ const ResultsWindow:FunctionComponent = () => {
 
   const parseMoreResults = (index?: number) => {
     console.log("NEW START", index)
-    setStart(index || 0)
+    setTimeout(() => {
+      setStart(index || 0)
+    }, 100)
+    
     return (<Shimmer isDataLoaded={false}></Shimmer>)
   }
 
