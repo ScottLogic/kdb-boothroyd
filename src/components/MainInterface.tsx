@@ -19,6 +19,7 @@ const MainInterface:FC = () => {
   const [connections, setConnections] = useState<{[key: string]:KdbConnection}>({})
   const [results, setResults] = useState<{[key: string]: any}>({})
   const [isLoading, setIsLoading] = useState(false)
+  const [isConnecting, setIsConnecting] = useState(false)
 
   useEffect(() => {
     loadServers()
@@ -59,6 +60,7 @@ const MainInterface:FC = () => {
     setConnections(currentConnections)
     setCurrentServer(serverID)
     setShowServerModal(false)
+    setIsConnecting(false)
   }
 
   function disconnectFromServer(sID:string) {
@@ -111,7 +113,9 @@ const MainInterface:FC = () => {
         results,
         updateResults,
         isLoading,
-        setIsLoading
+        setIsLoading,
+        isConnecting,
+        setIsConnecting
       }}>
         <Modal
           titleAriaId="Manage Servers"

@@ -2,7 +2,10 @@ import React, { FC, useContext, useEffect, useState } from 'react'
 import { 
   DefaultButton,
   ITextProps,
+  Overlay,
   PrimaryButton,
+  Spinner,
+  SpinnerSize,
   Stack, 
   Text, 
   TextField 
@@ -17,6 +20,7 @@ const ServerEdit:FC = () => {
   
   const context = useContext(ManageServerContext)
   const mainContext = useContext(MainContext)
+  const isConnecting = mainContext.isConnecting
 
   const [server, setServer] = useState<Server>({
     name: "",
@@ -98,8 +102,10 @@ const ServerEdit:FC = () => {
   }
 
   function connect() {
-    if (server && server.id)
+    if (server && server.id) {
       mainContext.connectToServer(server.id)
+      mainContext.setIsConnecting(true)
+    }
   }
 
   return (
@@ -130,10 +136,16 @@ const ServerEdit:FC = () => {
         <DefaultButton text="Reset" onClick={reset}/>
       </Stack>
       <Stack horizontal={true} horizontalAlign="end" tokens={stackTokens}>
-        <PrimaryButton 
-          text="Connect" 
-          disabled={!canConnect}
-          onClick={connect}/>
+        <PrimaryButton  
+          disabled={!canConnect || isConnecting}
+          onClick={connect}>
+          { isConnecting ? (
+            <Spinner size={SpinnerSize.large}/>
+          ) : (
+            "Connect"
+          )}
+        </PrimaryButton>
+        
       </Stack>
     </Stack>
   )
