@@ -30,22 +30,7 @@ const ResultsWindow:FunctionComponent = () => {
   const [currentResults,setCurrentResults] = useState<any>(null)
   const [columns, setColumns] = useState<IColumn[]>([])
   const [rows, setRows] = useState<Array<{}|string>>([])
-  //const [start, setStart] = useState(0)
-
-  const startReducer = (state:{start:number}, action:{type:string, payload:number}) => {
-    switch (action.type) {
-      case 'SET_START':
-        return {...state, start: action.payload}
-      default:
-        return state;
-    }
-  }
-  const [start, startDispatch] = useReducer(startReducer, {start:0})
-
-  const setStart = useCallback((index) => startDispatch({
-    type: "SET_START",
-    payload: index
-  }), [startDispatch])
+  const [start, setStart] = useState(0)
 
   useEffect(() => {
 
@@ -55,7 +40,7 @@ const ResultsWindow:FunctionComponent = () => {
       setCurrentResults(null)
     }
     
-    startDispatch({type: "SET_START", payload: 0})
+    setStart(0)
 
   }, [currentServer, results])
 
@@ -64,7 +49,7 @@ const ResultsWindow:FunctionComponent = () => {
 
     if (results) {
       console.log("START", start)
-      const processed = ResultsProcessor.process(currentResults, start.start)
+      const processed = ResultsProcessor.process(currentResults, start)
 
       console.log("processed", processed)
 
@@ -81,9 +66,9 @@ const ResultsWindow:FunctionComponent = () => {
 
   useEffect(() => {
     console.log("UPDATED START", start)
-    if (start.start > 0) {
+    if (start > 0) {
       if (results) {
-        const processed = ResultsProcessor.process(currentResults, start.start)
+        const processed = ResultsProcessor.process(currentResults, start)
   
         if (Array.isArray(processed)) {
           const [_, newRows] = processed as [Array<IColumn>, Array<{}>]
@@ -96,8 +81,8 @@ const ResultsWindow:FunctionComponent = () => {
 
   const parseMoreResults = (index?: number) => {
     console.log("NEW START", index)
-    startDispatch({type: "SET_START", payload: index || 0})
-    return null//(<Shimmer isDataLoaded={false}></Shimmer>)
+    setStart(index || 0)
+    return (<Shimmer isDataLoaded={false}></Shimmer>)
   }
 
   function onColumnClick() {
