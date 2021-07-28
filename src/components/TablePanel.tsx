@@ -120,14 +120,17 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
 
   async function tableSelected(e?: React.MouseEvent<HTMLElement>, item?: INavLink) {
     e && e.preventDefault()
-    if (item && currentServer) {
-      setTable(item.key)
+    if (item && item.key && currentServer) {
+      console.log("TABLES", tables)
+      if (Object.keys(tables[currentServer]).includes(item.key)) {
+        setTable(item.key)
 
-      //Reset results and show loading dialog
-      setIsLoading(true)
+        //Reset results and show loading dialog
+        setIsLoading(true)
 
-      const res = await connections[currentServer!].send(item.key!)
-      updateResults(currentServer, item.key!, res.data)
+        const res = await connections[currentServer].send(item.key)
+        updateResults(currentServer, item.key, res.data)
+      }
     }
   }
 
