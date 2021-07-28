@@ -21,6 +21,8 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
   const currentServer = context.currentServer
   const connections = context.connections
   const updateResults = context.updateResults
+  const results = context.results
+
   const [table, setTable] = useState<string | undefined>(undefined)
   const [navLinkGroups, setNavLinkGroups] = useState<INavLinkGroup[]>([])
   const [tables, setTables] = useState<{[key:string]: {[key:string]:string[]}}>({})
@@ -31,6 +33,17 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
       updateTables()
 
   }, [connections])
+
+  useEffect(() => {
+    if (currentServer) {
+      const refreshTables = async () => {
+        const tbls = {...tables}
+        tbls[currentServer] = await getTables(currentServer)
+        setTables(tbls)
+      }
+      refreshTables()
+    }
+  }, [results])
 
   useEffect(() => {
 
@@ -67,25 +80,31 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
       const tbls = {...tables}
 
       // Loop over each connection
-      for (let k in connections) {
-        const s = connections[k]
-        
+      for (let k in connections) {        
         // If we haven't already grabbed tables get them
         if (!tbls[k]) {
-          const results = await s.send("tables[]")
-          tbls[k] = {};
-          const data = results.data as string[]
-
-          // Get the columns for each table
-          for (let i = 0; i < data.length; i++) {
-            const t = data[i]
-            const results2 = await s.send(`cols ${t}`)
-            tbls[k][t] = results2.data as string[]
-          }
+          tbls[k] = await getTables(k)
         }
       }
 
       setTables(tbls)
+  }
+
+  async function getTables(server:string) {
+    const s = connections[server]
+    const results = await s.send("tables[]")
+    
+    const tbls:{[key:string]: string[]} = {};
+    const data = results.data as string[]
+
+    // Get the columns for each table
+    for (let i = 0; i < data.length; i++) {
+      const t = data[i]
+      const results2 = await s.send(`cols ${t}`)
+      tbls[t] = results2.data as string[]
+    }
+
+    return tbls
   }
 
   const items: ICommandBarItemProps[] = [
