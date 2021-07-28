@@ -14,7 +14,9 @@ type MainContextType = {
   results: {[key: string]: any},
   updateResults: (server:string, script:string | null, results:any) => void,
   isLoading: boolean,
-  setIsLoading: (loading:boolean) => void
+  setIsLoading: (loading:boolean) => void,
+  isConnecting: boolean,
+  setIsConnecting: (connecting:boolean) => void
 }
 
 export const MainContext = createContext<MainContextType>({
@@ -28,5 +30,7 @@ export const MainContext = createContext<MainContextType>({
   deleteServer: () => {},
   updateResults:() => {},
   isLoading: false,
-  setIsLoading: () => {}
+  setIsLoading: () => {},
+  isConnecting: false,
+  setIsConnecting: () => {}
 })
