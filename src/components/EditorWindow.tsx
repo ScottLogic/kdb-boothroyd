@@ -214,7 +214,11 @@ const EditorWindow:FunctionComponent = () => {
       title: "Find text in script",
       iconProps: { iconName: "Search"},
       onClick: () => {
-        console.log("FIND CLICKED")
+        if (editorRef && editorRef.current) {
+          const editor = editorRef.current as any
+          editor.focus();
+          editor.getAction("actions.find").run()
+        }
       }
     },
     {
@@ -223,7 +227,11 @@ const EditorWindow:FunctionComponent = () => {
       title: "Replace text in script",
       iconProps: { iconName: "Switch"},
       onClick: () => {
-        console.log("REPLACE CLICKED")
+        if (editorRef && editorRef.current) {
+          const editor = editorRef.current as any
+          editor.focus();
+          editor.getAction("editor.action.startFindReplaceAction").run()
+        }
       }
     }
   ]

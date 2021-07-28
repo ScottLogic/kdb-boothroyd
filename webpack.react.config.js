@@ -24,7 +24,7 @@ module.exports = {
 				use: ['style-loader', 'css-loader']
 			},
 			{
-				test: /\.ttf$/,
+				test: /!(node_modules)\.ttf$/,
 				use: ['file-loader']
 			}
     ],
@@ -41,6 +41,7 @@ module.exports = {
     filename: 'app.js'
   },
   plugins: [
+    new MonacoWebpackPlugin(),
     new HtmlWebpackPlugin({
       title: "KBD Studio 2"
     })
