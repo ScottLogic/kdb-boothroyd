@@ -175,7 +175,11 @@ const EditorWindow:FunctionComponent = () => {
       title: "Cut selected text",
       iconProps: { iconName: "Cut" },
       onClick: () => {
-        console.log("CUT CLICKED")
+        if (editorRef && editorRef.current) {
+          const editor = editorRef.current as any
+          editor.focus()
+          document.execCommand("cut")
+        }
       }
     },
     {
@@ -184,7 +188,11 @@ const EditorWindow:FunctionComponent = () => {
       title: "Copy selected text",
       iconProps: { iconName: "Copy" },
       onClick: () => {
-        console.log("COPY CLICKED")
+        if (editorRef && editorRef.current) {
+          const editor = editorRef.current as any
+          editor.focus()
+          document.execCommand("copy")
+        }
       }
     },
     {
@@ -193,7 +201,11 @@ const EditorWindow:FunctionComponent = () => {
       title: "Paste text from the clipboard",
       iconProps: { iconName: "Paste" },
       onClick: () => {
-        console.log("PASTE CLICKED")
+        if (editorRef && editorRef.current) {
+          const editor = editorRef.current as any
+          editor.focus()
+          document.execCommand("paste")
+        }
       }
     },
     {
