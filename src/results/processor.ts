@@ -71,6 +71,22 @@ export class ResultsProcessor {
           isPadded: true
         } as IColumn)
       })
+    } else {
+      cols.push({
+        key: "value",
+        name: "Value",
+        fieldName:"value",
+        minWidth:10,
+        maxWidth:200,
+        isRowHeader: true,
+        isResizable: true,
+        isSorted: false,
+        isSortedDescending: false,
+        sortAscendingAriaLabel: 'Sorted ASC',
+        sortDescendingAriaLabel: 'Sorted DESC',
+        data: typeof results[0],
+        isPadded: true
+      })
     }
 
     return cols
