@@ -123,7 +123,7 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
     if (item && currentServer) {
       setTable(item.key)
       const res = await connections[currentServer!].send(item.key!)
-      updateResults(currentServer, res.data)
+      updateResults(currentServer, item.key!, res.data)
     }
   }
 

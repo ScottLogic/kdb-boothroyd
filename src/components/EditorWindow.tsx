@@ -21,6 +21,7 @@ const EditorWindow:FunctionComponent = () => {
   const currentServer = context.currentServer
   const connections = context.connections
   const updateResults = context.updateResults
+  const results = context.results
 
 
   // Store a list of scripts against the server they're intended for
@@ -94,7 +95,17 @@ const EditorWindow:FunctionComponent = () => {
     if (currentServer) {
       try {
         const res = await connections[currentServer].send(currentScript)
-       updateResults(currentServer, res.data)
+        updateResults(currentServer, currentScript, res.data)
+      } catch (e) {}
+    }
+  }
+
+  async function refreshResults() {
+    if (currentServer) {
+      try {
+        const script = results[currentServer].script
+        const res = await connections[currentServer].send(script)
+        updateResults(currentServer, script, res.data)
       } catch (e) {}
     }
   }
@@ -122,8 +133,9 @@ const EditorWindow:FunctionComponent = () => {
       key: "refresh",
       title: "Refresh results",
       iconProps: { iconName: "Refresh" },
+      disabled: !(currentServer && results[currentServer]),
       onClick: () => {
-        console.log("REFRESH CLICKED")
+        refreshResults()
       }
     },
     

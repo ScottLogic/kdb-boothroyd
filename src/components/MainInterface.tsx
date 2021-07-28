@@ -24,14 +24,12 @@ const MainInterface:FC = () => {
   }, [])
 
   async function loadServers() {
-    console.log("LOAD SERVERS")
     const items = await getItems(SERVER_PREFIX)
     const servers = new Map<string, Server>();
     (items as Array<Server>).forEach((s) => {
       if (s.id)
         servers.set(s.id, s)
     })
-    console.log("LOADED", servers)
     setServers(Object.fromEntries(servers))
   }
   
@@ -87,9 +85,12 @@ const MainInterface:FC = () => {
     deleteItem(SERVER_PREFIX, sID)
   }
 
-  function updateResults(sID: string, data: any) {
+  function updateResults(sID: string, script:string, data: any) {
     const current = {...results}
-    current[sID] = data
+    current[sID] = {
+      script,
+      data
+    }
     setResults(current)
   }
 

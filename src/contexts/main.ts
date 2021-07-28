@@ -12,7 +12,7 @@ type MainContextType = {
   saveServer: (server:Server) => void,
   deleteServer: (server:string) => void,
   results: {[key: string]: any},
-  updateResults: (server:string, results:any) => void
+  updateResults: (server:string, script:string, results:any) => void
 }
 
 export const MainContext = createContext<MainContextType>({

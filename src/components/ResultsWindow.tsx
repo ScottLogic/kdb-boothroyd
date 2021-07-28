@@ -28,7 +28,7 @@ const ResultsWindow:FunctionComponent = () => {
 
     console.log("GET RESULTS", allResults)
     if (currentServer && allResults[currentServer]) {
-      setResults(allResults[currentServer])
+      setResults(allResults[currentServer].data)
     } else {
       setResults(null)
     }
