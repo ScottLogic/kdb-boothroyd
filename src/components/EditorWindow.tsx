@@ -96,11 +96,12 @@ const EditorWindow:FunctionComponent = () => {
     if (currentServer) {
       try {
         // Reset results to trigger loading animation
-        updateResults(currentServer, null)
+        updateResults(currentServer, null, null)
         setIsLoading(true)
 
         // Load actual results
         const res = await connections[currentServer].send(currentScript)
+        console.log("RESULTS", res)
         updateResults(currentServer, currentScript, res.data)
       } catch (e) {
         // TODO: handle error

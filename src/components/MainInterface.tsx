@@ -86,7 +86,7 @@ const MainInterface:FC = () => {
     deleteItem(SERVER_PREFIX, sID)
   }
 
-  function updateResults(sID: string, script:string, data: any) {
+  function updateResults(sID: string, script:string | null, data: any) {
     const current = {...results}
     current[sID] = {
       script,
