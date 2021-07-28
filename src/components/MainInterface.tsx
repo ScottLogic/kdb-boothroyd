@@ -57,6 +57,7 @@ const MainInterface:FC = () => {
     }
 
     setConnections(currentConnections)
+    setCurrentServer(serverID)
     setShowServerModal(false)
   }
 
