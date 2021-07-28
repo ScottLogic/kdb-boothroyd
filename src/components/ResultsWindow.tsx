@@ -48,10 +48,7 @@ const ResultsWindow:FunctionComponent = () => {
   useEffect(() => {
 
     if (results) {
-      console.log("START", start)
       const processed = ResultsProcessor.process(currentResults, start)
-
-      console.log("processed", processed)
 
       if (Array.isArray(processed)) {
         const [cols, rows] = processed as [Array<IColumn>, Array<{}>]
@@ -65,7 +62,6 @@ const ResultsWindow:FunctionComponent = () => {
   }, [currentResults])
 
   useEffect(() => {
-    console.log("UPDATED START", start)
     if (start > 0) {
       if (results) {
         const processed = ResultsProcessor.process(currentResults, start)
@@ -80,7 +76,6 @@ const ResultsWindow:FunctionComponent = () => {
   }, [start])
 
   const parseMoreResults = (index?: number) => {
-    console.log("NEW START", index)
     setTimeout(() => {
       setStart(index || 0)
     }, 100)
