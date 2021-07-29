@@ -10,6 +10,7 @@ import TablePanel from './TablePanel'
 import { MainContext } from '../contexts/MainContext'
 import Server, { SERVER_PREFIX } from '../types/server'
 import { deleteItem, getItems, saveItem } from '../storage/storage'
+import Result from '../types/results'
 
 const MainInterface:FC = () => {
 
@@ -17,7 +18,7 @@ const MainInterface:FC = () => {
   const [servers, setServers] = useState<{[key: string]: Server}>({})
   const [currentServer, setCurrentServer] = useState<string | undefined>(undefined)
   const [connections, setConnections] = useState<{[key: string]:KdbConnection}>({})
-  const [results, setResults] = useState<{[key: string]: any}>({})
+  const [results, setResults] = useState<{[key: string]: Result}>({})
   const [isLoading, setIsLoading] = useState(false)
   const [isConnecting, setIsConnecting] = useState(false)
 
@@ -90,11 +91,12 @@ const MainInterface:FC = () => {
     deleteItem(SERVER_PREFIX, sID)
   }
 
-  function updateResults(sID: string, script:string | null, data: any) {
+  function updateResults(sID: string, script:string, data: any | null, error?: string) {
     const current = {...results}
     current[sID] = {
       script,
-      data
+      data,
+      error
     }
     setResults(current)
   }

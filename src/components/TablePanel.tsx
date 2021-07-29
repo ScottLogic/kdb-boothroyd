@@ -128,8 +128,12 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
         //Reset results and show loading dialog
         setIsLoading(true)
 
-        const res = await connections[currentServer].send(item.key)
-        updateResults(currentServer, item.key, res.data)
+        try {
+          const res = await connections[currentServer].send(item.key)
+          updateResults(currentServer, item.key, res.data)
+        } catch (e) {
+          updateResults(currentServer, item.key, null, e)
+        }
       }
     }
   }
