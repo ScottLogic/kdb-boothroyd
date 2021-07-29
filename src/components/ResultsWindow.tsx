@@ -22,6 +22,11 @@ import { resultsWindow } from '../style'
 import { MainContext } from '../contexts/MainContext'
 import { ResultsProcessor } from '../results/processor'
 
+enum ResultsView {
+  Table,
+  Raw
+}
+
 const ResultsWindow:FunctionComponent = () => {
 
   const { 
@@ -37,6 +42,8 @@ const ResultsWindow:FunctionComponent = () => {
   const [columns, setColumns] = useState<IColumn[]>([])
   const [rows, setRows] = useState<Array<{}|string>>([])
   const [start, setStart] = useState(0)
+  const [currentView, setCurrentView] = useState(ResultsView.Raw)
+  const [viewOptions, setViewOptions] = useState<ICommandBarItemProps[]>([])
 
   useEffect(() => {
 
@@ -62,10 +69,14 @@ const ResultsWindow:FunctionComponent = () => {
       const processed = ResultsProcessor.process(currentResults, start)
 
       if (Array.isArray(processed)) {
+        setCurrentView(ResultsView.Table)
         const [cols, rows] = processed as [Array<IColumn>, Array<{}>]
 
         setColumns(cols)
         setRows(rows)
+      } else {
+        setColumns([])
+        setRows([])
       }
       setIsLoading(false)
     } else if (error) {
@@ -73,6 +84,35 @@ const ResultsWindow:FunctionComponent = () => {
     }
 
   }, [currentResults, error])
+
+  useEffect(() => {
+
+    if (rows.length > 0) {
+      setViewOptions([
+        {
+          key: "table",
+          text: "Table",
+          iconProps: { iconName: "Table" },
+          checked: (currentView == ResultsView.Table),
+          onClick: () => {
+            setCurrentView(ResultsView.Table)
+          }
+        },
+        {
+          key: "text",
+          text: "Raw",
+          iconProps: { iconName: "RawSource" },
+          checked: (currentView == ResultsView.Raw),
+          onClick: () => {
+            setCurrentView(ResultsView.Raw)
+          }
+        }
+      ])
+    } else {
+      setViewOptions([])
+    }
+
+  }, [currentView, rows])
 
   useEffect(() => {
     if (start > 0) {
@@ -101,6 +141,10 @@ const ResultsWindow:FunctionComponent = () => {
   }
 
   const items: ICommandBarItemProps[] = [
+    
+  ]
+
+  const farItems: ICommandBarItemProps[] = [
     /*{
       key: "excel",
       title: "Open in Excel",
@@ -156,7 +200,8 @@ const ResultsWindow:FunctionComponent = () => {
       position:"relative"
     }}>
       <CommandBar 
-        items={items}
+        items={viewOptions}
+        farItems={farItems}
         style={{ flex: "0" }}/>
         {(isLoading ) ? (
           <Spinner size={SpinnerSize.large}/>
@@ -173,8 +218,8 @@ const ResultsWindow:FunctionComponent = () => {
             </MessageBar>
           ) : (
           <>
-            {(typeof results === "string") ? (
-              <pre>{results}</pre>
+            {(typeof currentResults === "string" || currentView == ResultsView.Raw) ? (
+              <pre>{currentResults ? JSON.stringify(currentResults,null,2) : ""}</pre>
             ): (
             <DetailsList
               columns={columns}
