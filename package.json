@@ -1,7 +1,7 @@
 {
   "name": "kdb-studio-2",
   "version": "1.0.0",
-  "description": "New Electron app",
+  "description": "GUI for KDB/q database",
   "main": "./dist/main.js",
   "scripts": {
     "dev:electron": "NODE_ENV=development webpack --config webpack.electron.config.js --mode development && electron .",
@@ -13,19 +13,25 @@
     "dist": "electron-builder"
   },
   "keywords": [],
-  "author": "elisealcala",
+  "contributors": [
+    "ColinEberhardt",
+    "ihull",
+    "oinutter"
+  ],
   "license": "ISC",
   "build": {
     "files": [
       "dist/",
+      "build/",
       "node_modules/",
       "package.json"
     ],
-    "productName": "example",
-    "appId": "com.example.app",
+    "productName": "KDB Studio 2",
+    "appId": "com.scottlogic.kdbstudio2",
     "directories": {
       "output": "dist"
-    }
+    },
+    "icon": "build/icons/icon.png"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",

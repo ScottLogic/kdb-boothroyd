@@ -4,10 +4,12 @@ import * as path from "path";
 import * as url from "url";
 
 let mainWindow: Electron.BrowserWindow | null;
+const iconPath = path.join(__dirname, "..", "build", "icons", "icon.png")
 
 function createWindow() {
 
   mainWindow = new BrowserWindow({
+    title: "KDB Studio 2",
     width: 900,
     height: 700,
     webPreferences: {
@@ -16,6 +18,7 @@ function createWindow() {
       enableRemoteModule: false,
       webSecurity: false,
     },
+    icon: iconPath
   });
 
   if (process.env.NODE_ENV === "development") {
