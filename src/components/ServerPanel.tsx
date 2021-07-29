@@ -15,7 +15,7 @@ import React, { FunctionComponent, useContext, useEffect, useState } from "react
 import { serverPanel } from "../style"
 import Server from "../types/server"
 import { ManageServerContext } from "./ManageServers"
-import { MainContext } from "../contexts/main"
+import { MainContext } from "../contexts/MainContext"
 
 const ServerPanel:FunctionComponent = () => {
 
@@ -82,8 +82,10 @@ const ServerPanel:FunctionComponent = () => {
   // Select a server and update the context
   function serverSelected(e?: React.MouseEvent<HTMLElement>, item?: INavLink) {
     e && e.preventDefault()
-    if (item)
+    if (item) {
       context.setServer(item.key)
+      mainContext.setConnectionError(undefined)
+    }
   }
 
   // Perform actual delete operation after confiration

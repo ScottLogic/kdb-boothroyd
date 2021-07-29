@@ -9,7 +9,7 @@ import {
 import React, { FunctionComponent, useContext, useEffect, useState } from "react"
 
 import { tablePanel, stackTokens } from "../style"
-import { MainContext } from "../contexts/main"
+import { MainContext } from "../contexts/MainContext"
 
 type TablePanelProps = {
   toggleServerModal: (display:boolean) => void
@@ -35,7 +35,7 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
   }, [connections])
 
   useEffect(() => {
-    if (currentServer) {
+    if (currentServer && connections[currentServer].isConnected()) {
       const refreshTables = async () => {
         const tbls = {...tables}
         tbls[currentServer] = await getTables(currentServer)
@@ -92,16 +92,20 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
 
   async function getTables(server:string) {
     const s = connections[server]
-    const results = await s.send("tables[]")
-    
     const tbls:{[key:string]: string[]} = {};
-    const data = results.data as string[]
 
-    // Get the columns for each table
-    for (let i = 0; i < data.length; i++) {
-      const t = data[i]
-      const results2 = await s.send(`cols ${t}`)
-      tbls[t] = results2.data as string[]
+    try {
+      const results = await s.send("tables[]")
+      const data = results.data as string[]
+
+      // Get the columns for each table
+      for (let i = 0; i < data.length; i++) {
+        const t = data[i]
+        const results2 = await s.send(`cols ${t}`)
+        tbls[t] = results2.data as string[]
+      }
+    } catch (_) {
+      console.log("COULDN'T GET TABLE LIST")
     }
 
     return tbls
@@ -128,8 +132,12 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
         //Reset results and show loading dialog
         setIsLoading(true)
 
-        const res = await connections[currentServer].send(item.key)
-        updateResults(currentServer, item.key, res.data)
+        try {
+          const res = await connections[currentServer].send(item.key)
+          updateResults(currentServer, item.key, res.data)
+        } catch (e) {
+          updateResults(currentServer, item.key, null, e)
+        }
       }
     }
   }
