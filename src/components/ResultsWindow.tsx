@@ -21,6 +21,7 @@ import {
 import { resultsWindow } from '../style'
 import { MainContext } from '../contexts/MainContext'
 import { ResultsProcessor } from '../results/processor'
+import { ipcRenderer } from 'electron'
 
 enum ResultsView {
   Table,
@@ -145,15 +146,42 @@ const ResultsWindow:FunctionComponent = () => {
   ]
 
   const farItems: ICommandBarItemProps[] = [
-    /*{
+    {
       key: "excel",
       title: "Open in Excel",
       iconProps: { iconName: "ExcelLogo" },
+      disabled: (!Array.isArray(currentResults) || currentResults.length == 0),
       onClick: () => {
-        console.log("EXCEL CLICKED")
+        let csvContent = "data:text/csv;charset=utf-8,"
+
+        if (typeof currentResults[0] === "object") {
+          const keys = Object.keys(currentResults[0]) as string[]
+          csvContent += keys.join(",") + "\n"
+
+          console.log("KEYS", keys)
+          csvContent += currentResults.map((r:{[key:string]:any}) => {
+            const cols:any[] = []
+            keys.forEach((k) => {
+              cols.push(r[k])
+            })
+
+            console.log("COLS", cols)
+
+            return cols.join(",")
+          }).join("\n")
+        } else {
+          csvContent += currentResults.join("\n")
+        }
+
+        ipcRenderer.send("download", {
+          url: csvContent,
+          properties: {
+            saveAs:true
+          }
+        })
       },
     },
-    {
+    /*{
       key: "export",
       title: "Export result set",
       iconProps: { iconName: "Export" },
