@@ -12,7 +12,7 @@ import syntax from '../editor/syntax';
 import theme from '../editor/theme';
 import { editorWindow } from '../style'
 import ResultsWindow from './ResultsWindow';
-import { MainContext } from '../contexts/main';
+import { MainContext } from '../contexts/MainContext';
 
 const EditorWindow:FunctionComponent = () => {
 
@@ -108,6 +108,7 @@ const EditorWindow:FunctionComponent = () => {
 
   // Send our commands to the server
   async function runScript() {
+    let script = ""
     if (currentServer) {
       try {
         // Reset results to trigger loading animation
@@ -122,25 +123,37 @@ const EditorWindow:FunctionComponent = () => {
         }
 
         // If selected text use that, otherwise send full script
-        const script = (selected && selected != "") ? selected : currentScript
+       script = (selected && selected != "") ? selected : currentScript
         
         // Load actual results
         const res = await connections[currentServer].send(script)
         
-        updateResults(currentServer, script, res.data)
+        if (res.type == "success")
+          updateResults(currentServer, script, res.data)
+        else
+          updateResults(currentServer, script, null, res.data as string)
       } catch (e) {
         // TODO: handle error
+        updateResults(currentServer, script, null, e)
       }
     }
   }
 
   async function refreshResults() {
     if (currentServer) {
+      let script = ""
       try {
-        const script = results[currentServer].script
+        script = results[currentServer].script
         const res = await connections[currentServer].send(script)
-        updateResults(currentServer, script, res.data)
-      } catch (e) {}
+        
+        if (res.type == "success")
+          updateResults(currentServer, script, res.data)
+        else
+          updateResults(currentServer, script, null, res.data as string)
+
+      } catch (e) {
+        updateResults(currentServer, script, null, e)
+      }
     }
   }
 

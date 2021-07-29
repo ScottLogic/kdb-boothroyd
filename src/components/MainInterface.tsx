@@ -7,9 +7,10 @@ import { container, pivots, serverModal, stackTokens } from '../style'
 import EditorWindow from './EditorWindow'
 import ManageServers from './ManageServers'
 import TablePanel from './TablePanel'
-import { MainContext } from '../contexts/main'
+import { MainContext } from '../contexts/MainContext'
 import Server, { SERVER_PREFIX } from '../types/server'
 import { deleteItem, getItems, saveItem } from '../storage/storage'
+import Result from '../types/results'
 
 const MainInterface:FC = () => {
 
@@ -17,9 +18,10 @@ const MainInterface:FC = () => {
   const [servers, setServers] = useState<{[key: string]: Server}>({})
   const [currentServer, setCurrentServer] = useState<string | undefined>(undefined)
   const [connections, setConnections] = useState<{[key: string]:KdbConnection}>({})
-  const [results, setResults] = useState<{[key: string]: any}>({})
+  const [results, setResults] = useState<{[key: string]: Result}>({})
   const [isLoading, setIsLoading] = useState(false)
   const [isConnecting, setIsConnecting] = useState(false)
+  const [connectionError, setConnectionError] = useState<string | undefined>()
 
   useEffect(() => {
     loadServers()
@@ -49,17 +51,25 @@ const MainInterface:FC = () => {
     const server = servers[serverID]
     const currentConnections = {...connections}
 
+    setConnectionError(undefined)
+
     // Check server data exists and we don't already have a connection to it
-    if (server && !currentConnections[serverID]) {
-      currentConnections[serverID] = await KdbConnection.connect(
-        server.host,
-        server.port
-      )
+    if (server && !(currentConnections[serverID] && currentConnections[serverID].isConnected())) {
+      try {
+        currentConnections[serverID] = await KdbConnection.connect(
+          server.host,
+          server.port
+        )
+      } catch (e) {
+        setConnectionError(e.toString())
+      }
     }
 
     setConnections(currentConnections)
-    setCurrentServer(serverID)
-    setShowServerModal(false)
+    if (currentConnections[serverID] && currentConnections[serverID].isConnected()) {
+      setCurrentServer(serverID)
+      setShowServerModal(false)
+    }
     setIsConnecting(false)
   }
 
@@ -90,11 +100,12 @@ const MainInterface:FC = () => {
     deleteItem(SERVER_PREFIX, sID)
   }
 
-  function updateResults(sID: string, script:string | null, data: any) {
+  function updateResults(sID: string, script:string, data: any | null, error?: string) {
     const current = {...results}
     current[sID] = {
       script,
-      data
+      data,
+      error
     }
     setResults(current)
   }
@@ -115,7 +126,9 @@ const MainInterface:FC = () => {
         isLoading,
         setIsLoading,
         isConnecting,
-        setIsConnecting
+        setIsConnecting,
+        connectionError,
+        setConnectionError
       }}>
         <Modal
           titleAriaId="Manage Servers"

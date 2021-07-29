@@ -2,6 +2,8 @@ import React, { FC, useContext, useEffect, useState } from 'react'
 import { 
   DefaultButton,
   ITextProps,
+  MessageBar,
+  MessageBarType,
   Overlay,
   PrimaryButton,
   Spinner,
@@ -14,13 +16,14 @@ import uuid from "uuid"
 import { stackTokens } from '../style'
 import { ManageServerContext } from './ManageServers'
 import Server from '../types/server'
-import { MainContext } from '../contexts/main'
+import { MainContext } from '../contexts/MainContext'
 
 const ServerEdit:FC = () => {
   
   const context = useContext(ManageServerContext)
   const mainContext = useContext(MainContext)
   const isConnecting = mainContext.isConnecting
+  const connectionError = mainContext.connectionError
 
   const [server, setServer] = useState<Server>({
     name: "",
@@ -145,8 +148,19 @@ const ServerEdit:FC = () => {
             "Connect"
           )}
         </PrimaryButton>
-        
       </Stack>
+      {(connectionError) && (
+        <Stack horizontal={true} horizontalAlign="center" tokens={stackTokens}>
+          <MessageBar
+            messageBarType={MessageBarType.error}
+            isMultiline={true}
+            >
+            <Text block variant={"large" as ITextProps['variant']}>Error connecting to server</Text>
+            <br/>
+            <Text block>{connectionError}</Text>
+          </MessageBar>
+        </Stack>
+      )}
     </Stack>
   )
 }
