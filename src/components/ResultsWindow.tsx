@@ -6,6 +6,7 @@ import {
   DetailsListLayoutMode,  
   IColumn, 
   ICommandBarItemProps,
+  IContextualMenuItem,
   IDetailsListStyles,
   ITextProps,
   MessageBar,
@@ -17,11 +18,13 @@ import {
   Stack,
   Text,
 } from "@fluentui/react"
+import { getFileTypeIconProps } from '@fluentui/react-file-type-icons';
 
 import { resultsWindow } from '../style'
 import { MainContext } from '../contexts/MainContext'
 import { ResultsProcessor } from '../results/processor'
 import { ipcRenderer } from 'electron'
+import Exporter, { ExportFormat } from '../results/exporter';
 
 enum ResultsView {
   Table,
@@ -141,56 +144,49 @@ const ResultsWindow:FunctionComponent = () => {
     //TODO add sorting code
   }
 
-  const items: ICommandBarItemProps[] = [
-    
-  ]
-
   const farItems: ICommandBarItemProps[] = [
-    {
+    /*{
       key: "excel",
       title: "Open in Excel",
       iconProps: { iconName: "ExcelLogo" },
-      disabled: (!Array.isArray(currentResults) || currentResults.length == 0),
+      
       onClick: () => {
-        let csvContent = "data:text/csv;charset=utf-8,"
-
-        if (typeof currentResults[0] === "object") {
-          const keys = Object.keys(currentResults[0]) as string[]
-          csvContent += keys.join(",") + "\n"
-
-          console.log("KEYS", keys)
-          csvContent += currentResults.map((r:{[key:string]:any}) => {
-            const cols:any[] = []
-            keys.forEach((k) => {
-              cols.push(r[k])
-            })
-
-            console.log("COLS", cols)
-
-            return cols.join(",")
-          }).join("\n")
-        } else {
-          csvContent += currentResults.join("\n")
-        }
-
-        ipcRenderer.send("download", {
-          url: csvContent,
-          properties: {
-            saveAs:true
-          }
-        })
+        
       },
-    },
-    /*{
+    },*/
+    {
       key: "export",
+      text: "Export",
       title: "Export result set",
       iconProps: { iconName: "Export" },
-      onClick: () => {
-        console.log("EXPORT CLICKED")
-      },
-      
+      disabled: (!Array.isArray(currentResults) || currentResults.length == 0),
+      subMenuProps: {
+        onItemClick: (_, item?: IContextualMenuItem) => {
+          if (item && item.key) {
+            const file = Exporter.export(currentResults!,item.key as ExportFormat)
+            ipcRenderer.send("download", {
+              url: file,
+              properties: {
+                saveAs:true
+              }
+            })
+          }
+        },
+        items: [
+          {
+            key: ExportFormat.csv,
+            text: "CSV (comma separated)",
+            iconProps: getFileTypeIconProps({extension:"csv"})
+          },
+          {
+            key: ExportFormat.txt,
+            text: "TXT (tab separated)",
+            iconProps: getFileTypeIconProps({extension:"txt"})
+          }
+        ]
+      }
     },
-    {
+    /*{
       key: "chart",
       title: "Chart current result set",
       iconProps: { iconName: "AreaChart" },

@@ -3,12 +3,14 @@ import ReactDom from "react-dom"
 import { ipcRenderer } from "electron"
 import { ThemeProvider } from '@fluentui/react'
 import { initializeIcons } from "@fluentui/font-icons-mdl2"
+import { initializeFileTypeIcons } from "@fluentui/react-file-type-icons";
 
 import { darkTheme, lightTheme } from './themes'
 import MainInterface from './components/MainInterface'
 import { initStorage } from './storage/storage'
 
 initializeIcons()
+initializeFileTypeIcons();
 initStorage()
 
 const App:FunctionComponent = () => {

@@ -56,6 +56,7 @@
   },
   "dependencies": {
     "@fluentui/react": "^8.*",
+    "@fluentui/react-file-type-icons": "^8.2.1",
     "@types/react": "^17.*",
     "@types/react-dom": "^17.*",
     "electron-dl": "^3.2.1",
