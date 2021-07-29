@@ -6,42 +6,44 @@ const qSend = (conn: Connection, value: string) =>
   new Promise((resolve, reject) => {
     try {
       conn
-        .on('error', (e) => {
-          reject(e)
+        .on("error", (e) => {
+          reject(e);
         })
         .k(value, function (err, res) {
-          if (err) 
-            reject(err);
+          if (err) reject(err);
 
           resolve(res);
         });
     } catch (e) {
-      reject(e)
+      reject(e);
     }
   });
 
 class KdbConnection {
   connection: Connection | undefined;
+  host: string | undefined;
+  port: number | undefined;
 
-  constructor(connection: Connection) {
-    this.connection = connection;
+  constructor(host: string, port: number) {
+    this.host = host;
+    this.port = port;
   }
 
-  static async connect(host: string, port: number) {
-    console.log("connnected to KDB server", host, port);
+  async connect() {
+    console.log("connecting to KDB server", this.host, this.port);
 
     // @ts-ignore - something strange going on with the types here
-    const connection = (await promisify(nodeq.connect)({
-      host,
-      port,
+    this.connection = (await promisify(nodeq.connect)({
+      host: this.host,
+      port: this.port,
     })) as Connection;
-    const kconn = new KdbConnection(connection);
-    connection!.on("error", (e) => {
+
+    this.connection!.on("error", (e) => {
       console.log("Connection has gone away");
-      kconn.reset();
+      this.reset();
     });
 
-    return kconn;
+    return this;
   }
 
   reset() {
@@ -53,6 +55,15 @@ class KdbConnection {
   }
 
   async send(message: string) {
+    if (!this.connection) {
+      // Implies connection has gone away - try to reconnect
+      try {
+        await this.connect();
+      } catch (e) {
+        console.log("FAILED TO CONNECT TO SERVER");
+        throw "Unable to connect to server";
+      }
+    }
     try {
       const data = await qSend(this.connection!, message);
       if (data === null) {
