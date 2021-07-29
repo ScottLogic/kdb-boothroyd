@@ -14,7 +14,7 @@ import uuid from "uuid"
 import { stackTokens } from '../style'
 import { ManageServerContext } from './ManageServers'
 import Server from '../types/server'
-import { MainContext } from '../contexts/main'
+import { MainContext } from '../contexts/MainContext'
 
 const ServerEdit:FC = () => {
   

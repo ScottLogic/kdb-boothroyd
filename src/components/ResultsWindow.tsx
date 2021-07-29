@@ -15,7 +15,7 @@ import {
 } from "@fluentui/react"
 
 import { resultsWindow } from '../style'
-import { MainContext } from '../contexts/main'
+import { MainContext } from '../contexts/MainContext'
 import { ResultsProcessor } from '../results/processor'
 
 const ResultsWindow:FunctionComponent = () => {

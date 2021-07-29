@@ -15,7 +15,7 @@ import React, { FunctionComponent, useContext, useEffect, useState } from "react
 import { serverPanel } from "../style"
 import Server from "../types/server"
 import { ManageServerContext } from "./ManageServers"
-import { MainContext } from "../contexts/main"
+import { MainContext } from "../contexts/MainContext"
 
 const ServerPanel:FunctionComponent = () => {
 

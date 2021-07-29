@@ -9,7 +9,7 @@ import {
 import React, { FunctionComponent, useContext, useEffect, useState } from "react"
 
 import { tablePanel, stackTokens } from "../style"
-import { MainContext } from "../contexts/main"
+import { MainContext } from "../contexts/MainContext"
 
 type TablePanelProps = {
   toggleServerModal: (display:boolean) => void

@@ -7,7 +7,7 @@ import { container, pivots, serverModal, stackTokens } from '../style'
 import EditorWindow from './EditorWindow'
 import ManageServers from './ManageServers'
 import TablePanel from './TablePanel'
-import { MainContext } from '../contexts/main'
+import { MainContext } from '../contexts/MainContext'
 import Server, { SERVER_PREFIX } from '../types/server'
 import { deleteItem, getItems, saveItem } from '../storage/storage'
 

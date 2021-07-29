@@ -12,7 +12,7 @@ import syntax from '../editor/syntax';
 import theme from '../editor/theme';
 import { editorWindow } from '../style'
 import ResultsWindow from './ResultsWindow';
-import { MainContext } from '../contexts/main';
+import { MainContext } from '../contexts/MainContext';
 
 const EditorWindow:FunctionComponent = () => {
 
