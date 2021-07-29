@@ -92,16 +92,20 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
 
   async function getTables(server:string) {
     const s = connections[server]
-    const results = await s.send("tables[]")
-    
     const tbls:{[key:string]: string[]} = {};
-    const data = results.data as string[]
 
-    // Get the columns for each table
-    for (let i = 0; i < data.length; i++) {
-      const t = data[i]
-      const results2 = await s.send(`cols ${t}`)
-      tbls[t] = results2.data as string[]
+    try {
+      const results = await s.send("tables[]")
+      const data = results.data as string[]
+
+      // Get the columns for each table
+      for (let i = 0; i < data.length; i++) {
+        const t = data[i]
+        const results2 = await s.send(`cols ${t}`)
+        tbls[t] = results2.data as string[]
+      }
+    } catch (_) {
+      console.log("COULDN'T GET TABLE LIST")
     }
 
     return tbls
