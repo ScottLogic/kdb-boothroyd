@@ -4,10 +4,20 @@ import { promisify } from "util";
 // not sure why util.promisify doesn't work here?
 const qSend = (conn: Connection, value: string) =>
   new Promise((resolve, reject) => {
-    conn.k(value, function (err, res) {
-      if (err) reject(err);
-      resolve(res);
-    });
+    try {
+      conn
+        .on('error', (e) => {
+          reject(e)
+        })
+        .k(value, function (err, res) {
+          if (err) 
+            reject(err);
+
+          resolve(res);
+        });
+    } catch (e) {
+      reject(e)
+    }
   });
 
 class KdbConnection {
