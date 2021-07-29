@@ -88,7 +88,7 @@ const ResultsWindow:FunctionComponent = () => {
   }
 
   const items: ICommandBarItemProps[] = [
-    {
+    /*{
       key: "excel",
       title: "Open in Excel",
       iconProps: { iconName: "ExcelLogo" },
@@ -112,7 +112,7 @@ const ResultsWindow:FunctionComponent = () => {
       onClick: () => {
         console.log("CHART CLICKED")
       }
-    }
+    }*/
   ]
 
   const gridStyles: Partial<IDetailsListStyles> = {
