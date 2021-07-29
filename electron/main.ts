@@ -38,9 +38,9 @@ function createWindow() {
     return nativeTheme.shouldUseDarkColors
   })
 
-  ipcMain.on("download", (_, info) => {
-    console.log("DOWNLOADING", info)
-    download(BrowserWindow.getFocusedWindow()!, info.url, info.properties)
+  ipcMain.on("download", async (_, info) => {
+    const dl = await download(BrowserWindow.getFocusedWindow()!, info.url, info.properties)
+    mainWindow?.webContents.send("download-complete", dl.getURL())
   })
 
   nativeTheme.on("updated", () => {

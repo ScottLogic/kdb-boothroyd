@@ -132,6 +132,11 @@ const ResultsWindow:FunctionComponent = () => {
     }
   }, [start])
 
+  ipcRenderer.on("download-complete", (_, file) => {
+    Exporter.cleanup(file)
+  })
+              
+
   const parseMoreResults = (index?: number) => {
     setTimeout(() => {
       setStart(index || 0)
@@ -164,12 +169,14 @@ const ResultsWindow:FunctionComponent = () => {
         onItemClick: (_, item?: IContextualMenuItem) => {
           if (item && item.key) {
             const file = Exporter.export(currentResults!,item.key as ExportFormat)
-            ipcRenderer.send("download", {
-              url: file,
-              properties: {
-                saveAs:true
-              }
-            })
+            if (file) {
+              ipcRenderer.send("download", {
+                url: file,
+                properties: {
+                  saveAs:true
+                }
+              })
+            }
           }
         },
         items: [
@@ -182,6 +189,16 @@ const ResultsWindow:FunctionComponent = () => {
             key: ExportFormat.txt,
             text: "TXT (tab separated)",
             iconProps: getFileTypeIconProps({extension:"txt"})
+          },
+          {
+            key: ExportFormat.xml,
+            text: "XML",
+            iconProps: getFileTypeIconProps({extension:"xml"})
+          },
+          {
+            key: ExportFormat.xlsx,
+            text: "XLSX",
+            iconProps: getFileTypeIconProps({extension:"xlsx"})
           }
         ]
       }
