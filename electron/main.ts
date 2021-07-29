@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain, nativeTheme } from "electron";
-import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import * as path from "path";
 import * as url from "url";
+import { download } from "electron-dl"
 
 let mainWindow: Electron.BrowserWindow | null;
 const iconPath = path.join(__dirname, "..", "build", "icons", "icon.png")
@@ -36,6 +36,11 @@ function createWindow() {
 
   ipcMain.handle("is-dark-mode", () => {
     return nativeTheme.shouldUseDarkColors
+  })
+
+  ipcMain.on("download", (_, info) => {
+    console.log("DOWNLOADING", info)
+    download(BrowserWindow.getFocusedWindow()!, info.url, info.properties)
   })
 
   nativeTheme.on("updated", () => {

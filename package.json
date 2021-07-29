@@ -58,6 +58,7 @@
     "@fluentui/react": "^8.*",
     "@types/react": "^17.*",
     "@types/react-dom": "^17.*",
+    "electron-dl": "^3.2.1",
     "electron-json-storage": "^4.5.0",
     "node-q": "^2.5.0",
     "office-ui-fabric-core": "^11.0.0",
