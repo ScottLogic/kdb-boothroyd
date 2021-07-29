@@ -35,7 +35,7 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
   }, [connections])
 
   useEffect(() => {
-    if (currentServer) {
+    if (currentServer && connections[currentServer].isConnected()) {
       const refreshTables = async () => {
         const tbls = {...tables}
         tbls[currentServer] = await getTables(currentServer)
