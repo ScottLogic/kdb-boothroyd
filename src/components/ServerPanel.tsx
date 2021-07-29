@@ -82,8 +82,10 @@ const ServerPanel:FunctionComponent = () => {
   // Select a server and update the context
   function serverSelected(e?: React.MouseEvent<HTMLElement>, item?: INavLink) {
     e && e.preventDefault()
-    if (item)
+    if (item) {
       context.setServer(item.key)
+      mainContext.setConnectionError(undefined)
+    }
   }
 
   // Perform actual delete operation after confiration

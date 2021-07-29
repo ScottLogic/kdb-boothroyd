@@ -21,6 +21,7 @@ const MainInterface:FC = () => {
   const [results, setResults] = useState<{[key: string]: Result}>({})
   const [isLoading, setIsLoading] = useState(false)
   const [isConnecting, setIsConnecting] = useState(false)
+  const [connectionError, setConnectionError] = useState<string | undefined>()
 
   useEffect(() => {
     loadServers()
@@ -50,17 +51,25 @@ const MainInterface:FC = () => {
     const server = servers[serverID]
     const currentConnections = {...connections}
 
+    setConnectionError(undefined)
+
     // Check server data exists and we don't already have a connection to it
-    if (server && !currentConnections[serverID]) {
-      currentConnections[serverID] = await KdbConnection.connect(
-        server.host,
-        server.port
-      )
+    if (server && !(currentConnections[serverID] && currentConnections[serverID].isConnected())) {
+      try {
+        currentConnections[serverID] = await KdbConnection.connect(
+          server.host,
+          server.port
+        )
+      } catch (e) {
+        setConnectionError(e.toString())
+      }
     }
 
     setConnections(currentConnections)
-    setCurrentServer(serverID)
-    setShowServerModal(false)
+    if (currentConnections[serverID] && currentConnections[serverID].isConnected()) {
+      setCurrentServer(serverID)
+      setShowServerModal(false)
+    }
     setIsConnecting(false)
   }
 
@@ -117,7 +126,9 @@ const MainInterface:FC = () => {
         isLoading,
         setIsLoading,
         isConnecting,
-        setIsConnecting
+        setIsConnecting,
+        connectionError,
+        setConnectionError
       }}>
         <Modal
           titleAriaId="Manage Servers"

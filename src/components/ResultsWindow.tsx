@@ -7,11 +7,15 @@ import {
   IColumn, 
   ICommandBarItemProps,
   IDetailsListStyles,
+  ITextProps,
+  MessageBar,
+  MessageBarType,
   SelectionMode,
   Shimmer,
   Spinner,
   SpinnerSize,
   Stack,
+  Text,
 } from "@fluentui/react"
 
 import { resultsWindow } from '../style'
@@ -28,6 +32,8 @@ const ResultsWindow:FunctionComponent = () => {
   } = useContext(MainContext)
 
   const [currentResults,setCurrentResults] = useState<any>(null)
+  const [currentScript, setCurrentScript] = useState<string | undefined>()
+  const [error, setError] = useState<string | undefined>()
   const [columns, setColumns] = useState<IColumn[]>([])
   const [rows, setRows] = useState<Array<{}|string>>([])
   const [start, setStart] = useState(0)
@@ -35,8 +41,13 @@ const ResultsWindow:FunctionComponent = () => {
   useEffect(() => {
 
     if (currentServer && results[currentServer]) {
-      setCurrentResults(results[currentServer].data)
+      const r = results[currentServer]
+      setCurrentScript(r.script)
+      setError(r.error)
+      setCurrentResults(r.data)
     } else {
+      setCurrentScript(undefined)
+      setError(undefined)
       setCurrentResults(null)
     }
     
@@ -47,7 +58,7 @@ const ResultsWindow:FunctionComponent = () => {
   // Format the results for display (needs extracting out)
   useEffect(() => {
 
-    if (results) {
+    if (currentResults) {
       const processed = ResultsProcessor.process(currentResults, start)
 
       if (Array.isArray(processed)) {
@@ -57,9 +68,11 @@ const ResultsWindow:FunctionComponent = () => {
         setRows(rows)
       }
       setIsLoading(false)
+    } else if (error) {
+      setIsLoading(false)
     }
 
-  }, [currentResults])
+  }, [currentResults, error])
 
   useEffect(() => {
     if (start > 0) {
@@ -148,6 +161,17 @@ const ResultsWindow:FunctionComponent = () => {
         {(isLoading ) ? (
           <Spinner size={SpinnerSize.large}/>
         ) : (
+          (error) ? (
+            <MessageBar
+              messageBarType={MessageBarType.error}
+              isMultiline={true}
+              >
+              <Text block variant={"large" as ITextProps['variant']}>Error when executing query</Text>
+              <br/>
+              <Text block>Query: {currentScript}</Text>
+              <Text block>{error}</Text>
+            </MessageBar>
+          ) : (
           <>
             {(typeof results === "string") ? (
               <pre>{results}</pre>
@@ -162,6 +186,7 @@ const ResultsWindow:FunctionComponent = () => {
               onRenderMissingItem={parseMoreResults}/>
             )}
           </>
+          )
         )}
     </Stack>
   )
