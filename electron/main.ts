@@ -52,9 +52,5 @@ function createWindow() {
 
 app
   .on("ready", createWindow)
-  .whenReady().then(() => {
-    installExtension(REACT_DEVELOPER_TOOLS)
-        .then((name) => console.log(`Added Extension:  ${name}`))
-        .catch((err) => console.log('An error occurred: ', err));
-  });
+  
 app.allowRendererProcessReuse = true;
