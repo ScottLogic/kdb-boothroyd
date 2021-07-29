@@ -56,10 +56,8 @@ const MainInterface:FC = () => {
     // Check server data exists and we don't already have a connection to it
     if (server && !(currentConnections[serverID] && currentConnections[serverID].isConnected())) {
       try {
-        currentConnections[serverID] = await KdbConnection.connect(
-          server.host,
-          server.port
-        )
+        const conn = new KdbConnection(server.host, server.port);
+        currentConnections[serverID] = await conn.connect();
       } catch (e) {
         setConnectionError(e.toString())
       }
