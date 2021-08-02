@@ -168,14 +168,14 @@ const EditorWindow:FunctionComponent = () => {
         runScript()
       }
     },
-    {
+    /*{
       key: "stop",
       title: "Stop script",
       iconProps: { iconName: "Stop" },
       onClick: () => {
         console.log("STOP CLICKED")
       }
-    },
+    },*/
     {
       key: "refresh",
       title: "Refresh results",
