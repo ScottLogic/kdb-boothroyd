@@ -21,10 +21,10 @@ import {
 import { getFileTypeIconProps } from '@fluentui/react-file-type-icons';
 
 import { resultsWindow } from '../style'
-import { MainContext } from '../contexts/MainContext'
 import { ResultsProcessor } from '../results/processor'
 import { ipcRenderer } from 'electron'
 import Exporter, { ExportFormat } from '../results/exporter';
+import { ConnectionContext } from '../contexts/ConnectionContext';
 
 enum ResultsView {
   Table,
@@ -34,11 +34,10 @@ enum ResultsView {
 const ResultsWindow:FunctionComponent = () => {
 
   const { 
-    currentServer,
     results,
     isLoading, 
     setIsLoading
-  } = useContext(MainContext)
+  } = useContext(ConnectionContext)
 
   const [currentResults,setCurrentResults] = useState<any>(null)
   const [currentScript, setCurrentScript] = useState<string | undefined>()
@@ -51,11 +50,10 @@ const ResultsWindow:FunctionComponent = () => {
 
   useEffect(() => {
 
-    if (currentServer && results[currentServer]) {
-      const r = results[currentServer]
-      setCurrentScript(r.script)
-      setError(r.error)
-      setCurrentResults(r.data)
+    if (results) {
+      setCurrentScript(results.script)
+      setError(results.error)
+      setCurrentResults(results.data)
     } else {
       setCurrentScript(undefined)
       setError(undefined)
@@ -64,7 +62,7 @@ const ResultsWindow:FunctionComponent = () => {
     
     setStart(0)
 
-  }, [currentServer, results])
+  }, [results])
 
   // Format the results for display (needs extracting out)
   useEffect(() => {

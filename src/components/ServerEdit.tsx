@@ -13,17 +13,26 @@ import {
   TextField 
 } from '@fluentui/react'
 import uuid from "uuid"
+
 import { stackTokens } from '../style'
-import { ManageServerContext } from './ManageServers'
 import Server from '../types/server'
-import { MainContext } from '../contexts/MainContext'
+import { ManageServersContext } from '../contexts/ManageServersContext'
+import { CurrentServerContext } from '../contexts/CurrentServerContext'
 
 const ServerEdit:FC = () => {
   
-  const context = useContext(ManageServerContext)
-  const mainContext = useContext(MainContext)
-  const isConnecting = mainContext.isConnecting
-  const connectionError = mainContext.connectionError
+  const {
+    servers,
+    saveServer,
+    isConnecting,
+    connectionError,
+    connectToServer
+  } = useContext(ManageServersContext)
+  
+  const {
+    currentServer,
+    setCurrentServer
+  } = useContext(CurrentServerContext)
 
   const [server, setServer] = useState<Server>({
     name: "",
@@ -36,11 +45,11 @@ const ServerEdit:FC = () => {
   const [canConnect, setCanConnect] = useState(false)
 
   useEffect(() => {
-    let server
-    if (context.server) {
-      server = mainContext.servers[context.server]
+    let s
+    if (currentServer) {
+      s = servers[currentServer]
     } else {
-      server = {
+      s = {
         name: "",
         host: "",
         port: 0
@@ -48,12 +57,12 @@ const ServerEdit:FC = () => {
     }
     setServer(server)
     setCanConnect(!!server.id)
-  }, [context.server])
+  }, [currentServer])
 
   // If the server's been updated update our fields
   useEffect(() => {
 
-    if (context.server) {
+    if (currentServer) {
       setName(server!.name)
       setHost(server!.host)
       setPort(server!.port)
@@ -91,9 +100,9 @@ const ServerEdit:FC = () => {
       port
     }
     
-    mainContext.saveServer(s)
+    saveServer(s)
 
-    context.setServer(server.id!)
+    setCurrentServer(server.id!)
     setServer(s)
     setCanConnect(true)
   }
@@ -105,10 +114,8 @@ const ServerEdit:FC = () => {
   }
 
   function connect() {
-    if (server && server.id) {
-      mainContext.connectToServer(server.id)
-      mainContext.setIsConnecting(true)
-    }
+    if (server && server.id)
+      connectToServer(server.id)
   }
 
   return (

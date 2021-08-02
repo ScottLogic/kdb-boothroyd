@@ -9,36 +9,29 @@ import {
 import React, { FunctionComponent, useContext, useEffect, useState } from "react"
 
 import { tablePanel, stackTokens } from "../style"
-import { MainContext } from "../contexts/MainContext"
+import { ConnectionContext } from "../contexts/ConnectionContext"
 
-type TablePanelProps = {
-  toggleServerModal: (display:boolean) => void
-}
+const TablePanel:FunctionComponent = () => {
 
-const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:TablePanelProps) => {
-
-  const context = useContext(MainContext)
-  const currentServer = context.currentServer
-  const connections = context.connections
-  const updateResults = context.updateResults
-  const setIsLoading = context.setIsLoading
+  const context = useContext(ConnectionContext)
+  const connection = context.connection
+  const performQuery = context.performQuery
   const results = context.results
   const [table, setTable] = useState<string | undefined>(undefined)
   const [navLinkGroups, setNavLinkGroups] = useState<INavLinkGroup[]>([])
-  const [tables, setTables] = useState<{[key:string]: {[key:string]:string[]}}>({})
+  const [tables, setTables] = useState<{[key:string]:string[]}>({})
 
   useEffect(() => {
 
       // Split into seperate function to manage async
       updateTables()
 
-  }, [connections])
+  }, [connection])
 
   useEffect(() => {
-    if (currentServer && connections[currentServer].isConnected()) {
+    if (connection && connection.isConnected()) {
       const refreshTables = async () => {
-        const tbls = {...tables}
-        tbls[currentServer] = await getTables(currentServer)
+        const tbls = await getTables()
         setTables(tbls)
       }
       refreshTables()
@@ -47,15 +40,15 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
 
   useEffect(() => {
 
-    if (currentServer && tables[currentServer]) {
+    if (tables) {
       // Create nested list of tables and columns
-      const links = Object.keys(tables[currentServer]).map((t) => {
+      const links = Object.keys(tables).map((t) => {
         return {
           key: t,
           name: t,
           url: t,
           isExpanded: false,
-          links: tables[currentServer][t].map((c) => {
+          links: tables[t].map((c) => {
             return {
               key: c,
               name: c,
@@ -72,26 +65,27 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
       ])
     }
     
-  }, [tables, currentServer])
+  }, [tables])
 
   // If we have a new connection we need to go grab the schema for it
   async function updateTables() {
 
-      const tbls = {...tables}
+      let tbls = {}
 
-      // Loop over each connection
-      for (let k in connections) {        
-        // If we haven't already grabbed tables get them
-        if (!tbls[k]) {
-          tbls[k] = await getTables(k)
-        }
+      // If we haven't already grabbed tables get them
+      if (connection && !tbls || Object.keys(tables).length == 0) {
+        tbls = await getTables()
       }
 
       setTables(tbls)
   }
 
-  async function getTables(server:string) {
-    const s = connections[server]
+  async function getTables() {
+    const s = connection
+
+    if (!s)
+      return {}
+
     const tbls:{[key:string]: string[]} = {};
 
     try {
@@ -111,33 +105,13 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
     return tbls
   }
 
-  const items: ICommandBarItemProps[] = [
-    {
-      key: "server",
-      text: "Server",
-      iconProps: { iconName: "Server" },
-      onClick: () => {
-        toggleServerModal(true)
-      },
-    }
-  ]
-
   async function tableSelected(e?: React.MouseEvent<HTMLElement>, item?: INavLink) {
     e && e.preventDefault()
-    if (item && item.key && currentServer) {
+    if (item && item.key && connection) {
       console.log("TABLES", tables)
-      if (Object.keys(tables[currentServer]).includes(item.key)) {
+      if (Object.keys(tables).includes(item.key)) {
         setTable(item.key)
-
-        //Reset results and show loading dialog
-        setIsLoading(true)
-
-        try {
-          const res = await connections[currentServer].send(item.key)
-          updateResults(currentServer, item.key, res.data)
-        } catch (e) {
-          updateResults(currentServer, item.key, null, e)
-        }
+        performQuery(item.key)
       }
     }
   }
@@ -147,9 +121,6 @@ const TablePanel:FunctionComponent<TablePanelProps> = ({toggleServerModal}:Table
       <Stack tokens={stackTokens} style={{
         ...tablePanel
       }}>
-        <CommandBar 
-          items={items}
-          style={{ gridRow: 1 }}/>
         <Nav
           onLinkClick={tableSelected}
           selectedKey={table}

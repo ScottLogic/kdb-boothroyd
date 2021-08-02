@@ -12,17 +12,26 @@ import {
   DialogType
 } from "@fluentui/react"
 import React, { FunctionComponent, useContext, useEffect, useState } from "react"
+
+import { CurrentServerContext } from "../contexts/CurrentServerContext"
+import { ManageServersContext } from "../contexts/ManageServersContext"
 import { serverPanel } from "../style"
 import Server from "../types/server"
-import { ManageServerContext } from "./ManageServers"
-import { MainContext } from "../contexts/MainContext"
+
+
 
 const ServerPanel:FunctionComponent = () => {
 
-  const context = useContext(ManageServerContext)
-  const mainContext = useContext(MainContext)
-  const deleteServer = mainContext.deleteServer
-  const servers = mainContext.servers
+  const {
+    deleteServer,
+    servers,
+    setConnectionError
+  } = useContext(ManageServersContext)
+  
+  const {
+    currentServer,
+    setCurrentServer
+  } = useContext(CurrentServerContext)
 
   const [hideDeleteConfirmation, setHideDeleteConfirmation] = useState(true)
   const [navLinkGroups, setNavLinkGroups] = useState<INavLinkGroup[]>([])
@@ -62,15 +71,15 @@ const ServerPanel:FunctionComponent = () => {
       text: "Add",
       iconProps: { iconName: "Add" },
       onClick: () => {
-        context.setServer(undefined)
+        setCurrentServer(undefined)
       },
     },
     {
       key: "delete",
       text: "Delete",
-      disabled: !context.server,
+      disabled: !currentServer,
       onClick: () => {
-        if (!context.server)
+        if (!currentServer)
           return;
 
         setHideDeleteConfirmation(false)
@@ -83,15 +92,15 @@ const ServerPanel:FunctionComponent = () => {
   function serverSelected(e?: React.MouseEvent<HTMLElement>, item?: INavLink) {
     e && e.preventDefault()
     if (item) {
-      context.setServer(item.key)
-      mainContext.setConnectionError(undefined)
+      setCurrentServer(item.key)
+      setConnectionError(undefined)
     }
   }
 
   // Perform actual delete operation after confiration
   function doDelete() {
-    deleteServer(context.server!)
-    context.setServer(undefined)
+    deleteServer(currentServer!)
+    setCurrentServer(undefined)
     setHideDeleteConfirmation(true)
   }
 
@@ -102,7 +111,7 @@ const ServerPanel:FunctionComponent = () => {
         style={{ gridRow: 1 }}/>
       <Nav
         onLinkClick={serverSelected}
-        selectedKey={context.server || ""}
+        selectedKey={currentServer || ""}
         ariaLabel="Server List"
         groups={navLinkGroups}
       />

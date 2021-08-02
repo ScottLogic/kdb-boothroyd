@@ -1,16 +1,14 @@
-import { IStyle, Modal, Pivot, PivotItem, Stack } from '@fluentui/react'
+import { CommandBar, ICommandBarItemProps, IStyle, Modal, Pivot, PivotItem, Stack } from '@fluentui/react'
 import React, { FC, useEffect, useState } from 'react'
 import KdbConnection from '../server/kdb-connection'
 import uuid from "uuid"
 
 import { container, pivots, serverModal, stackTokens } from '../style'
-import EditorWindow from './EditorWindow'
 import ManageServers from './ManageServers'
-import TablePanel from './TablePanel'
-import { MainContext } from '../contexts/MainContext'
 import Server, { SERVER_PREFIX } from '../types/server'
 import { deleteItem, getItems, saveItem } from '../storage/storage'
-import Result from '../types/results'
+import ServerInterface from './ServerInterface'
+import { ManageServersContext } from '../contexts/ManageServersContext'
 
 const MainInterface:FC = () => {
 
@@ -18,8 +16,6 @@ const MainInterface:FC = () => {
   const [servers, setServers] = useState<{[key: string]: Server}>({})
   const [currentServer, setCurrentServer] = useState<string | undefined>(undefined)
   const [connections, setConnections] = useState<{[key: string]:KdbConnection}>({})
-  const [results, setResults] = useState<{[key: string]: Result}>({})
-  const [isLoading, setIsLoading] = useState(false)
   const [isConnecting, setIsConnecting] = useState(false)
   const [connectionError, setConnectionError] = useState<string | undefined>()
 
@@ -51,6 +47,7 @@ const MainInterface:FC = () => {
     const server = servers[serverID]
     const currentConnections = {...connections}
 
+    setIsConnecting(true)
     setConnectionError(undefined)
 
     // Check server data exists and we don't already have a connection to it
@@ -98,49 +95,45 @@ const MainInterface:FC = () => {
     deleteItem(SERVER_PREFIX, sID)
   }
 
-  function updateResults(sID: string, script:string, data: any | null, error?: string) {
-    const current = {...results}
-    current[sID] = {
-      script,
-      data,
-      error
+  
+
+  const items: ICommandBarItemProps[] = [
+    {
+      key: "server",
+      text: "Server",
+      iconProps: { iconName: "Server" },
+      onClick: () => {
+        toggleServerModal(true)
+      },
     }
-    setResults(current)
-  }
+  ]
 
   return (
     <>
-      <MainContext.Provider value={{
-        currentServer, 
-        setCurrentServer,
-        connections,
-        connectToServer,
-        disconnectFromServer,
-        servers,
-        saveServer,
-        deleteServer,
-        results,
-        updateResults,
-        isLoading,
-        setIsLoading,
-        isConnecting,
-        setIsConnecting,
-        connectionError,
-        setConnectionError
-      }}>
-        <Modal
-          titleAriaId="Manage Servers"
-          isOpen={showServerModal}
-          styles={{ "main": serverModal as IStyle }}
-          onDismiss={() => toggleServerModal(false,)}
-          isBlocking={Object.keys(connections).length === 0}
-        >
-          <ManageServers closeModal={(server?:string) => toggleServerModal(false, server)}/>
-        </Modal>
-        <Stack horizontal={true} tokens={stackTokens} style={container}>
-          <TablePanel toggleServerModal={toggleServerModal}/>
-          <Stack style={{flex:"1 1 auto", alignItems:"stretch", minWidth: 0}}>
-            <Pivot 
+      <Modal
+        titleAriaId="Manage Servers"
+        isOpen={showServerModal}
+        styles={{ "main": serverModal as IStyle }}
+        onDismiss={() => toggleServerModal(false,)}
+        isBlocking={Object.keys(connections).length === 0}
+      > 
+        <ManageServersContext.Provider value={{
+          servers,
+          connectToServer,
+          saveServer,
+          deleteServer,
+          isConnecting,
+          connectionError,
+          setConnectionError
+        }}>
+          <ManageServers/>
+        </ManageServersContext.Provider>
+      </Modal>
+      <Stack style={container}>
+        <Stack horizontal={true} tokens={stackTokens} style={{flex:"0"}}>
+          <CommandBar 
+            items={items}/>
+          <Pivot 
               selectedKey={currentServer || ""}
               style={{...pivots}}
               onLinkClick={handlePivotClick}>
@@ -148,10 +141,15 @@ const MainInterface:FC = () => {
                 <PivotItem itemKey={s} key={s} headerText={servers[s].name}/>
               ))}
             </Pivot>
-            <EditorWindow/>
-          </Stack>
         </Stack>
-      </MainContext.Provider>
+        {Object.entries(connections).map(([k,v]:[string, KdbConnection])=> (
+          <ServerInterface
+            key={k}
+            connection={v} 
+            visible={k==currentServer}/>
+        ))}
+        
+      </Stack>
     </>
   )
 }
