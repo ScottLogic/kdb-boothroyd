@@ -155,9 +155,18 @@ const ServerEdit:FC = () => {
             messageBarType={MessageBarType.error}
             isMultiline={true}
             >
-            <Text block variant={"large" as ITextProps['variant']}>Error connecting to server</Text>
+            <Text 
+              block 
+              variant={"large" as ITextProps['variant']} 
+              style={{color:"inherit"}}>
+              Error connecting to server
+            </Text>
             <br/>
-            <Text block>{connectionError}</Text>
+            <Text 
+              block
+              style={{color:"inherit"}}>
+              {connectionError}
+            </Text>
           </MessageBar>
         </Stack>
       )}

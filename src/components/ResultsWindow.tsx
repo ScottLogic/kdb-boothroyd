@@ -252,10 +252,23 @@ const ResultsWindow:FunctionComponent = () => {
               messageBarType={MessageBarType.error}
               isMultiline={true}
               >
-              <Text block variant={"large" as ITextProps['variant']}>Error when executing query</Text>
+              <Text 
+                block 
+                variant={"large" as ITextProps['variant']}
+                style={{color:"inherit"}}>
+                Error when executing query
+              </Text>
               <br/>
-              <Text block>Query: {currentScript}</Text>
-              <Text block>{error}</Text>
+              <Text 
+                block
+                style={{color:"inherit"}}>
+                Query: {currentScript}
+              </Text>
+              <Text 
+                block
+                style={{color:"inherit"}}>
+                {error}
+              </Text>
             </MessageBar>
           ) : (
           <>
