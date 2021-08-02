@@ -51,6 +51,14 @@ const EditorWindow:FunctionComponent = () => {
   // Store a ref to the editor
   const editorRef = useRef()
 
+  useEffect(() => {
+    window.addEventListener('resize', () => {
+      if (editorRef.current)
+        (editorRef.current as any).layout({height:"100%", width:"100%"})
+      
+    })
+  },[])
+
   // If current script changes switch out script in editor
   useEffect(() => {
     if (currentServer) {
@@ -168,14 +176,14 @@ const EditorWindow:FunctionComponent = () => {
         runScript()
       }
     },
-    {
+    /*{
       key: "stop",
       title: "Stop script",
       iconProps: { iconName: "Stop" },
       onClick: () => {
         console.log("STOP CLICKED")
       }
-    },
+    },*/
     {
       key: "refresh",
       title: "Refresh results",
