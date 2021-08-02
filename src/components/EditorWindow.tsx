@@ -1,11 +1,14 @@
 import React, { createRef, FunctionComponent, useContext, useEffect, useRef, useState } from 'react'
 import MonacoEditor from 'react-monaco-editor';
 import { ipcRenderer } from 'electron'
+import Split from 'react-split'
 
 import { 
   CommandBar, 
+  getTheme, 
   ICommandBarItemProps,
   Stack,
+  Theme,
 } from "@fluentui/react"
 
 import syntax from '../editor/syntax';
@@ -32,6 +35,21 @@ const EditorWindow:FunctionComponent = () => {
   // Find out if system is in dark mode so we can use the appropriate editor theme
   let [isDarkMode, setIsDarkMode] = useState(false)
 
+  const uiTheme = getTheme()
+  console.log('theme', uiTheme)
+
+  let resizeTimeout
+
+  useEffect(() => {
+    window.addEventListener('resize', function ()  {
+      if (editorRef.current) {
+        resizeTimeout = setTimeout(() => {
+          (editorRef.current as any).layout({height:"100%", width:"100%"})
+        }, 50)
+      }
+    })
+  },[])
+
   // Check current theme
   ipcRenderer
     .invoke("is-dark-mode")
@@ -50,14 +68,6 @@ const EditorWindow:FunctionComponent = () => {
 
   // Store a ref to the editor
   const editorRef = useRef()
-
-  useEffect(() => {
-    window.addEventListener('resize', () => {
-      if (editorRef.current)
-        (editorRef.current as any).layout({height:"100%", width:"100%"})
-      
-    })
-  },[])
 
   // If current script changes switch out script in editor
   useEffect(() => {
@@ -294,24 +304,48 @@ const EditorWindow:FunctionComponent = () => {
 
   return (
     <>
-      <Stack style={ { ...editorWindow }}>
-        <CommandBar 
-            items={items}
-            overflowItems={overflowItems}
-            farItems={rightItems}
-            style={{
-              flex: "0" 
-            }}/>
-        <MonacoEditor
-          language="kbd/q"
-          theme={(isDarkMode) ? "vs-dark" : "vs-light"}
-          options={editorOptions}
-          editorWillMount={editorWillMount}
-          editorDidMount={editorDidMount}
-          onChange={updateScripts}
-        />
-      </Stack>
-      <ResultsWindow />
+      <Split
+        direction="vertical"
+        expandToMin={true}
+        gutterSize={4}
+        gutterStyle={(_: "height" | "width", gutterSize:number) => {
+          return {
+            background:uiTheme.palette.themeLighter || "#fff",
+            height: gutterSize,
+            flex: "0 0 0",
+            cursor: "row-resize"
+          }
+        }}
+        onDragEnd={() => {
+          if (editorRef.current){
+            setTimeout(() => {
+              (editorRef.current as any).layout({height:"100%", width:"100%"})
+            },50)
+          }
+        }}
+        style={{
+          flex: "1 1 auto"
+        }}
+        >
+        <Stack style={ { ...editorWindow }}>
+          <CommandBar 
+              items={items}
+              overflowItems={overflowItems}
+              farItems={rightItems}
+              style={{
+                flex: "0" 
+              }}/>
+          <MonacoEditor
+            language="kbd/q"
+            theme={(isDarkMode) ? "vs-dark" : "vs-light"}
+            options={editorOptions}
+            editorWillMount={editorWillMount}
+            editorDidMount={editorDidMount}
+            onChange={updateScripts}
+          />
+        </Stack>
+        <ResultsWindow />
+      </Split>
     </>
   )
 }
