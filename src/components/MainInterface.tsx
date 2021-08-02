@@ -1,112 +1,45 @@
-import { CommandBar, ICommandBarItemProps, IStyle, Modal, Pivot, PivotItem, Stack } from '@fluentui/react'
-import React, { FC, useEffect, useState } from 'react'
+import { ActionButton, CommandBar, ICommandBarItemProps, IconButton, IIconProps, IStyle, Modal, Pivot, PivotItem, Stack } from '@fluentui/react'
+import React, { FC, useState } from 'react'
 import KdbConnection from '../server/kdb-connection'
-import uuid from "uuid"
 
 import { container, pivots, serverModal, stackTokens } from '../style'
-import ManageServers from './ManageServers'
-import Server, { SERVER_PREFIX } from '../types/server'
-import { deleteItem, getItems, saveItem } from '../storage/storage'
+import Server from '../types/server'
+import ServerManager from './server/ServerManager'
 import ServerInterface from './ServerInterface'
-import { ManageServersContext } from '../contexts/ManageServersContext'
+
+interface NamedConnection {
+  connection: KdbConnection;
+  name: string;
+};
 
 const MainInterface:FC = () => {
 
   const [showServerModal, setShowServerModal] = useState(true)
-  const [servers, setServers] = useState<{[key: string]: Server}>({})
-  const [currentServer, setCurrentServer] = useState<string | undefined>(undefined)
-  const [connections, setConnections] = useState<{[key: string]:KdbConnection}>({})
-  const [isConnecting, setIsConnecting] = useState(false)
-  const [connectionError, setConnectionError] = useState<string | undefined>()
+  const [currentConnectionIndex, setCurrentConnectionIndex] = useState(-1);
+  const [connections, setConnections] = useState<NamedConnection[]>([]);
 
-  useEffect(() => {
-    loadServers()
-  }, [])
-
-  async function loadServers() {
-    const items = await getItems(SERVER_PREFIX)
-    const servers = new Map<string, Server>();
-    (items as Array<Server>).forEach((s) => {
-      if (s.id)
-        servers.set(s.id, s)
-    })
-    setServers(Object.fromEntries(servers))
-  }
-  
-  function toggleServerModal(display:boolean, server?:string) {
-    setShowServerModal(display)
-    if (server)
-      setCurrentServer(server)
-  }
 
   function handlePivotClick(item?: PivotItem) {
-    setCurrentServer((item && item.props.itemKey) ? item.props.itemKey : undefined)
-  }
-
-  async function connectToServer(serverID:string) {
-    const server = servers[serverID]
-    const currentConnections = {...connections}
-
-    setIsConnecting(true)
-    setConnectionError(undefined)
-
-    // Check server data exists and we don't already have a connection to it
-    if (server && !(currentConnections[serverID] && currentConnections[serverID].isConnected())) {
-      try {
-        const conn = new KdbConnection(server.host, server.port);
-        currentConnections[serverID] = await conn.connect();
-      } catch (e) {
-        setConnectionError(e.toString())
-      }
+    if (item && item.props.itemKey) {
+      setCurrentConnectionIndex(parseInt(item.props.itemKey));
     }
+  }
 
-    setConnections(currentConnections)
-    if (currentConnections[serverID] && currentConnections[serverID].isConnected()) {
-      setCurrentServer(serverID)
-      setShowServerModal(false)
+  async function connectToServer(server: Server) {
+    const currentConnections = [...connections];
+    const connection = await new KdbConnection(server.host, server.port).connect()
+    setConnections([...currentConnections, {
+      connection,
+      // needs better naming logic here
+      name: `${server.name} - (${connections.length})`,
+    }]);
+    if (currentConnectionIndex === -1) {
+      setCurrentConnectionIndex(0);
     }
-    setIsConnecting(false)
+    setShowServerModal(false);
   }
 
-  function disconnectFromServer(sID:string) {
-    const currentConnections = {...connections}
-    if (currentConnections[sID]) {
-      currentConnections[sID].reset()
-      delete currentConnections[sID]
-    }
-
-    setConnections(currentConnections)
-  }
-
-  function saveServer(server: Server) {
-    const current = {...servers}
-    if (!server.id)
-      server.id = uuid.v4()
-
-    current[server.id] = server
-    setServers(current)
-    saveItem(SERVER_PREFIX, server)
-  }
-
-  function deleteServer(sID:string) {
-    const current = {...servers}
-    delete current[sID]
-    setServers(current)
-    deleteItem(SERVER_PREFIX, sID)
-  }
-
-  
-
-  const items: ICommandBarItemProps[] = [
-    {
-      key: "server",
-      text: "Server",
-      iconProps: { iconName: "Server" },
-      onClick: () => {
-        toggleServerModal(true)
-      },
-    }
-  ]
+  const emojiIcon: IIconProps = { iconName: 'Database' };
 
   return (
     <>
@@ -114,41 +47,30 @@ const MainInterface:FC = () => {
         titleAriaId="Manage Servers"
         isOpen={showServerModal}
         styles={{ "main": serverModal as IStyle }}
-        onDismiss={() => toggleServerModal(false,)}
-        isBlocking={Object.keys(connections).length === 0}
+        onDismiss={() => setShowServerModal(false)}
       > 
-        <ManageServersContext.Provider value={{
-          servers,
-          connectToServer,
-          saveServer,
-          deleteServer,
-          isConnecting,
-          connectionError,
-          setConnectionError
-        }}>
-          <ManageServers/>
-        </ManageServersContext.Provider>
+        <ServerManager onConnect={connectToServer}/>
       </Modal>
       <Stack style={container}>
-        <Stack horizontal={true} tokens={stackTokens} style={{flex:"0"}}>
-          <CommandBar 
-            items={items}/>
+        <Stack horizontal>
+        <Stack.Item grow={3} >
           <Pivot 
-              selectedKey={currentServer || ""}
-              style={{...pivots}}
-              onLinkClick={handlePivotClick}>
-              {Object.keys(connections).map((s) => (
-                <PivotItem itemKey={s} key={s} headerText={servers[s].name}/>
-              ))}
-            </Pivot>
+            selectedKey={currentConnectionIndex !== -1 ? connections[currentConnectionIndex].name : undefined}
+            style={{...pivots}}
+            onLinkClick={handlePivotClick}>
+            {connections.map((c, i) => (
+              <PivotItem itemKey={i.toString()} key={i.toString()} headerText={c.name}/>
+            ))}
+          </Pivot>
+          </Stack.Item>
+          <ActionButton iconProps={emojiIcon} onClick={() => setShowServerModal(true)}>Servers</ActionButton>
         </Stack>
-        {Object.entries(connections).map(([k,v]:[string, KdbConnection])=> (
+        {connections.map((c, i) => (
           <ServerInterface
-            key={k}
-            connection={v} 
-            visible={k==currentServer}/>
+            key={c.name}
+            connection={c.connection} 
+            visible={i === currentConnectionIndex}/>
         ))}
-        
       </Stack>
     </>
   )
