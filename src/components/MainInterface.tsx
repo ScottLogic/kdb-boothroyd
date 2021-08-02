@@ -14,9 +14,9 @@ import Result from '../types/results'
 
 const MainInterface:FC = () => {
 
-  const [showServerModal, setShowServerModal] = useState(true)
+  const [showServerModal, setShowServerModal] = useState(false)
   const [servers, setServers] = useState<{[key: string]: Server}>({})
-  const [currentServer, setCurrentServer] = useState<string | undefined>(undefined)
+  const [currentServer, setCurrentServer] = useState<string | undefined>()
   const [connections, setConnections] = useState<{[key: string]:KdbConnection}>({})
   const [results, setResults] = useState<{[key: string]: Result}>({})
   const [isLoading, setIsLoading] = useState(false)
@@ -25,6 +25,8 @@ const MainInterface:FC = () => {
 
   useEffect(() => {
     loadServers()
+    console.log("current", currentServer)
+    setShowServerModal(!currentServer)
   }, [])
 
   async function loadServers() {
