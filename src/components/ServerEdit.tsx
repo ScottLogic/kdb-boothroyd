@@ -55,14 +55,14 @@ const ServerEdit:FC = () => {
         port: 0
       }
     }
-    setServer(server)
-    setCanConnect(!!server.id)
+    setServer(s)
+    setCanConnect(!!s.id)
   }, [currentServer])
 
   // If the server's been updated update our fields
   useEffect(() => {
 
-    if (currentServer) {
+    if (server) {
       setName(server!.name)
       setHost(server!.host)
       setPort(server!.port)
