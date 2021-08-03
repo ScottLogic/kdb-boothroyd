@@ -1,4 +1,4 @@
-import { ActionButton, FontIcon, IIconProps, IPivotItemProps, IStyle, Modal, Pivot, PivotItem, Stack } from '@fluentui/react'
+import { ActionButton, FontIcon, IIconProps, IPivotItemProps, IStyle, Modal, Pivot, PivotItem, Stack, useTheme } from '@fluentui/react'
 import React, { FC, useState } from 'react'
 import KdbConnection from '../server/kdb-connection'
 
@@ -19,6 +19,7 @@ const MainInterface:FC = () => {
   const [currentConnectionIndex, setCurrentConnectionIndex] = useState(-1);
   const [connections, setConnections] = useState<NamedConnection[]>([]);
 
+  const theme = useTheme()
 
   function handlePivotClick(item?: PivotItem) {
     if (item && item.props.itemKey)
@@ -68,7 +69,9 @@ const MainInterface:FC = () => {
     }
   
     return (
-      <span style={{ flex: '0 1 100%' }}>
+      <span style={{ 
+        flex: '0 1 100%',
+        }}>
         {defaultRenderer({ ...link, itemIcon: undefined })}
         <FontIcon
           iconName="ChromeClose" 
@@ -92,20 +95,34 @@ const MainInterface:FC = () => {
       > 
         <ServerManager onConnect={connectToServer}/>
       </Modal>
-      <Stack style={container}>
+      <Stack style={{
+          ...container,
+          backgroundColor: theme.palette.neutralLighterAlt
+        }}>
         <Stack horizontal>
           <Stack.Item grow={3}>
             <Pivot 
               selectedKey={currentConnectionIndex !== -1 ? currentConnectionIndex.toString() : ""}
-              style={{...pivots}}
+              style={{
+                ...pivots
+              }}
               onLinkClick={handlePivotClick}
               overflowBehavior="menu">
               {connections.map((c, i) => (
-                <PivotItem itemKey={i.toString()} key={i.toString()} headerText={c.name} onRenderItemLink={customPivotRenderer}/>
+                <PivotItem 
+                  itemKey={i.toString()} 
+                  key={i.toString()} 
+                  headerText={c.name} 
+                  onRenderItemLink={customPivotRenderer}
+                  />
               ))}
             </Pivot>
           </Stack.Item>
-          <ActionButton iconProps={emojiIcon} onClick={() => setShowServerModal(true)}>Servers</ActionButton>
+          <ActionButton 
+            iconProps={emojiIcon} 
+            onClick={() => setShowServerModal(true)}>
+              Servers
+          </ActionButton>
         </Stack>
         {connections.map((c, i) => (
           <ServerInterface

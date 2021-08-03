@@ -1,9 +1,10 @@
-import { Nav, INavLink, Stack, Text } from "@fluentui/react";
+import { Nav, INavLink, Stack, Text, useTheme } from "@fluentui/react";
 import React, {
   FunctionComponent,
   useEffect,
   useState,
 } from "react";
+import theme from "../editor/theme";
 import KdbConnection from "../server/kdb-connection";
 
 import { tablePanel, stackTokens } from "../style";
@@ -21,6 +22,7 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
   results
 }) => {
   const [tables, setTables] = useState<{ [key: string]: string[] }>({});
+  const theme = useTheme()
 
   useEffect(() => {
     // Split into seperate function to manage async
@@ -97,7 +99,8 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
   return (
     <>
       <Stack tokens={stackTokens} style={{
-        ...tablePanel
+        ...tablePanel,
+        backgroundColor: theme.palette.white
       }}>
         { Object.keys(tables).length > 0 ? (
           <Nav

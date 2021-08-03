@@ -17,6 +17,7 @@ import {
   SpinnerSize,
   Stack,
   Text,
+  useTheme,
 } from "@fluentui/react"
 import { getFileTypeIconProps } from '@fluentui/react-file-type-icons';
 
@@ -46,6 +47,8 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
   const [start, setStart] = useState(0)
   const [currentView, setCurrentView] = useState(ResultsView.Raw)
   const [viewOptions, setViewOptions] = useState<ICommandBarItemProps[]>([])
+
+  const theme = useTheme()
 
   useEffect(() => {
 
@@ -234,7 +237,7 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
   return (
     <Stack style={{
       ...resultsWindow,
-      position:"relative"
+      backgroundColor: theme.palette.white
     }}>
       <CommandBar 
         items={viewOptions}
