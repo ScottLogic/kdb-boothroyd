@@ -11,7 +11,9 @@ const ServerDeleteConfirmation: FC<ServerDeleteConfirmationProps> = ({hidden, on
   return (
     <Dialog
       hidden={hidden}
-      isBlocking={true}
+      modalProps={{
+        isBlocking:true
+      }}
       onDismiss={onCancel}
       dialogContentProps={{
         type: DialogType.normal,
