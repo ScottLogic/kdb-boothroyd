@@ -81,9 +81,9 @@ const ServerManager: FC<ServerManagerProps> = ({ onConnect }) => {
       ? servers.find((s) => s.id === selectedServerId)
       : undefined;
 
-  async function connectClick() {
+  async function connectClick(server: Server) {
     try {
-      await onConnect(selectedServer!);
+      await onConnect(server);
     } catch (e) {
       setConnectionError(e.message);
     }
