@@ -87,6 +87,7 @@ const MainInterface:FC = () => {
         titleAriaId="Manage Servers"
         isOpen={showServerModal}
         styles={{ "main": serverModal as IStyle }}
+        isBlocking={connections.length == 0}
         onDismiss={() => setShowServerModal(false)}
       > 
         <ServerManager onConnect={connectToServer}/>
