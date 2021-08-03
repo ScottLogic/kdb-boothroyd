@@ -17,28 +17,27 @@ import {
   SpinnerSize,
   Stack,
   Text,
+  useTheme,
 } from "@fluentui/react"
 import { getFileTypeIconProps } from '@fluentui/react-file-type-icons';
 
-import { resultsWindow } from '../style'
-import { MainContext } from '../contexts/MainContext'
+import { resultsWindow, stackTokens } from '../style'
 import { ResultsProcessor } from '../results/processor'
 import { ipcRenderer } from 'electron'
 import Exporter, { ExportFormat } from '../results/exporter';
+import Result from '../types/results';
 
 enum ResultsView {
   Table,
   Raw
 }
+interface ResultsWindowProps {
+  results: Result | undefined;
+  isLoading: boolean;
+  onExecuteQuery: (query: string) => void;
+}
 
-const ResultsWindow:FunctionComponent = () => {
-
-  const { 
-    currentServer,
-    results,
-    isLoading, 
-    setIsLoading
-  } = useContext(MainContext)
+const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoading, onExecuteQuery }) => {
 
   const [currentResults,setCurrentResults] = useState<any>(null)
   const [currentScript, setCurrentScript] = useState<string | undefined>()
@@ -49,13 +48,14 @@ const ResultsWindow:FunctionComponent = () => {
   const [currentView, setCurrentView] = useState(ResultsView.Raw)
   const [viewOptions, setViewOptions] = useState<ICommandBarItemProps[]>([])
 
+  const theme = useTheme()
+
   useEffect(() => {
 
-    if (currentServer && results[currentServer]) {
-      const r = results[currentServer]
-      setCurrentScript(r.script)
-      setError(r.error)
-      setCurrentResults(r.data)
+    if (results) {
+      setCurrentScript(results.script)
+      setError(results.error)
+      setCurrentResults(results.data)
     } else {
       setCurrentScript(undefined)
       setError(undefined)
@@ -64,7 +64,7 @@ const ResultsWindow:FunctionComponent = () => {
     
     setStart(0)
 
-  }, [currentServer, results])
+  }, [results])
 
   // Format the results for display (needs extracting out)
   useEffect(() => {
@@ -82,9 +82,6 @@ const ResultsWindow:FunctionComponent = () => {
         setColumns([])
         setRows([])
       }
-      setIsLoading(false)
-    } else if (error) {
-      setIsLoading(false)
     }
 
   }, [currentResults, error])
@@ -145,20 +142,30 @@ const ResultsWindow:FunctionComponent = () => {
     return (<Shimmer isDataLoaded={false}></Shimmer>)
   }
 
-  function onColumnClick() {
-    //TODO add sorting code
-  }
 
   const farItems: ICommandBarItemProps[] = [
-    /*{
+    {
+      key: "refresh",
+      iconProps: { iconName: "Refresh" },
+      disabled: !(results && results.data),
+      onClick: () => {
+        onExecuteQuery(results!.script);
+      }
+    },
+    {
       key: "excel",
       title: "Open in Excel",
       iconProps: { iconName: "ExcelLogo" },
-      
+      disabled: (!Array.isArray(currentResults) || currentResults.length == 0),
       onClick: () => {
-        
+        const file = Exporter.export(currentResults!, ExportFormat.xlsx)
+        if (file) {
+          ipcRenderer.send("open-file", {
+            url: file
+          })
+        }
       },
-    },*/
+    },
     {
       key: "export",
       text: "Export",
@@ -202,15 +209,7 @@ const ResultsWindow:FunctionComponent = () => {
           }
         ]
       }
-    },
-    /*{
-      key: "chart",
-      title: "Chart current result set",
-      iconProps: { iconName: "AreaChart" },
-      onClick: () => {
-        console.log("CHART CLICKED")
-      }
-    }*/
+    }
   ]
 
   const gridStyles: Partial<IDetailsListStyles> = {
@@ -238,12 +237,13 @@ const ResultsWindow:FunctionComponent = () => {
   return (
     <Stack style={{
       ...resultsWindow,
-      position:"relative"
+      backgroundColor: theme.palette.white
     }}>
       <CommandBar 
         items={viewOptions}
         farItems={farItems}
         style={{ flex: "0" }}/>
+        <Stack tokens={stackTokens}>
         {(isLoading ) ? (
           <Spinner size={SpinnerSize.large}/>
         ) : (
@@ -252,28 +252,42 @@ const ResultsWindow:FunctionComponent = () => {
               messageBarType={MessageBarType.error}
               isMultiline={true}
               >
-              <Text block variant={"large" as ITextProps['variant']}>Error when executing query</Text>
+              <Text 
+                block 
+                variant={"large" as ITextProps['variant']}
+                style={{color:"inherit"}}>
+                Error when executing query
+              </Text>
               <br/>
-              <Text block>Query: {currentScript}</Text>
-              <Text block>{error}</Text>
+              <Text 
+                block
+                style={{color:"inherit"}}>
+                Query: {currentScript}
+              </Text>
+              <Text 
+                block
+                style={{color:"inherit"}}>
+                {error}
+              </Text>
             </MessageBar>
           ) : (
-          <>
-            {(typeof currentResults === "string" || currentView == ResultsView.Raw) ? (
-              <pre>{currentResults ? JSON.stringify(currentResults,null,2) : ""}</pre>
-            ): (
-            <DetailsList
-              columns={columns}
-              items={rows}
-              styles={gridStyles}
-              layoutMode={DetailsListLayoutMode.fixedColumns}
-              constrainMode={ConstrainMode.unconstrained}
-              selectionMode={SelectionMode.none}
-              onRenderMissingItem={parseMoreResults}/>
-            )}
-          </>
+            <>
+              {(typeof currentResults === "string" || currentView == ResultsView.Raw) ? (
+                <pre>{currentResults ? JSON.stringify(currentResults,null,2) : ""}</pre>
+              ): (
+              <DetailsList
+                columns={columns}
+                items={rows}
+                styles={gridStyles}
+                layoutMode={DetailsListLayoutMode.fixedColumns}
+                constrainMode={ConstrainMode.unconstrained}
+                selectionMode={SelectionMode.none}
+                onRenderMissingItem={parseMoreResults}/>
+              )}
+            </>
           )
         )}
+        </Stack>
     </Stack>
   )
 }

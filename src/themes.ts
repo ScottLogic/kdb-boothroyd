@@ -50,6 +50,6 @@ export const darkTheme:PartialTheme = {
     neutralPrimary: '#ffffff',
     neutralDark: '#f4f4f4',
     black: '#f8f8f8',
-    white: '#333333'
+    white: '#1e1e1e'
   }
 }

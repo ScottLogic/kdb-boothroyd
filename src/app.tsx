@@ -1,5 +1,4 @@
 import React, { FunctionComponent, useState } from 'react'
-import ReactDom from "react-dom"
 import { ipcRenderer } from "electron"
 import { ThemeProvider } from '@fluentui/react'
 import { initializeIcons } from "@fluentui/font-icons-mdl2"
@@ -43,8 +42,4 @@ const App:FunctionComponent = () => {
   )
 }
 
-// Render React app
-ReactDom.render(
-  <App />, 
-  document.getElementById('root')
-);
+export default App
