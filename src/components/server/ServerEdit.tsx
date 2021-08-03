@@ -20,6 +20,8 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
   const [name, setName] = useState("");
   const [host, setHost] = useState("");
   const [port, setPort] = useState(0);
+  const [port, setPort] = useState<number | undefined>(0);
+  const [changeMade, setChangeMade] = useState(false)
 
   useEffect(() => {
     setName(server ? server.name : "");
