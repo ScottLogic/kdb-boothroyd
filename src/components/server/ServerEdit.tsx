@@ -29,11 +29,16 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
 
   const stateToServer = () =>
     ({
+  const stateToServer = () => {
+
+    const p = (port !== undefined) ? port : 5001
+    return ({
       name,
       host,
-      port,
+      port: p,
       id: server ? server.id : undefined,
-    } as Server);
+    } as Server)
+  }
 
   const connectEnabled = name !== "" && host !== "" && port !== 0;
 
@@ -55,8 +60,9 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
         />
         <TextField
           label="Port"
-          value={port.toString()}
-          onChange={(_, newValue) => setPort(parseInt(newValue!))}
+          value={(port !== undefined) ? port.toString() : ""}
+          placeholder="5001"
+          onChange={(_, newValue) => setPort(parseInt(newValue!) || undefined)}
         />
       </Stack>
       <Stack horizontal={true} tokens={stackTokens}>
