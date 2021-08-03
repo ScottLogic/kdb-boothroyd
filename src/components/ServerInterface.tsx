@@ -50,7 +50,11 @@ const ServerInterface: FC<ServerInterfaceProps> = ({
         display: visible ? "flex" : "none",
       }}
     >
-      <TablePanel onExecuteQuery={executeQuery} connection={connection} />
+      <TablePanel 
+        onExecuteQuery={executeQuery} 
+        connection={connection} 
+        results={results}
+      />
       <Stack style={{ flex: "1 1 auto", alignItems: "stretch", minWidth: 0 }}>
         <EditorWindow onExecuteQuery={executeQuery} />
         <ResultsWindow
