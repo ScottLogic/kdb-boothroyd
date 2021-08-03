@@ -94,15 +94,16 @@ const MainInterface:FC = () => {
       </Modal>
       <Stack style={container}>
         <Stack horizontal>
-          <Stack.Item grow={3} >
-          <Pivot 
-            selectedKey={currentConnectionIndex !== -1 ? currentConnectionIndex.toString() : ""}
-            style={{...pivots}}
-            onLinkClick={handlePivotClick}>
-            {connections.map((c, i) => (
-              <PivotItem itemKey={i.toString()} key={i.toString()} headerText={c.name} onRenderItemLink={customPivotRenderer}/>
-            ))}
-          </Pivot>
+          <Stack.Item grow={3}>
+            <Pivot 
+              selectedKey={currentConnectionIndex !== -1 ? currentConnectionIndex.toString() : ""}
+              style={{...pivots}}
+              onLinkClick={handlePivotClick}
+              overflowBehavior="menu">
+              {connections.map((c, i) => (
+                <PivotItem itemKey={i.toString()} key={i.toString()} headerText={c.name} onRenderItemLink={customPivotRenderer}/>
+              ))}
+            </Pivot>
           </Stack.Item>
           <ActionButton iconProps={emojiIcon} onClick={() => setShowServerModal(true)}>Servers</ActionButton>
         </Stack>
