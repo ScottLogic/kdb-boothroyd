@@ -20,21 +20,21 @@ const MainInterface:FC = () => {
 
 
   function handlePivotClick(item?: PivotItem) {
-    if (item && item.props.itemKey) {
+    if (item && item.props.itemKey)
       setCurrentConnectionIndex(parseInt(item.props.itemKey));
-    }
   }
 
   async function connectToServer(server: Server) {
     const currentConnections = [...connections];
-    console.log("CONNECT TO:", server)
     const connection = await new KdbConnection(server.host, server.port).connect()
+    
     setConnections([...currentConnections, {
       connection,
       // needs better naming logic here
-      name: `${server.name} - (${connections.length})`,
+      name: `${server.name} - (${connections.length + 1})`,
     }]);
     setCurrentConnectionIndex(connections.length);
+
     setShowServerModal(false);
   }
 
@@ -54,7 +54,7 @@ const MainInterface:FC = () => {
         <Stack horizontal>
           <Stack.Item grow={3} >
           <Pivot 
-            selectedKey={currentConnectionIndex !== -1 ? connections[currentConnectionIndex].name : undefined}
+            selectedKey={currentConnectionIndex !== -1 ? currentConnectionIndex.toString() : ""}
             style={{...pivots}}
             onLinkClick={handlePivotClick}>
             {connections.map((c, i) => (
