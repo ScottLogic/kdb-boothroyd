@@ -27,15 +27,14 @@ const MainInterface:FC = () => {
 
   async function connectToServer(server: Server) {
     const currentConnections = [...connections];
+    console.log("CONNECT TO:", server)
     const connection = await new KdbConnection(server.host, server.port).connect()
     setConnections([...currentConnections, {
       connection,
       // needs better naming logic here
       name: `${server.name} - (${connections.length})`,
     }]);
-    if (currentConnectionIndex === -1) {
-      setCurrentConnectionIndex(0);
-    }
+    setCurrentConnectionIndex(connections.length-1);
     setShowServerModal(false);
   }
 
