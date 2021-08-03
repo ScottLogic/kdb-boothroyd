@@ -37,8 +37,7 @@ export const serverPanel: CSSProperties = {
 }
 
 export const tablePanel: CSSProperties = {
-  flex: "0",
-  minWidth: "200px"
+  flex: "0"
 }
 
 export const pivots: CSSProperties = {
