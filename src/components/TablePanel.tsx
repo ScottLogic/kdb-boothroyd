@@ -5,6 +5,7 @@ import {
   INavLink, 
   INavLinkGroup,
   Stack,
+  Text,
 } from "@fluentui/react"
 import React, { FunctionComponent, useContext, useEffect, useState } from "react"
 
@@ -121,12 +122,16 @@ const TablePanel:FunctionComponent = () => {
       <Stack tokens={stackTokens} style={{
         ...tablePanel
       }}>
-        <Nav
-          onLinkClick={tableSelected}
-          selectedKey={table}
-          ariaLabel="Table List"
-          groups={navLinkGroups}
-        />
+        { Object.keys(tables).length > 0 ? (
+          <Nav
+            onLinkClick={tableSelected}
+            selectedKey={table}
+            ariaLabel="Table List"
+            groups={navLinkGroups}
+          />
+        ) : (
+          <Text>No Tables</Text>
+        )}
       </Stack>
     </>
   )
