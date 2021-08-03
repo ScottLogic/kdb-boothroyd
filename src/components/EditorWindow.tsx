@@ -11,22 +11,17 @@ import {
 import syntax from '../editor/syntax';
 import theme from '../editor/theme';
 import { editorWindow } from '../style'
-import ResultsWindow from './ResultsWindow';
-import { MainContext } from '../contexts/MainContext';
+import { ConnectionContext } from '../contexts/ConnectionContext';
 
 const EditorWindow:FunctionComponent = () => {
 
-  // Get properties from MainContext
-  const context = useContext(MainContext)
-  const currentServer = context.currentServer
-  const connections = context.connections
-  const updateResults = context.updateResults
+  // Get properties from ConnectionContext
+  const context = useContext(ConnectionContext)
+  const connection = context.connection
+  const performQuery = context.performQuery
   const results = context.results
 
-  const setIsLoading = context.setIsLoading
-
   // Store a list of scripts against the server they're intended for
-  const [scripts, setScripts] = useState<{[key:string]:string}>({})
   const [currentScript, setCurrentScript] = useState("")
 
   // Find out if system is in dark mode so we can use the appropriate editor theme
@@ -59,15 +54,6 @@ const EditorWindow:FunctionComponent = () => {
     })
   },[])
 
-  // If current script changes switch out script in editor
-  useEffect(() => {
-    if (currentServer) {
-      const script = scripts[currentServer] || ""
-      setCurrentScript(script)
-      if (editorRef && editorRef.current)
-        (editorRef.current as any).setValue(script)
-    }
-  }, [currentServer])
 
   // Set some default options for the Monaco Editor
   const editorOptions = {
@@ -108,60 +94,32 @@ const EditorWindow:FunctionComponent = () => {
   // As we write scripts we need to update our store of them so we don't lose stuff when switching to 
   // another server
   function updateScripts(newValue:string) {
-    const list = {...scripts}
-    list[currentServer!] = newValue
-    setScripts(list)
     setCurrentScript(newValue)
   }
 
   // Send our commands to the server
   async function runScript() {
     let script = ""
-    if (currentServer) {
-      try {
-        // Reset results to trigger loading animation
-        setIsLoading(true)
-
-        let selected
-        
-        // Get currently highlighted text
-        if (editorRef.current) {
-          const editor:any = editorRef.current!
-          selected = editor.getModel().getValueInRange(editor.getSelection())
-        }
-
-        // If selected text use that, otherwise send full script
-       script = (selected && selected != "") ? selected : currentScript
-        
-        // Load actual results
-        const res = await connections[currentServer].send(script)
-        
-        if (res.type == "success")
-          updateResults(currentServer, script, res.data)
-        else
-          updateResults(currentServer, script, null, res.data as string)
-      } catch (e) {
-        // TODO: handle error
-        updateResults(currentServer, script, null, e)
-      }
+    // Reset results to trigger loading animation
+    let selected
+    
+    // Get currently highlighted text
+    if (editorRef.current) {
+      const editor:any = editorRef.current!
+      selected = editor.getModel().getValueInRange(editor.getSelection())
     }
+
+    // If selected text use that, otherwise send full script
+    script = (selected && selected != "") ? selected : currentScript
+    
+    // Load actual results
+    performQuery(script)
   }
 
   async function refreshResults() {
-    if (currentServer) {
-      let script = ""
-      try {
-        script = results[currentServer].script
-        const res = await connections[currentServer].send(script)
-        
-        if (res.type == "success")
-          updateResults(currentServer, script, res.data)
-        else
-          updateResults(currentServer, script, null, res.data as string)
-
-      } catch (e) {
-        updateResults(currentServer, script, null, e)
-      }
+    if (results && results.script) {
+      let script = results.script
+      performQuery(script)
     }
   }
 
@@ -188,7 +146,7 @@ const EditorWindow:FunctionComponent = () => {
       key: "refresh",
       title: "Refresh results",
       iconProps: { iconName: "Refresh" },
-      disabled: !(currentServer && results[currentServer]),
+      disabled: !(connection && results),
       onClick: () => {
         refreshResults()
       }
@@ -293,26 +251,23 @@ const EditorWindow:FunctionComponent = () => {
 
 
   return (
-    <>
-      <Stack style={ { ...editorWindow }}>
-        <CommandBar 
-            items={items}
-            overflowItems={overflowItems}
-            farItems={rightItems}
-            style={{
-              flex: "0" 
-            }}/>
-        <MonacoEditor
-          language="kbd/q"
-          theme={(isDarkMode) ? "vs-dark" : "vs-light"}
-          options={editorOptions}
-          editorWillMount={editorWillMount}
-          editorDidMount={editorDidMount}
-          onChange={updateScripts}
-        />
-      </Stack>
-      <ResultsWindow />
-    </>
+    <Stack style={ { ...editorWindow }}>
+      <CommandBar 
+          items={items}
+          overflowItems={overflowItems}
+          farItems={rightItems}
+          style={{
+            flex: "0" 
+          }}/>
+      <MonacoEditor
+        language="kbd/q"
+        theme={(isDarkMode) ? "vs-dark" : "vs-light"}
+        options={editorOptions}
+        editorWillMount={editorWillMount}
+        editorDidMount={editorDidMount}
+        onChange={updateScripts}
+      />
+    </Stack>
   )
 }
 
