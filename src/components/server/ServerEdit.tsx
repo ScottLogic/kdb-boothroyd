@@ -27,8 +27,21 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
     setPort(server ? server.port : 0);
   }, [server]);
 
-  const stateToServer = () =>
-    ({
+  useEffect(() => {
+    if (server) {
+      setChangeMade(
+        name != server.name ||
+        host != server.host ||
+        port != server.port
+      )
+    } else {
+      setChangeMade(
+        name != "" &&
+        host != ""
+      )
+    }
+  }, [server, name, host, port])
+
   const stateToServer = () => {
 
     const p = (port !== undefined) ? port : 5001
@@ -68,6 +81,7 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
       <Stack horizontal={true} tokens={stackTokens}>
         <DefaultButton
           text="Save"
+          disabled={!changeMade}
           onClick={() => onSave(stateToServer())}
         />
         <PrimaryButton
