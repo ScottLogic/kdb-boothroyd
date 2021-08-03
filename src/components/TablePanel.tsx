@@ -7,19 +7,25 @@ import React, {
 import KdbConnection from "../server/kdb-connection";
 
 import { tablePanel, stackTokens } from "../style";
+import Result from "../types/results";
 
 interface TabelPanelProps {
   onExecuteQuery: (query: string) => void;
   connection: KdbConnection;
+  results: Result | undefined
 }
 
-const TablePanel: FunctionComponent<TabelPanelProps> = ({ onExecuteQuery, connection }) => {
+const TablePanel: FunctionComponent<TabelPanelProps> = ({ 
+  onExecuteQuery, 
+  connection,
+  results
+}) => {
   const [tables, setTables] = useState<{ [key: string]: string[] }>({});
 
   useEffect(() => {
     // Split into seperate function to manage async
     updateTables();
-  }, [connection]);
+  }, [connection, results]);
 
   const links = Object.keys(tables).map((t) => ({
     key: t,
@@ -46,7 +52,7 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({ onExecuteQuery, connec
     let tbls = {};
 
     // If we haven't already grabbed tables get them
-    if ((connection && !tbls) || Object.keys(tables).length == 0) {
+    if (connection) {
       setTables(await getTables());
     } else {
       setTables(tbls);
