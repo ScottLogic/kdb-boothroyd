@@ -34,7 +34,7 @@ const MainInterface:FC = () => {
       // needs better naming logic here
       name: `${server.name} - (${connections.length})`,
     }]);
-    setCurrentConnectionIndex(connections.length-1);
+    setCurrentConnectionIndex(connections.length);
     setShowServerModal(false);
   }
 
