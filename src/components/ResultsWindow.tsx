@@ -148,15 +148,20 @@ const ResultsWindow:FunctionComponent = () => {
   }
 
   const farItems: ICommandBarItemProps[] = [
-    /*{
+    {
       key: "excel",
       title: "Open in Excel",
       iconProps: { iconName: "ExcelLogo" },
-      
+      disabled: (!Array.isArray(currentResults) || currentResults.length == 0),
       onClick: () => {
-        
+        const file = Exporter.export(currentResults!, ExportFormat.xlsx)
+        if (file) {
+          ipcRenderer.send("open-file", {
+            url: file
+          })
+        }
       },
-    },*/
+    },
     {
       key: "export",
       text: "Export",
