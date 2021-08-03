@@ -24,10 +24,18 @@ const ServerInterface: FC<ServerInterfaceProps> = ({
       try {
         setIsLoading(true);
         const res = await connection.send(script);
+        if (res.type == "success") {
+          setResults({
+            script,
+            data: res.data,
+          });
+      } else if (res.type == "error") {
         setResults({
           script,
-          data: res.data,
-        });
+          data: null,
+          error: res.data as string
+        })
+      }
       } catch (e) {
         setResults({
           script,
