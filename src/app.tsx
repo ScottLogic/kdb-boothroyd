@@ -1,4 +1,3 @@
-import { hot } from 'react-hot-loader/root';
 import React, { FunctionComponent, useState } from 'react'
 import { ipcRenderer } from "electron"
 import { ThemeProvider } from '@fluentui/react'
@@ -43,4 +42,4 @@ const App:FunctionComponent = () => {
   )
 }
 
-export default hot(App)
+export default App
