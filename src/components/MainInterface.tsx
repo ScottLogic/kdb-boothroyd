@@ -1,9 +1,10 @@
-import { ActionButton, CommandBar, ICommandBarItemProps, IconButton, IIconProps, IStyle, Modal, Pivot, PivotItem, Stack } from '@fluentui/react'
+import { ActionButton, FontIcon, IIconProps, IPivotItemProps, IStyle, Modal, Pivot, PivotItem, Stack } from '@fluentui/react'
 import React, { FC, useState } from 'react'
 import KdbConnection from '../server/kdb-connection'
 
-import { container, pivots, serverModal, stackTokens } from '../style'
+import { container, pivotClose, pivots, serverModal } from '../style'
 import Server from '../types/server'
+import { removeAtIndex } from '../utils'
 import ServerManager from './server/ServerManager'
 import ServerInterface from './ServerInterface'
 
@@ -38,6 +39,46 @@ const MainInterface:FC = () => {
     setShowServerModal(false);
   }
 
+  function disconnectFromServer(index: number) {
+    const toRemove = connections[index]
+    toRemove.connection.reset()
+    setConnections(removeAtIndex(connections, index))
+    if (currentConnectionIndex == index && connections.length > 1) {
+      setCurrentConnectionIndex(0)
+    }
+
+    if (connections.length == 1) {
+      setCurrentConnectionIndex(-1)
+      setShowServerModal(true)
+    }
+  }
+
+  function disconnectButtonClicked(key?: string) {
+    if (key) {
+      disconnectFromServer(parseInt(key))
+    }
+  }
+
+  function customPivotRenderer(
+    link?: IPivotItemProps,
+    defaultRenderer?: (link?: IPivotItemProps) => JSX.Element | null,
+  ): JSX.Element | null {
+    if (!link || !defaultRenderer) {
+      return null;
+    }
+  
+    return (
+      <span style={{ flex: '0 1 100%' }}>
+        {defaultRenderer({ ...link, itemIcon: undefined })}
+        <FontIcon
+          iconName="ChromeClose" 
+          style={{...pivotClose}}
+          onClick={() => disconnectButtonClicked(link.itemKey)}
+          />
+      </span>
+    );
+  }
+
   const emojiIcon: IIconProps = { iconName: 'Database' };
 
   return (
@@ -58,7 +99,7 @@ const MainInterface:FC = () => {
             style={{...pivots}}
             onLinkClick={handlePivotClick}>
             {connections.map((c, i) => (
-              <PivotItem itemKey={i.toString()} key={i.toString()} headerText={c.name}/>
+              <PivotItem itemKey={i.toString()} key={i.toString()} headerText={c.name} onRenderItemLink={customPivotRenderer}/>
             ))}
           </Pivot>
           </Stack.Item>

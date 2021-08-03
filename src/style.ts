@@ -46,6 +46,13 @@ export const pivots: CSSProperties = {
   height:"50px"
 }
 
+export const pivotClose: CSSProperties = {
+  marginLeft: "10px",
+  width: 8,
+  height: 8,
+  fontSize: 8
+}
+
 export const editorWindow: CSSProperties = {
   flex:"1 1 auto",
   maxWidth:"100%",
