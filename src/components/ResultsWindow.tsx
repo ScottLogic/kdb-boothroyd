@@ -21,7 +21,7 @@ import {
 } from "@fluentui/react"
 import { getFileTypeIconProps } from '@fluentui/react-file-type-icons';
 
-import { resultsWindow } from '../style'
+import { resultsWindow, stackTokens } from '../style'
 import { ResultsProcessor } from '../results/processor'
 import { ipcRenderer } from 'electron'
 import Exporter, { ExportFormat } from '../results/exporter';
@@ -243,6 +243,7 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
         items={viewOptions}
         farItems={farItems}
         style={{ flex: "0" }}/>
+        <Stack tokens={stackTokens}>
         {(isLoading ) ? (
           <Spinner size={SpinnerSize.large}/>
         ) : (
@@ -270,22 +271,23 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
               </Text>
             </MessageBar>
           ) : (
-          <>
-            {(typeof currentResults === "string" || currentView == ResultsView.Raw) ? (
-              <pre>{currentResults ? JSON.stringify(currentResults,null,2) : ""}</pre>
-            ): (
-            <DetailsList
-              columns={columns}
-              items={rows}
-              styles={gridStyles}
-              layoutMode={DetailsListLayoutMode.fixedColumns}
-              constrainMode={ConstrainMode.unconstrained}
-              selectionMode={SelectionMode.none}
-              onRenderMissingItem={parseMoreResults}/>
-            )}
-          </>
+            <>
+              {(typeof currentResults === "string" || currentView == ResultsView.Raw) ? (
+                <pre>{currentResults ? JSON.stringify(currentResults,null,2) : ""}</pre>
+              ): (
+              <DetailsList
+                columns={columns}
+                items={rows}
+                styles={gridStyles}
+                layoutMode={DetailsListLayoutMode.fixedColumns}
+                constrainMode={ConstrainMode.unconstrained}
+                selectionMode={SelectionMode.none}
+                onRenderMissingItem={parseMoreResults}/>
+              )}
+            </>
           )
         )}
+        </Stack>
     </Stack>
   )
 }
