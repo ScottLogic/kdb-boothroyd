@@ -36,13 +36,26 @@ const ServerManager: FC<ServerManagerProps> = ({ onConnect }) => {
 
   const groups = [
     {
-      links: servers.map(
-        (s) =>
-          ({
-            key: s.id,
-            name: s.name,
-          } as INavLink)
-      ),
+      links: servers
+        .sort((a, b) => {
+          if (!a.id)
+            return -1
+          
+          if (!b.id)
+            return 1
+
+          if (a.id == b.id)
+            return 0
+          else 
+            return (a.id > b.id) ? -1 : 1
+        })
+        .map(
+          (s) =>
+            ({
+              key: s.id,
+              name: s.name,
+            } as INavLink)
+        ),
     },
   ];
 
