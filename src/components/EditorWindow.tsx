@@ -113,7 +113,8 @@ const EditorWindow:FunctionComponent = () => {
     script = (selected && selected != "") ? selected : currentScript
     
     // Load actual results
-    performQuery(script)
+    if (script != "")
+      performQuery(script)
   }
 
   async function refreshResults() {
@@ -129,6 +130,7 @@ const EditorWindow:FunctionComponent = () => {
       key: "go",
       title: "Run script",
       iconProps: { iconName: "Play" },
+      disabled: !(currentScript && currentScript != ""),
       elementRef: goRef,
       onClick: () => {
         runScript()
