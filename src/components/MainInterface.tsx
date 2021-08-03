@@ -52,7 +52,7 @@ const MainInterface:FC = () => {
       </Modal>
       <Stack style={container}>
         <Stack horizontal>
-        <Stack.Item grow={3} >
+          <Stack.Item grow={3} >
           <Pivot 
             selectedKey={currentConnectionIndex !== -1 ? currentConnectionIndex.toString() : ""}
             style={{...pivots}}

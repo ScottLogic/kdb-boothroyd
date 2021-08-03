@@ -24,20 +24,19 @@ import { resultsWindow } from '../style'
 import { ResultsProcessor } from '../results/processor'
 import { ipcRenderer } from 'electron'
 import Exporter, { ExportFormat } from '../results/exporter';
-import { ConnectionContext } from '../contexts/ConnectionContext';
+import Result from '../types/results';
 
 enum ResultsView {
   Table,
   Raw
 }
+interface ResultsWindowProps {
+  results: Result | undefined;
+  isLoading: boolean;
+  onExecuteQuery: (query: string) => void;
+}
 
-const ResultsWindow:FunctionComponent = () => {
-
-  const { 
-    results,
-    isLoading, 
-    setIsLoading
-  } = useContext(ConnectionContext)
+const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoading, onExecuteQuery }) => {
 
   const [currentResults,setCurrentResults] = useState<any>(null)
   const [currentScript, setCurrentScript] = useState<string | undefined>()
@@ -80,9 +79,6 @@ const ResultsWindow:FunctionComponent = () => {
         setColumns([])
         setRows([])
       }
-      setIsLoading(false)
-    } else if (error) {
-      setIsLoading(false)
     }
 
   }, [currentResults, error])
@@ -143,11 +139,16 @@ const ResultsWindow:FunctionComponent = () => {
     return (<Shimmer isDataLoaded={false}></Shimmer>)
   }
 
-  function onColumnClick() {
-    //TODO add sorting code
-  }
 
   const farItems: ICommandBarItemProps[] = [
+    {
+      key: "refresh",
+      iconProps: { iconName: "Refresh" },
+      disabled: !(results && results.data),
+      onClick: () => {
+        onExecuteQuery(results!.script);
+      }
+    },
     {
       key: "excel",
       title: "Open in Excel",
@@ -205,15 +206,7 @@ const ResultsWindow:FunctionComponent = () => {
           }
         ]
       }
-    },
-    /*{
-      key: "chart",
-      title: "Chart current result set",
-      iconProps: { iconName: "AreaChart" },
-      onClick: () => {
-        console.log("CHART CLICKED")
-      }
-    }*/
+    }
   ]
 
   const gridStyles: Partial<IDetailsListStyles> = {

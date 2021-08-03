@@ -1,25 +1,20 @@
 import React, { createRef, FunctionComponent, useContext, useEffect, useRef, useState } from 'react'
 import MonacoEditor from 'react-monaco-editor';
 import { ipcRenderer } from 'electron'
-
 import { 
   CommandBar, 
   ICommandBarItemProps,
   Stack,
 } from "@fluentui/react"
-
 import syntax from '../editor/syntax';
 import theme from '../editor/theme';
 import { editorWindow } from '../style'
-import { ConnectionContext } from '../contexts/ConnectionContext';
 
-const EditorWindow:FunctionComponent = () => {
+interface EditorWindowProps {
+  onExecuteQuery: (query:string) => void;
+}
 
-  // Get properties from ConnectionContext
-  const context = useContext(ConnectionContext)
-  const connection = context.connection
-  const performQuery = context.performQuery
-  const results = context.results
+const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery}) => {
 
   // Store a list of scripts against the server they're intended for
   const [currentScript, setCurrentScript] = useState("")
@@ -50,7 +45,6 @@ const EditorWindow:FunctionComponent = () => {
     window.addEventListener('resize', () => {
       if (editorRef.current)
         (editorRef.current as any).layout({height:"100%", width:"100%"})
-      
     })
   },[])
 
@@ -113,15 +107,7 @@ const EditorWindow:FunctionComponent = () => {
     script = (selected && selected != "") ? selected : currentScript
     
     // Load actual results
-    if (script != "")
-      performQuery(script)
-  }
-
-  async function refreshResults() {
-    if (results && results.script) {
-      let script = results.script
-      performQuery(script)
-    }
+    onExecuteQuery(script)
   }
 
   // Set up our command bar items
@@ -135,25 +121,7 @@ const EditorWindow:FunctionComponent = () => {
       onClick: () => {
         runScript()
       }
-    },
-    /*{
-      key: "stop",
-      title: "Stop script",
-      iconProps: { iconName: "Stop" },
-      onClick: () => {
-        console.log("STOP CLICKED")
-      }
-    },*/
-    {
-      key: "refresh",
-      title: "Refresh results",
-      iconProps: { iconName: "Refresh" },
-      disabled: !(connection && results),
-      onClick: () => {
-        refreshResults()
-      }
-    },
-    
+    }
   ]
 
   const overflowItems: ICommandBarItemProps[] = [
