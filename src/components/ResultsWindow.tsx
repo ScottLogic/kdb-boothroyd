@@ -142,6 +142,14 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
 
   const farItems: ICommandBarItemProps[] = [
     {
+      key: "refresh",
+      iconProps: { iconName: "Refresh" },
+      disabled: !(results && results.data),
+      onClick: () => {
+        onExecuteQuery(results!.script);
+      }
+    },
+    {
       key: "excel",
       title: "Open in Excel",
       iconProps: { iconName: "ExcelLogo" },
@@ -154,14 +162,6 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
           })
         }
       },
-    },
-    {
-      key: "refresh",
-      iconProps: { iconName: "Refresh" },
-      disable: () => !results,
-      onClick: () => {
-        onExecuteQuery(results!.script);
-      }
     },
     {
       key: "export",
