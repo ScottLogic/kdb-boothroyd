@@ -15,5 +15,6 @@
     "outDir": "./dist",
     "strict": true ,
     "esModuleInterop": true,
+    "typeRoots": [ "./types", "./node_modules/@types"]
   }
 }

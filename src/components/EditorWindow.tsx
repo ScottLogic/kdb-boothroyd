@@ -8,9 +8,11 @@ import {
   Stack,
   Theme,
 } from "@fluentui/react"
+import useResizeObserver from '@react-hook/resize-observer'
+
 import syntax from '../editor/syntax';
 import theme from '../editor/theme';
-import { editorWindow } from '../style'
+import { editorWindow, editorWrapper } from '../style'
 
 interface EditorWindowProps {
   onExecuteQuery: (query:string) => void;
@@ -25,19 +27,6 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery}) => 
   let [isDarkMode, setIsDarkMode] = useState(false)
 
   const uiTheme = getTheme()
-  console.log('theme', uiTheme)
-
-  let resizeTimeout
-
-  useEffect(() => {
-    window.addEventListener('resize', function ()  {
-      if (editorRef.current) {
-        resizeTimeout = setTimeout(() => {
-          (editorRef.current as any).layout({height:"100%", width:"100%"})
-        }, 50)
-      }
-    })
-  },[])
 
   // Check current theme
   ipcRenderer
@@ -56,7 +45,8 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery}) => 
   const goRef = createRef<HTMLButtonElement>()
 
   // Store a ref to the editor
-  const editorRef = useRef()
+  const editorRef = useRef(null)
+  const wrapper = useRef(null)
 
   useEffect(() => {
     window.addEventListener('resize', () => {
@@ -64,6 +54,16 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery}) => 
         (editorRef.current as any).layout({height:"100%", width:"100%"})
     })
   },[])
+
+  useResizeObserver(wrapper, (entry) => {
+    console.log("RESIZED", entry.contentRect)
+    if (editorRef && editorRef.current) {
+      (editorRef.current as any).layout({
+        height: entry.contentRect.height,
+        width: entry.contentRect.width
+      })
+    }
+  })
 
 
   // Set some default options for the Monaco Editor
@@ -89,7 +89,7 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery}) => 
   function editorDidMount(editor:any, monaco:any) {
     // Get round bug with editor and flex layouts where editor gets too big for it's boots, literally
     editor._domElement.style.maxWidth="100%"
-    editor.layout()
+    editor.layout({height:"100%",width:"100%"})
 
     editorRef.current = editor
     // Bind a shortcut key to run current script
@@ -238,7 +238,11 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery}) => 
 
 
   return (
-    <Stack style={ { ...editorWindow }}>
+    <Stack 
+      style={{ 
+        ...editorWindow,
+        backgroundColor: uiTheme.palette.white
+      }}>
       <CommandBar 
           items={items}
           overflowItems={overflowItems}
@@ -246,14 +250,16 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery}) => 
           style={{
             flex: "0" 
           }}/>
-      <MonacoEditor
-        language="kbd/q"
-        theme={(isDarkMode) ? "vs-dark" : "vs-light"}
-        options={editorOptions}
-        editorWillMount={editorWillMount}
-        editorDidMount={editorDidMount}
-        onChange={updateScripts}
-      />
+      <div ref={wrapper} style={{...editorWrapper}}>
+        <MonacoEditor
+          language="kbd/q"
+          theme={(isDarkMode) ? "vs-dark" : "vs-light"}
+          options={editorOptions}
+          editorWillMount={editorWillMount}
+          editorDidMount={editorDidMount}
+          onChange={updateScripts}
+        />
+      </div>
     </Stack>
   )
 }
