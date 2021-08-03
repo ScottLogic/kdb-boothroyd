@@ -21,11 +21,16 @@ const ServeConnectionError: FC<ServeConnectionErrorProps> = ({
       isMultiline={true}
       onDismiss={onDismiss}
     >
-      <Text block variant={"large" as ITextProps["variant"]}>
+      <Text 
+        block 
+        variant={"large" as ITextProps["variant"]}
+        style={{color:"inherit"}}>
         Error connecting to server
       </Text>
       <br />
-      <Text block>{message}</Text>
+      <Text 
+        block
+        style={{color:"inherit"}}>{message}</Text>
     </MessageBar>
   );
 };
