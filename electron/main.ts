@@ -68,8 +68,6 @@ function createWindow() {
       } catch (e) {
         mainWindow?.webContents.send("show-error", e)
       }
-    } else {
-      console.log("no file selected");
     }
   })
 
