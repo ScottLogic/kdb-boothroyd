@@ -24,6 +24,7 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
   const [tables, setTables] = useState<{ [key: string]: string[] }>({});
   const [columns, setColumns] = useState<string[]>([])
   const [groups, setGroups] = useState<IGroup[]>([])
+  const [isCollapsed, setIsCollapsed] = useState(false)
   const theme = useTheme()
 
   useEffect(() => {
@@ -178,25 +179,43 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
           return null;
         }
 
+  function togglePanel() {
+    setIsCollapsed(!isCollapsed)
+  }
+
   return (
     <>
       <Stack tokens={stackTokens} style={{
         ...tablePanel,
-        backgroundColor: theme.palette.white
+        backgroundColor: theme.palette.white,
+        minWidth: (isCollapsed) ? "50px" : "200px" 
       }}>
-        <Text block variant={"large" as ITextProps["variant"]}>Tables:</Text>
-        { Object.keys(tables).length > 0 ? (
-          <GroupedList
-            items={columns}
-            groups={groups}
-            onRenderCell={renderListCell}
-            groupProps={{
-              onRenderHeader:renderListHeader
-            }}
-            
-          />
-        ) : (
-          <Text>No Tables</Text>
+        <Stack horizontal={true} horizontalAlign="end">
+          {!isCollapsed && (
+            <Text block variant={"large" as ITextProps["variant"]}>Tables:</Text>
+          )}
+          <IconButton 
+            iconProps={{iconName: (isCollapsed) ?"OpenPaneMirrored" : "ClosePaneMirrored"}}
+            onClick={togglePanel}
+            />
+        </Stack>
+        
+        {!isCollapsed && (
+          <>
+          { Object.keys(tables).length > 0 ? (
+            <GroupedList
+              items={columns}
+              groups={groups}
+              onRenderCell={renderListCell}
+              groupProps={{
+                onRenderHeader:renderListHeader
+              }}
+              
+            />
+          ) : (
+            <Text>No Tables</Text>
+          )}
+        </>
         )}
       </Stack>
     </>
