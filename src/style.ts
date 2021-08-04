@@ -72,7 +72,8 @@ export const editorWrapper: CSSProperties = {
 
 export const resultsWindow: CSSProperties = {
   flex:"1 1 auto",
-  position:"relative"
+  position:"relative",
+  overflow:"scroll"
 }
 
 export const serverModal: CSSProperties = {

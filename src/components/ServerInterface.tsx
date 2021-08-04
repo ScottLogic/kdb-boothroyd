@@ -66,7 +66,7 @@ const ServerInterface: FC<ServerInterfaceProps> = ({
       horizontal={true}
       tokens={stackTokens}
       style={{
-        maxHeight: "100%",
+        overflow:"hidden",
         flex: "1 1 auto",
         alignItems: "stretch",
         display: visible ? "flex" : "none",
