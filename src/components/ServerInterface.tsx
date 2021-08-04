@@ -90,9 +90,6 @@ const ServerInterface: FC<ServerInterfaceProps> = ({
           alignItems: "stretch", 
           minWidth: 0 
         }}
-        onDragEnd={(sizes:number[]) => {
-          console.log("SIZES", sizes)
-        }}
         >
           <EditorWindow onExecuteQuery={executeQuery} />
           <ResultsWindow
