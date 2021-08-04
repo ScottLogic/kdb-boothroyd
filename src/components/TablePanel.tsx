@@ -5,6 +5,7 @@ import React, {
   useState,
 } from "react";
 import KdbConnection from "../server/kdb-connection";
+import { QColDict, QDataTypes, QMetaDict } from "../server/q-datatypes";
 
 import { tablePanel, stackTokens, tableListIcon, tableListColumn, tableListName } from "../style";
 import Result from "../types/results";
@@ -84,7 +85,7 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
       setTables(tbls);
     }
   }
-
+  
   async function getTables() {
     if (!connection) return {};
 
@@ -97,8 +98,28 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
       // Get the columns for each table
       for (let i = 0; i < data.length; i++) {
         const t = data[i];
-        const results2 = await connection.send(`cols ${t}`);
-        tbls[t] = results2.data as string[];
+        const results2 = await connection.send(`meta ${t}`);
+        //tbls[t] = results2.data as string[];
+        
+        if (results2.type == "success") {
+          const data2 = results2.data as Array<QColDict[]|QMetaDict[]>
+          if (data2.length > 0) {
+            let meta:QMetaDict[]
+            if (data2.length > 1) {
+              meta = data2[1] as QMetaDict[]
+            }
+            tbls[t] = (data2[0] as QColDict[]).map((c, i) => {
+              let col = c.c
+
+              if (meta && meta[i] && meta[i].t !== null) {
+                col += ` (${QDataTypes[meta[i].t!]})`
+              }
+
+              return col
+            })
+          }
+        }
+        
       }
     } catch (_) {
       console.log("COULDN'T GET TABLE LIST");
