@@ -22,5 +22,5 @@ declare module "react-split" {
         collapsed?: Number
     }
 
-    export default class Split extends React.Component<SplitProps, any> {}
+    export default class Split extends React.Component<React.HTMLAttributes<HTMLDivElement> & SplitProps, any> {}
 }
