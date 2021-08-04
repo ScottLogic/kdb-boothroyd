@@ -53,26 +53,6 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
 
   }, [tables])
 
-  /*const links = Object.keys(tables).map((t) => ({
-    key: t,
-    name: t,
-    url: t,
-    isExpanded: false,
-    links: tables[t].map(
-      (col) =>
-        ({
-          key: col,
-          name: col,
-        } as INavLink)
-    ),
-  }));
-
-  const navLinkGroups = [
-    {
-      links,
-    },
-  ];*/
-
   // If we have a new connection we need to go grab the schema for it
   async function updateTables() {
     let tbls = {};
@@ -98,7 +78,6 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
       for (let i = 0; i < data.length; i++) {
         const t = data[i];
         const results2 = await connection.send(`meta ${t}`);
-        //tbls[t] = results2.data as string[];
         
         if (results2.type == "success") {
           const data2 = results2.data as Array<QColDict[]|QMetaDict[]>
