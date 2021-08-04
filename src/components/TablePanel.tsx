@@ -190,11 +190,20 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
         backgroundColor: theme.palette.white,
         minWidth: (isCollapsed) ? "50px" : "200px" 
       }}>
-        <Stack horizontal={true} horizontalAlign="end">
+        <Stack 
+          horizontal={true} 
+          horizontalAlign="start" 
+          verticalAlign="center">
           {!isCollapsed && (
-            <Text block variant={"large" as ITextProps["variant"]}>Tables:</Text>
+            <Text 
+              block
+              style={{flex:"1 1 auto"}}
+              variant={"large" as ITextProps["variant"]}>
+                Tables:
+            </Text>
           )}
           <IconButton 
+            style={{flex:"0"}}
             iconProps={{iconName: (isCollapsed) ?"OpenPaneMirrored" : "ClosePaneMirrored"}}
             onClick={togglePanel}
             />
