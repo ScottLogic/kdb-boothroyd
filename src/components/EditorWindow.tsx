@@ -158,7 +158,6 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery}) => 
       disabled: !(currentScript && currentScript != ""),
       onClick: () => {
         let file = "data:text/plain;charset=utf-8," + encodeURIComponent(currentScript)
-        console.log("FILE", file)
         ipcRenderer.send("download", {
           url: file,
           properties: {
