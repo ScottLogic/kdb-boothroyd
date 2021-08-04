@@ -30,7 +30,6 @@ class KdbConnection {
   }
 
   async connect() {
-    console.log("connecting to KDB server", this.host, this.port);
 
     // @ts-ignore - something strange going on with the types here
     this.connection = (await promisify(nodeq.connect)({
@@ -39,7 +38,6 @@ class KdbConnection {
     })) as Connection;
 
     this.connection!.on("error", (e) => {
-      console.log("Connection has gone away");
       this.reset();
     });
 
@@ -60,7 +58,6 @@ class KdbConnection {
       try {
         await this.connect();
       } catch (e) {
-        console.log("FAILED TO CONNECT TO SERVER");
         throw "Unable to connect to server";
       }
     }

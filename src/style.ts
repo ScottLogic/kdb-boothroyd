@@ -40,6 +40,20 @@ export const tablePanel: CSSProperties = {
   flex: "0"
 }
 
+export const tableListIcon: CSSProperties = {
+  flex:"0",
+  cursor:"pointer"
+}
+
+export const tableListName: CSSProperties = {
+  flex:"1 1 auto"
+}
+
+export const tableListColumn: CSSProperties = {
+  paddingLeft:"20px",
+  height: "38px"
+}
+
 export const pivots: CSSProperties = {
   flex: "0 0 none"
 }
