@@ -34,19 +34,19 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
 
   useEffect(() => {
 
-    const cols:string[] = []
-    const grps:IGroup[] = []
-
-    Object.entries(tables).forEach(([k,v]) => {      
-      grps.push({
-        key: k,
-        name: k,
-        count: v.length,
-        startIndex: cols.length,
-        isCollapsed: true
-      })
-      cols.push(...v)
-    })
+    const [cols, grps]:[string[], IGroup[]] = Object
+      .entries(tables)
+      .reduce(([a,b]:[string[], IGroup[]],[k,v]) => {
+        b.push({
+          key: k,
+          name: k,
+          count: v.length,
+          startIndex: a.length,
+          isCollapsed: true
+        })
+        a.push(...v)
+        return [a,b]
+      },[[],[]])
 
     setColumns(cols)
     setGroups(grps)
