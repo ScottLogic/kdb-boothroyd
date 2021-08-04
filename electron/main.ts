@@ -1,6 +1,7 @@
-import { app, BrowserWindow, ipcMain, nativeTheme, shell } from "electron";
+import { app, BrowserWindow, ipcMain, nativeTheme, shell, dialog } from "electron";
 import * as path from "path";
 import * as url from "url";
+import * as fs from "fs";
 
 
 import { download } from "electron-dl"
@@ -51,6 +52,30 @@ function createWindow() {
     console.log("DL", dl.getSavePath())
     shell.openPath(dl.getSavePath())
     mainWindow?.webContents.send("download-complete", dl.getURL())
+  })
+
+  ipcMain.on("show-open-dialog", async () => {
+    const response = await dialog.showOpenDialog({
+      filters:[{name:"Q Files", extensions:["*.q"]}],
+      properties: ['openFile'] 
+    })
+
+    if (!response.canceled) {
+        // handle fully qualified file name
+      try {
+        fs.readFile(response.filePaths[0], (err, data) =>{
+          
+          if (err)
+            return mainWindow?.webContents.send("show-error", err)
+
+          mainWindow?.webContents.send("file-opened", data.toString())
+        })
+      } catch (e) {
+        mainWindow?.webContents.send("show-error", e)
+      }
+    } else {
+      console.log("no file selected");
+    }
   })
 
   nativeTheme.on("updated", () => {
