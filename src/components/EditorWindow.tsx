@@ -56,7 +56,6 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery}) => 
   },[])
 
   useResizeObserver(wrapper, (entry) => {
-    console.log("RESIZED", entry.contentRect)
     if (editorRef && editorRef.current) {
       (editorRef.current as any).layout({
         height: entry.contentRect.height,
