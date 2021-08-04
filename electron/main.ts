@@ -62,13 +62,9 @@ function createWindow() {
     if (!response.canceled) {
         // handle fully qualified file name
       try {
-        fs.readFile(response.filePaths[0], (err, data) =>{
+        const data = fs.readFileSync(response.filePaths[0])
           
-          if (err)
-            return mainWindow?.webContents.send("show-error", err)
-
-          mainWindow?.webContents.send("file-opened", data.toString())
-        })
+        mainWindow?.webContents.send("file-opened", data.toString())
       } catch (e) {
         mainWindow?.webContents.send("show-error", e)
       }
