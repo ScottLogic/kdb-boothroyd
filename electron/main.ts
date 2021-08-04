@@ -49,7 +49,6 @@ function createWindow() {
   ipcMain.on("open-file", async(_, info) => {
     // Open a local file in the default app
     const dl = await download(BrowserWindow.getFocusedWindow()!, info.url)
-    console.log("DL", dl.getSavePath())
     shell.openPath(dl.getSavePath())
     mainWindow?.webContents.send("download-complete", dl.getURL())
   })

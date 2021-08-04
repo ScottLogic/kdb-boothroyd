@@ -12,8 +12,6 @@ export class ResultsProcessor {
     if (Array.isArray(results)) {
         // We have a list of results, lets convert them to our format for details list
         if (results.length  > 0) {
-          console.log("START", start)
-          console.log("LIMIT", limit)
           cols = this.prepareHeaders(results as Array<any>)
           rows = this.prepareRows((results as Array<any>).slice(start,start + limit), start)
 
@@ -95,8 +93,6 @@ export class ResultsProcessor {
   static prepareRows(results:Array<any>, start:number = 0): Array<{}> {
 
     const rows:{}[] = []
-
-    console.log("PREP ROWS", results.length, start)
 
     results.forEach((v:any, i:number) =>{
       const item = {
