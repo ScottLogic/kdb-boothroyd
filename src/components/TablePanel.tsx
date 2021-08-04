@@ -48,8 +48,6 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
       cols.push(...v)
     })
 
-    console.log("ITEMS", cols)
-    console.log("GROUPS", grps)
     setColumns(cols)
     setGroups(grps)
 
@@ -122,9 +120,7 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
         }
         
       }
-    } catch (_) {
-      console.log("COULDN'T GET TABLE LIST");
-    }
+    } catch (_) {}
 
     return tbls;
   }
