@@ -37,8 +37,7 @@ export const serverPanel: CSSProperties = {
 }
 
 export const tablePanel: CSSProperties = {
-  flex: "0",
-  minWidth: "200px"
+  flex: "0"
 }
 
 export const pivots: CSSProperties = {
@@ -52,17 +51,29 @@ export const pivotClose: CSSProperties = {
   fontSize: 8
 }
 
+export const grabberBar: CSSProperties = {
+  width: 10,
+  height: 10,
+  fontSize: 10,
+  cursor: "row-resize"
+}
+
 export const editorWindow: CSSProperties = {
   flex:"1 1 auto",
   maxWidth:"100%",
   alignItems: "stretch"
 }
 
+export const editorWrapper: CSSProperties = {
+  flex:"1 1 auto", 
+  overflow:"hidden",
+  padding: 10
+}
+
 export const resultsWindow: CSSProperties = {
   flex:"1 1 auto",
-  height:"60%",
-  marginTop:"10px",
-  position:"relative"
+  position:"relative",
+  overflow:"scroll"
 }
 
 export const serverModal: CSSProperties = {

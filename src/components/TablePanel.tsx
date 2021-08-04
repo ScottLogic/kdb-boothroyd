@@ -1,4 +1,4 @@
-import { Nav, INavLink, Stack, Text, useTheme } from "@fluentui/react";
+import { Nav, INavLink, Stack, Text, useTheme, IconButton } from "@fluentui/react";
 import React, {
   FunctionComponent,
   useEffect,
@@ -22,6 +22,7 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
   results
 }) => {
   const [tables, setTables] = useState<{ [key: string]: string[] }>({});
+  const [isCollapsed, setIsCollapsed] = useState(false)
   const theme = useTheme()
 
   useEffect(() => {
@@ -96,20 +97,35 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
     }
   }
 
+  function togglePanel() {
+    setIsCollapsed(!isCollapsed)
+  }
+
   return (
     <>
       <Stack tokens={stackTokens} style={{
         ...tablePanel,
-        backgroundColor: theme.palette.white
+        backgroundColor: theme.palette.white,
+        minWidth: (isCollapsed) ? "50px" : "200px" 
       }}>
-        { Object.keys(tables).length > 0 ? (
-          <Nav
-            onLinkClick={tableSelected}
-            ariaLabel="Table List"
-            groups={navLinkGroups}
-          />
-        ) : (
-          <Text>No Tables</Text>
+        <Stack horizontal={true} horizontalAlign="end">
+          <IconButton 
+            iconProps={{iconName: (isCollapsed) ?"OpenPaneMirrored" : "ClosePaneMirrored"}}
+            onClick={togglePanel}
+            />
+        </Stack>
+        {!isCollapsed && (
+          <>
+            { Object.keys(tables).length > 0 ? (
+              <Nav
+                onLinkClick={tableSelected}
+                ariaLabel="Table List"
+                groups={navLinkGroups}
+              />
+            ) : (
+              <Text>No Tables</Text>
+            )}
+          </>
         )}
       </Stack>
     </>
