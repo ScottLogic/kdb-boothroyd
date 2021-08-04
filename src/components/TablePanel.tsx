@@ -1,13 +1,12 @@
-import { Nav, INavLink, Stack, Text, useTheme } from "@fluentui/react";
+import { Stack, Text, useTheme, GroupedList, IGroupHeaderProps, IGroup, IconButton, ITextProps, ActionButton, FontIcon } from "@fluentui/react";
 import React, {
   FunctionComponent,
   useEffect,
   useState,
 } from "react";
-import theme from "../editor/theme";
 import KdbConnection from "../server/kdb-connection";
 
-import { tablePanel, stackTokens } from "../style";
+import { tablePanel, stackTokens, tableListIcon, tableListColumn, tableListName } from "../style";
 import Result from "../types/results";
 
 interface TabelPanelProps {
@@ -22,6 +21,8 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
   results
 }) => {
   const [tables, setTables] = useState<{ [key: string]: string[] }>({});
+  const [columns, setColumns] = useState<string[]>([])
+  const [groups, setGroups] = useState<IGroup[]>([])
   const theme = useTheme()
 
   useEffect(() => {
@@ -29,7 +30,30 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
     updateTables();
   }, [connection, results]);
 
-  const links = Object.keys(tables).map((t) => ({
+  useEffect(() => {
+
+    const cols:string[] = []
+    const grps:IGroup[] = []
+
+    Object.entries(tables).forEach(([k,v]) => {      
+      grps.push({
+        key: k,
+        name: k,
+        count: v.length,
+        startIndex: cols.length,
+        isCollapsed: true
+      })
+      cols.push(...v)
+    })
+
+    console.log("ITEMS", cols)
+    console.log("GROUPS", grps)
+    setColumns(cols)
+    setGroups(grps)
+
+  }, [tables])
+
+  /*const links = Object.keys(tables).map((t) => ({
     key: t,
     name: t,
     url: t,
@@ -47,7 +71,7 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
     {
       links,
     },
-  ];
+  ];*/
 
   // If we have a new connection we need to go grab the schema for it
   async function updateTables() {
@@ -83,18 +107,55 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
     return tbls;
   }
 
-  async function tableSelected(
-    e?: React.MouseEvent<HTMLElement>,
-    item?: INavLink
-  ) {
-    e && e.preventDefault();
-    if (item && item.key && connection) {
-      console.log("TABLES", tables);
-      if (Object.keys(tables).includes(item.key)) {
-        onExecuteQuery(item.key);
-      }
-    }
-  }
+  const renderListCell = (nestingDepth?: number, item?: string, itemIndex?: number): React.ReactNode => {
+          return item ? (
+            <Stack horizontal={true} verticalAlign="center" style={tableListColumn}>
+              <Text
+                block
+              >{item}</Text>
+            </Stack>
+          ) : null;
+        },
+        renderListHeader = (props?: IGroupHeaderProps): JSX.Element | null => {
+          if (props) {
+            const toggleCollapse = (): void => {
+              props.onToggleCollapse!(props.group!);
+            };
+            const tableSelected = (): void => {
+              onExecuteQuery(props.group!.name);
+            }
+            const isCollapsed = props.group!.isCollapsed
+            return (
+              <Stack 
+                horizontal={true} 
+                tokens={{
+                  padding: "0 5"
+                }}
+                horizontalAlign="start" 
+                verticalAlign="center"
+                >
+                <FontIcon 
+                  iconName={(isCollapsed) ? "ChevronDown" : "ChevronUp"}
+                  onClick={toggleCollapse}
+                  style={tableListIcon}
+                />
+                <ActionButton
+                  style={tableListName}
+                  onClick={tableSelected}
+                >
+                    {props.group!.name}
+                </ActionButton>
+                <IconButton
+                  iconProps={{iconName:"Play"}}
+                  onClick={tableSelected}
+                  style={tableListIcon}
+                />
+              </Stack>
+            )
+          }
+        
+          return null;
+        }
 
   return (
     <>
@@ -102,11 +163,16 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
         ...tablePanel,
         backgroundColor: theme.palette.white
       }}>
+        <Text block variant={"large" as ITextProps["variant"]}>Tables:</Text>
         { Object.keys(tables).length > 0 ? (
-          <Nav
-            onLinkClick={tableSelected}
-            ariaLabel="Table List"
-            groups={navLinkGroups}
+          <GroupedList
+            items={columns}
+            groups={groups}
+            onRenderCell={renderListCell}
+            groupProps={{
+              onRenderHeader:renderListHeader
+            }}
+            
           />
         ) : (
           <Text>No Tables</Text>
