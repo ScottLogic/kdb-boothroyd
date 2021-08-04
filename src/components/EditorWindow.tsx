@@ -40,6 +40,11 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery}) => 
     .on("colour-scheme-changed", (_, isDarkMode) => {
       setIsDarkMode(isDarkMode)
     })
+    .on("file-opened", (_, loaded:string) => {
+      setCurrentScript(loaded)
+      if (editorRef && editorRef.current)
+        (editorRef.current as any).setValue(loaded)
+    })
 
   // Store a reference we can use to target the run script button
   const goRef = createRef<HTMLButtonElement>()
@@ -136,6 +141,30 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery}) => 
       elementRef: goRef,
       onClick: () => {
         runScript()
+      }
+    },
+    {
+      key: "open",
+      title: "Open",
+      iconProps: { iconName: "OpenFolderHorizontal" },
+      onClick: () => {
+        ipcRenderer.send("show-open-dialog")
+      }
+    },
+    {
+      key: "save",
+      title: "Save",
+      iconProps: { iconName: "Save" },
+      disabled: !(currentScript && currentScript != ""),
+      onClick: () => {
+        let file = "data:text/plain;charset=utf-8," + encodeURIComponent(currentScript)
+        ipcRenderer.send("download", {
+          url: file,
+          properties: {
+            saveAs:true,
+            filename: "script.q"
+          }
+        })
       }
     }
   ]

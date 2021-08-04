@@ -1,10 +1,12 @@
 import { ActionButton, FontIcon, IIconProps, IPivotItemProps, IStyle, Modal, Pivot, PivotItem, Stack, useTheme } from '@fluentui/react'
+import { ipcRenderer } from 'electron'
 import React, { FC, useState } from 'react'
 import KdbConnection from '../server/kdb-connection'
 
 import { container, pivotClose, pivots, serverModal } from '../style'
 import Server from '../types/server'
 import { removeAtIndex } from '../utils'
+import ErrorDialog from './ErrorDialog'
 import ServerManager from './server/ServerManager'
 import ServerInterface from './ServerInterface'
 
@@ -18,8 +20,15 @@ const MainInterface:FC = () => {
   const [showServerModal, setShowServerModal] = useState(true)
   const [currentConnectionIndex, setCurrentConnectionIndex] = useState(-1);
   const [connections, setConnections] = useState<NamedConnection[]>([]);
+  const [showError, setShowError] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
 
   const theme = useTheme()
+
+  ipcRenderer.on("show-error", (_, error:string) => {
+    setErrorMessage(error)
+    setShowError(true)
+  })
 
   function handlePivotClick(item?: PivotItem) {
     if (item && item.props.itemKey)
@@ -82,6 +91,10 @@ const MainInterface:FC = () => {
     );
   }
 
+  function onDialogDismissed() {
+    setShowError(false)
+  }
+
   const emojiIcon: IIconProps = { iconName: 'Database' };
 
   return (
@@ -95,6 +108,7 @@ const MainInterface:FC = () => {
       > 
         <ServerManager onConnect={connectToServer}/>
       </Modal>
+      <ErrorDialog hidden={!showError} message={errorMessage} onDialogDismissed={onDialogDismissed}/>
       <Stack style={{
           ...container,
           backgroundColor: theme.palette.neutralLighterAlt
