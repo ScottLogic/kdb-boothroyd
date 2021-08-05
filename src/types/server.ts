@@ -3,7 +3,8 @@ export default interface Server {
   host: string;
   port: number;
   id?: string;
-  tables?: string[];
+  username?:string;
+  password?:string;
 }
 
 export const SERVER_PREFIX = "server-"

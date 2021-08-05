@@ -23,18 +23,23 @@ class KdbConnection {
   connection: Connection | undefined;
   host: string | undefined;
   port: number | undefined;
+  username: string | undefined;
+  password: string | undefined
 
-  constructor(host: string, port: number) {
+  constructor(host: string, port: number, username?: string, password?: string) {
     this.host = host;
     this.port = port;
+    this.username = username;
+    this.password = password;
   }
 
   async connect() {
-
     // @ts-ignore - something strange going on with the types here
     this.connection = (await promisify(nodeq.connect)({
       host: this.host,
       port: this.port,
+      user: this.username,
+      password: this.password
     })) as Connection;
 
     this.connection!.on("error", (e) => {

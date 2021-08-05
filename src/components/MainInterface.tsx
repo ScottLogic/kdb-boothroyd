@@ -28,7 +28,12 @@ const MainInterface:FC = () => {
 
   async function connectToServer(server: Server) {
     const currentConnections = [...connections];
-    const connection = await new KdbConnection(server.host, server.port).connect()
+    const connection = await new KdbConnection(
+      server.host, 
+      server.port,
+      server.username,
+      server.password
+    ).connect()
     
     setConnections([...currentConnections, {
       connection,

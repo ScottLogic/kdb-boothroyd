@@ -1,6 +1,8 @@
 import {
   DefaultButton,
   ITextProps,
+  Pivot,
+  PivotItem,
   PrimaryButton,
   Stack,
   Text,
@@ -20,12 +22,18 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
   const [name, setName] = useState("");
   const [host, setHost] = useState("");
   const [port, setPort] = useState<number | undefined>(0);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
   const [changeMade, setChangeMade] = useState(false)
 
   useEffect(() => {
     setName(server ? server.name : "");
     setHost(server ? server.host : "");
     setPort(server ? server.port : 0);
+    setUsername((server && server.username) ? server.username : "");
+    setPassword((server && server.password) ? server.password : "");
+
   }, [server]);
 
   useEffect(() => {
@@ -33,7 +41,9 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
       setChangeMade(
         name != server.name ||
         host != server.host ||
-        port != server.port
+        port != server.port ||
+        username != server.username ||
+        password != server.password
       )
     } else {
       setChangeMade(
@@ -41,7 +51,7 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
         host != ""
       )
     }
-  }, [server, name, host, port])
+  }, [server, name, host, port, username, password])
 
   const stateToServer = () => {
 
@@ -50,6 +60,8 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
       name,
       host,
       port: p,
+      username,
+      password,
       id: server ? server.id : undefined,
     } as Server)
   }
@@ -62,22 +74,47 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
         <Text variant={"large" as ITextProps["variant"]}>
           {server ? "Edit" : "Add"} Server
         </Text>
-        <TextField
-          label="Name"
-          value={name}
-          onChange={(_, newValue) => setName(newValue!)}
-        />
-        <TextField
-          label="Host"
-          value={host}
-          onChange={(_, newValue) => setHost(newValue!)}
-        />
-        <TextField
-          label="Port"
-          value={(port !== undefined) ? port.toString() : ""}
-          placeholder="5001"
-          onChange={(_, newValue) => setPort(parseInt(newValue!) || undefined)}
-        />
+        <Pivot>
+          <PivotItem
+            itemKey="server"
+            headerText="Server"
+            >
+            <TextField
+              label="Name"
+              value={name}
+              onChange={(_, newValue) => setName(newValue!)}
+            />
+            <TextField
+              label="Host"
+              value={host}
+              onChange={(_, newValue) => setHost(newValue!)}
+            />
+            <TextField
+              label="Port"
+              value={(port !== undefined) ? port.toString() : ""}
+              placeholder="5001"
+              onChange={(_, newValue) => setPort(parseInt(newValue!) || undefined)}
+            />
+          </PivotItem>
+          <PivotItem
+            itemKey="auth"
+            headerText="Authorisation"
+            >
+            <TextField
+              label="Username"
+              value={username}
+              onChange={(_, newValue) => setUsername(newValue!)}
+            />
+            <TextField
+              label="Password"
+              type="password"
+              value={password}
+              canRevealPassword
+              revealPasswordAriaLabel="Show password"
+              onChange={(_, newValue) => setPassword(newValue!)}
+            />
+          </PivotItem>
+        </Pivot>
       </Stack>
       <Stack horizontal={true} tokens={stackTokens}>
         <DefaultButton
