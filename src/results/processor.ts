@@ -7,18 +7,27 @@ export class ResultsProcessor {
 
     let cols:IColumn[] = [], 
         rows:Array<{} | null> = []
-
+        
     // Get the type of our results
     if (Array.isArray(results)) {
         // We have a list of results, lets convert them to our format for details list
         if (results.length  > 0) {
-          cols = this.prepareHeaders(results as Array<any>)
+          cols = this.prepareHeaders(results[0])
           rows = this.prepareRows((results as Array<any>).slice(start,start + limit), start)
 
           if (results.length > (start + limit))
             rows.push(null)
         }
         return [cols, rows]
+    } else if (typeof results === "object") {
+      cols = this.prepareHeaders({key:"",value:""}, false)
+      rows = this.prepareRows(Object.entries(results).map(([k,v]) => {
+        return {
+          key:k,
+          value: v
+        }
+      }))
+      return [cols, rows]
     } else if (typeof results === "string") {
       // If it's a string just return it as is
       return results
@@ -29,30 +38,32 @@ export class ResultsProcessor {
 
   }
 
-  static prepareHeaders(results:Array<any>): Array<IColumn> {
+  static prepareHeaders(resultItem:any, includeIndex:boolean = true): Array<IColumn> {
 
     const cols:IColumn[] = []
 
-    // Add index column
-    cols.push({
-      key: "index",
-      name: "",
-      fieldName:"|i|",
-      minWidth:10,
-      maxWidth:50,
-      isRowHeader: true,
-      isResizable: true,
-      isSorted: false,
-      isSortedDescending: false,
-      sortAscendingAriaLabel: 'Sorted ASC',
-      sortDescendingAriaLabel: 'Sorted DESC',
-      data: Number,
-      isPadded: true
-    })
+    if (includeIndex) {
+      // Add index column
+      cols.push({
+        key: "index",
+        name: "",
+        fieldName:"|i|",
+        minWidth:10,
+        maxWidth:50,
+        isRowHeader: true,
+        isResizable: true,
+        isSorted: false,
+        isSortedDescending: false,
+        sortAscendingAriaLabel: 'Sorted ASC',
+        sortDescendingAriaLabel: 'Sorted DESC',
+        data: Number,
+        isPadded: true
+      })
+    }
 
-    if (typeof results[0] === "object") {
+    if (typeof resultItem === "object") {
       // Set column headers
-      Object.entries(results[0]).forEach(([k,v]) => {
+      Object.entries(resultItem).forEach(([k,v]) => {
         cols.push({
           key: k.toLowerCase(),
           name: k.toUpperCase(),
@@ -82,7 +93,7 @@ export class ResultsProcessor {
         isSortedDescending: false,
         sortAscendingAriaLabel: 'Sorted ASC',
         sortDescendingAriaLabel: 'Sorted DESC',
-        data: typeof results[0],
+        data: typeof resultItem,
         isPadded: true
       })
     }

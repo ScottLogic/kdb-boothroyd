@@ -156,7 +156,7 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
       key: "excel",
       title: "Open in Excel",
       iconProps: { iconName: "ExcelLogo" },
-      disabled: (!Array.isArray(currentResults) || currentResults.length == 0),
+      disabled: (!rows || rows.length == 0),
       onClick: () => {
         const file = Exporter.export(currentResults!, ExportFormat.xlsx)
         if (file) {
@@ -171,7 +171,7 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
       text: "Export",
       title: "Export result set",
       iconProps: { iconName: "Export" },
-      disabled: (!Array.isArray(currentResults) || currentResults.length == 0),
+      disabled: (!rows || rows.length == 0),
       subMenuProps: {
         onItemClick: (_, item?: IContextualMenuItem) => {
           if (item && item.key) {

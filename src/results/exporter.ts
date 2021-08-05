@@ -12,6 +12,15 @@ export enum ExportFormat {
 export default class Exporter {
   static export(data: any[], format: ExportFormat): string | null {
 
+    if (typeof data === "object") {
+      data = Object.entries(data).map(([k,v]) => {
+        return {
+          key: k,
+          value: v
+        }
+      })
+    }
+
     let file
     switch (format) {
       case ExportFormat.csv:
