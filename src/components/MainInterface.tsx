@@ -40,8 +40,11 @@ const MainInterface:FC = () => {
     const connection = await new KdbConnection(
       server.host, 
       server.port,
-      server.username,
-      server.password
+      {
+        user: server.username,
+        password: (server.password) ? decryptWithAES(server.password) : undefined,
+        useTLS: server.useTLS || false
+      }
     ).connect()
     
     setConnections([...currentConnections, {

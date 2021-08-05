@@ -5,6 +5,7 @@ export default interface Server {
   id?: string;
   username?:string;
   password?:string;
+  useTLS?:boolean
 }
 
 export const SERVER_PREFIX = "server-"

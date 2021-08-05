@@ -19,18 +19,23 @@ const qSend = (conn: Connection, value: string) =>
     }
   });
 
+type KdbConnectionOptions = {
+  user?: string, 
+  password?: string,
+  useTLS: boolean,
+  key?: string
+}
+
 class KdbConnection {
   connection: Connection | undefined;
   host: string | undefined;
   port: number | undefined;
-  username: string | undefined;
-  password: string | undefined
+  options:KdbConnectionOptions;
 
-  constructor(host: string, port: number, username?: string, password?: string) {
+  constructor(host: string, port: number, options: KdbConnectionOptions = {useTLS:false}) {
     this.host = host;
     this.port = port;
-    this.username = username;
-    this.password = password;
+    this.options = options
   }
 
   async connect() {
@@ -38,13 +43,12 @@ class KdbConnection {
     this.connection = (await promisify(nodeq.connect)({
       host: this.host,
       port: this.port,
-      user: this.username,
-      password: this.password
+      ...this.options
     })) as Connection;
 
     this.connection!.on("error", (e) => {
       this.reset();
-    });
+    })
 
     return this;
   }
