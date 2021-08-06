@@ -295,6 +295,7 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
               <DetailsList
                 columns={columns}
                 items={rows}
+                compact={true}
                 styles={gridStyles}
                 layoutMode={DetailsListLayoutMode.fixedColumns}
                 constrainMode={ConstrainMode.unconstrained}
