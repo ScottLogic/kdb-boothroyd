@@ -129,7 +129,6 @@ const MainInterface:FC = () => {
           ...container,
           backgroundColor: theme.palette.neutralLighterAlt
         }}>
-        <span>{currentConnection}</span>
         <Stack horizontal>
           <Stack.Item grow={3}>
             <Pivot 
