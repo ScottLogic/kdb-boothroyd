@@ -3,24 +3,30 @@ import { ipcRenderer } from 'electron'
 import React, { FC, useState } from 'react'
 import { useEffect } from 'react'
 import KdbConnection from '../server/kdb-connection'
-
+import path from 'path';
 import { container, pivotClose, pivots, serverModal } from '../style'
 import Server from '../types/server'
-import { removeAtIndex } from '../utils'
+import { removeAtIndex, replaceAtIndex } from '../utils'
 import ErrorDialog from './ErrorDialog'
 import ServerManager from './server/ServerManager'
 import ServerInterface from './ServerInterface'
+import uuid from 'uuid';
 
-interface NamedConnection {
+interface ConnectionTab {
   connection: KdbConnection;
-  name: string;
+  filename?: string;
+  id: string;
 };
+
+function titleForTab(tab: ConnectionTab) {
+  return tab.filename ? `${tab.connection.host} - ${path.basename(tab.filename)}` : tab.connection.host;
+}
 
 const MainInterface:FC = () => {
 
   const [showServerModal, setShowServerModal] = useState(true)
   const [currentConnection, setCurrentConnection] = useState<string | null>(null);
-  const [connections, setConnections] = useState<NamedConnection[]>([]);
+  const [connections, setConnections] = useState<ConnectionTab[]>([]);
   const [showError, setShowError] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
 
@@ -32,17 +38,12 @@ const MainInterface:FC = () => {
   })
 
   useEffect(() => {
-
-    const index = connections.findIndex((c) => {
-      return c.name === currentConnection
-    })
+    const index = connections.findIndex((c) =>  c.id === currentConnection);
 
     if (index == -1) {
       if (connections.length > 0) {
-        console.log("SET INDEX TO 0")
-        setCurrentConnection(connections[0].name)
+        setCurrentConnection(connections[0].id)
       } else {
-        console.log("SET INDEX TO -1")
         setCurrentConnection(null)
         setShowServerModal(true)
       }
@@ -57,20 +58,17 @@ const MainInterface:FC = () => {
   async function connectToServer(server: Server) {
     const currentConnections = [...connections];
     const connection = await new KdbConnection(server.host, server.port).connect()
-    const named = {
+    const tab: ConnectionTab = {
       connection,
-      // needs better naming logic here
-      name: `${server.name} - (${connections.length + 1})`,
+      id: uuid.v4(),
     }
-
-    setConnections([...currentConnections, named]);
-    setCurrentConnection(named.name);
-
+    setConnections([...currentConnections, tab]);
+    setCurrentConnection(tab.id);
     setShowServerModal(false);
   }
 
   function disconnectFromServer(name: string) {
-    const index = connections.findIndex((c) => c.name === name)
+    const index = connections.findIndex((c) => c.id === name)
     
     if (index == -1)
       return
@@ -140,9 +138,9 @@ const MainInterface:FC = () => {
               overflowBehavior="menu">
               {connections.map((c, i) => (
                 <PivotItem 
-                  itemKey={c.name} 
+                  itemKey={c.id} 
                   key={i.toString()} 
-                  headerText={c.name} 
+                  headerText={titleForTab(c)} 
                   onRenderItemLink={customPivotRenderer}
                   />
               ))}
@@ -156,9 +154,14 @@ const MainInterface:FC = () => {
         </Stack>
         {connections.map((c, i) => (
           <ServerInterface
-            key={c.name}
-            connection={c.connection} 
-            visible={c.name === currentConnection}/>
+            key={c.id}
+            filename={c.filename}
+            connection={c.connection}
+            onFilenameChanged={(filename: string) => {
+              c.filename = filename;
+              setConnections(replaceAtIndex(connections, c, i));
+            }} 
+            visible={c.id === currentConnection}/>
         ))}
       </Stack>
     </>

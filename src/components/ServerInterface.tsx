@@ -13,10 +13,14 @@ import Split from 'react-split'
 type ServerInterfaceProps = {
   connection: KdbConnection;
   visible: boolean;
+  filename?: string;
+  onFilenameChanged: (scriptName: string) => void;
 };
 
 const ServerInterface: FC<ServerInterfaceProps> = ({
   connection,
+  filename,
+  onFilenameChanged,
   visible = false,
 }: ServerInterfaceProps) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -91,7 +95,7 @@ const ServerInterface: FC<ServerInterfaceProps> = ({
           minWidth: 0 
         }}
         >
-          <EditorWindow onExecuteQuery={executeQuery} />
+          <EditorWindow onExecuteQuery={executeQuery} onFilenameChanged={onFilenameChanged} filename={filename}/>
           <ResultsWindow
             results={results}
             isLoading={isLoading}

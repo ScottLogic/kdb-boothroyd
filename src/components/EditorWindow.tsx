@@ -15,13 +15,14 @@ import theme from '../editor/theme';
 import { editorWindow, editorWrapper } from '../style'
 
 interface EditorWindowProps {
-  onExecuteQuery: (query:string) => void;
+  onExecuteQuery: (query: string) => void;
+  onFilenameChanged: (scriptName: string) => void;
+  filename?: string;
 }
 
-const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery}) => {
+const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFilenameChanged: onFilenameChanged, filename}) => {
 
-  // Store a list of scripts against the server they're intended for
-  const [currentScript, setCurrentScript] = useState("")
+  const [currentScript, setCurrentScript] = useState("");
 
   // Find out if system is in dark mode so we can use the appropriate editor theme
   let [isDarkMode, setIsDarkMode] = useState(false)
@@ -40,10 +41,12 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery}) => 
     .on("colour-scheme-changed", (_, isDarkMode) => {
       setIsDarkMode(isDarkMode)
     })
-    .on("file-opened", (_, loaded:string) => {
-      setCurrentScript(loaded)
+    .on("file-opened", (_, ...args) => {
+      const [script, filename] = args;
+      setCurrentScript(script)
       if (editorRef && editorRef.current)
-        (editorRef.current as any).setValue(loaded)
+        (editorRef.current as any).setValue(script)
+      onFilenameChanged(filename);
     })
 
   // Store a reference we can use to target the run script button
@@ -112,6 +115,28 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery}) => 
     setCurrentScript(newValue)
   }
 
+  async function loadScript() {
+    const result: any = await ipcRenderer.invoke("load-script");
+    console.log(result);
+    if (result) {
+      const {data, filename} = result;
+      setCurrentScript(data)
+      if (editorRef && editorRef.current)
+        (editorRef.current as any).setValue(data)
+      onFilenameChanged(filename); 
+    }
+  }
+
+  async function saveScript() {
+    const savedFilename = await ipcRenderer.invoke("save-script", currentScript, filename)
+    onFilenameChanged(savedFilename);
+  }
+
+  async function saveScriptAs() {
+    const savedFilename = await ipcRenderer.invoke("save-script", currentScript)
+    onFilenameChanged(savedFilename);
+  }
+
   // Send our commands to the server
   async function runScript() {
     let script = ""
@@ -148,23 +173,25 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery}) => 
       title: "Open",
       iconProps: { iconName: "OpenFolderHorizontal" },
       onClick: () => {
-        ipcRenderer.send("show-open-dialog")
+        loadScript();
+      }
+    },
+    {
+      key: "save-as",
+      title: "Save As",
+      iconProps: { iconName: "SaveAs" },
+      disabled: !(currentScript && currentScript != ""),
+      onClick: () => {
+        saveScriptAs();
       }
     },
     {
       key: "save",
       title: "Save",
       iconProps: { iconName: "Save" },
-      disabled: !(currentScript && currentScript != ""),
+      disabled: !(currentScript && currentScript != "") || !filename,
       onClick: () => {
-        let file = "data:text/plain;charset=utf-8," + encodeURIComponent(currentScript)
-        ipcRenderer.send("download", {
-          url: file,
-          properties: {
-            saveAs:true,
-            filename: "script.q"
-          }
-        })
+        saveScript();
       }
     }
   ]
