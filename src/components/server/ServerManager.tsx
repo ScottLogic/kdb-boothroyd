@@ -38,16 +38,16 @@ const ServerManager: FC<ServerManagerProps> = ({ onConnect }) => {
     {
       links: servers
         .sort((a, b) => {
-          if (!a.id)
+          if (!a.name)
             return -1
           
-          if (!b.id)
+          if (!b.name)
             return 1
 
-          if (a.id == b.id)
+          if (a.name == b.name)
             return 0
           else 
-            return (a.id > b.id) ? -1 : 1
+            return (a.name < b.name) ? -1 : 1
         })
         .map(
           (s) =>

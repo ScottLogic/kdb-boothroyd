@@ -49,7 +49,12 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
       },[[],[]])
 
     setColumns(cols)
-    setGroups(grps)
+    setGroups(grps.sort((a,b) => {
+      if (a.name == b.name)
+        return 0
+      else
+        return (a.name < b.name) ? -1 : 1
+    }))
 
   }, [tables])
 

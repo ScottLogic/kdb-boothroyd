@@ -1,25 +1,32 @@
 import { ActionButton, FontIcon, IIconProps, IPivotItemProps, IStyle, Modal, Pivot, PivotItem, Stack, useTheme } from '@fluentui/react'
 import { ipcRenderer } from 'electron'
 import React, { FC, useState } from 'react'
+import { useEffect } from 'react'
 import KdbConnection from '../server/kdb-connection'
-
+import path from 'path';
 import { container, pivotClose, pivots, serverModal } from '../style'
 import Server from '../types/server'
-import { decryptWithAES, removeAtIndex } from '../utils'
+import { decryptWithAES, removeAtIndex, replaceAtIndex } from '../utils'
 import ErrorDialog from './ErrorDialog'
 import ServerManager from './server/ServerManager'
 import ServerInterface from './ServerInterface'
+import uuid from 'uuid';
 
-interface NamedConnection {
+interface ConnectionTab {
   connection: KdbConnection;
-  name: string;
+  filename?: string;
+  id: string;
 };
+
+function titleForTab(tab: ConnectionTab) {
+  return tab.filename ? `${tab.connection.host} - ${path.basename(tab.filename)}` : tab.connection.host;
+}
 
 const MainInterface:FC = () => {
 
   const [showServerModal, setShowServerModal] = useState(true)
-  const [currentConnectionIndex, setCurrentConnectionIndex] = useState(-1);
-  const [connections, setConnections] = useState<NamedConnection[]>([]);
+  const [currentConnection, setCurrentConnection] = useState<string | null>(null);
+  const [connections, setConnections] = useState<ConnectionTab[]>([]);
   const [showError, setShowError] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
 
@@ -30,9 +37,22 @@ const MainInterface:FC = () => {
     setShowError(true)
   })
 
+  useEffect(() => {
+    const index = connections.findIndex((c) =>  c.id === currentConnection);
+
+    if (index == -1) {
+      if (connections.length > 0) {
+        setCurrentConnection(connections[0].id)
+      } else {
+        setCurrentConnection(null)
+        setShowServerModal(true)
+      }
+    }
+  }, [connections])
+
   function handlePivotClick(item?: PivotItem) {
     if (item && item.props.itemKey)
-      setCurrentConnectionIndex(parseInt(item.props.itemKey));
+      setCurrentConnection(item.props.itemKey);
   }
 
   async function connectToServer(server: Server) {
@@ -47,34 +67,29 @@ const MainInterface:FC = () => {
       }
     ).connect()
     
-    setConnections([...currentConnections, {
+    const tab: ConnectionTab = {
       connection,
-      // needs better naming logic here
-      name: `${server.name} - (${connections.length + 1})`,
-    }]);
-    setCurrentConnectionIndex(connections.length);
-
+      id: uuid.v4(),
+    }
+    setConnections([...currentConnections, tab]);
+    setCurrentConnection(tab.id);
     setShowServerModal(false);
   }
 
-  function disconnectFromServer(index: number) {
-    const toRemove = connections[index]
-    toRemove.connection.reset()
-    setConnections(removeAtIndex(connections, index))
-    if (currentConnectionIndex == index && connections.length > 1) {
-      setCurrentConnectionIndex(0)
-    }
+  function disconnectFromServer(name: string) {
+    const index = connections.findIndex((c) => c.id === name)
+    
+    if (index == -1)
+      return
 
-    if (connections.length == 1) {
-      setCurrentConnectionIndex(-1)
-      setShowServerModal(true)
-    }
+    connections[index].connection.reset()
+
+    setConnections(removeAtIndex(connections, index))
   }
 
   function disconnectButtonClicked(key?: string) {
-    if (key) {
-      disconnectFromServer(parseInt(key))
-    }
+    if (key)
+      disconnectFromServer(key)
   }
 
   function customPivotRenderer(
@@ -124,7 +139,7 @@ const MainInterface:FC = () => {
         <Stack horizontal>
           <Stack.Item grow={3}>
             <Pivot 
-              selectedKey={currentConnectionIndex !== -1 ? currentConnectionIndex.toString() : ""}
+              selectedKey={currentConnection || ""}
               style={{
                 ...pivots
               }}
@@ -132,9 +147,9 @@ const MainInterface:FC = () => {
               overflowBehavior="menu">
               {connections.map((c, i) => (
                 <PivotItem 
-                  itemKey={i.toString()} 
+                  itemKey={c.id} 
                   key={i.toString()} 
-                  headerText={c.name} 
+                  headerText={titleForTab(c)} 
                   onRenderItemLink={customPivotRenderer}
                   />
               ))}
@@ -148,9 +163,14 @@ const MainInterface:FC = () => {
         </Stack>
         {connections.map((c, i) => (
           <ServerInterface
-            key={c.name}
-            connection={c.connection} 
-            visible={i === currentConnectionIndex}/>
+            key={c.id}
+            filename={c.filename}
+            connection={c.connection}
+            onFilenameChanged={(filename: string) => {
+              c.filename = filename;
+              setConnections(replaceAtIndex(connections, c, i));
+            }} 
+            visible={c.id === currentConnection}/>
         ))}
       </Stack>
     </>

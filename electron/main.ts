@@ -41,9 +41,19 @@ function createWindow() {
     return nativeTheme.shouldUseDarkColors
   })
 
-  ipcMain.on("download", async (_, info) => {
-    const dl = await download(BrowserWindow.getFocusedWindow()!, info.url, info.properties)
-    mainWindow?.webContents.send("download-complete", dl.getURL())
+  ipcMain.handle("save-script", async (_, ...args) => {
+    let [script, filename] = args;
+    if (!filename) {
+      // if a filename is not given, open the save-as dialog
+      filename = dialog.showSaveDialogSync({
+        title: "Save Query",
+        filters:[{name:"Q Files", extensions:["*.q"]}],
+      });
+    }
+    if (filename) {
+      fs.writeFileSync(filename, script);
+    }
+    return filename;
   })
 
   ipcMain.on("open-file", async(_, info) => {
@@ -53,22 +63,20 @@ function createWindow() {
     mainWindow?.webContents.send("download-complete", dl.getURL())
   })
 
-  ipcMain.on("show-open-dialog", async () => {
+  ipcMain.handle("load-script", async () => {
     const response = await dialog.showOpenDialog({
       filters:[{name:"Q Files", extensions:["*.q"]}],
       properties: ['openFile'] 
     })
 
     if (!response.canceled) {
-        // handle fully qualified file name
-      try {
-        const data = fs.readFileSync(response.filePaths[0])
-          
-        mainWindow?.webContents.send("file-opened", data.toString())
-      } catch (e) {
-        mainWindow?.webContents.send("show-error", e)
-      }
-    }
+      const filename = response.filePaths[0]
+      const data = fs.readFileSync(filename)
+      return {
+        data: data.toString(),
+        filename
+      };
+    } 
   })
 
   nativeTheme.on("updated", () => {
