@@ -1,6 +1,7 @@
 import { ActionButton, FontIcon, IIconProps, IPivotItemProps, IStyle, Modal, Pivot, PivotItem, Stack, useTheme } from '@fluentui/react'
 import { ipcRenderer } from 'electron'
 import React, { FC, useState } from 'react'
+import { useEffect } from 'react'
 import KdbConnection from '../server/kdb-connection'
 
 import { container, pivotClose, pivots, serverModal } from '../style'
@@ -18,7 +19,7 @@ interface NamedConnection {
 const MainInterface:FC = () => {
 
   const [showServerModal, setShowServerModal] = useState(true)
-  const [currentConnectionIndex, setCurrentConnectionIndex] = useState(-1);
+  const [currentConnection, setCurrentConnection] = useState<string | null>(null);
   const [connections, setConnections] = useState<NamedConnection[]>([]);
   const [showError, setShowError] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
@@ -30,43 +31,58 @@ const MainInterface:FC = () => {
     setShowError(true)
   })
 
+  useEffect(() => {
+
+    const index = connections.findIndex((c) => {
+      return c.name === currentConnection
+    })
+
+    if (index == -1) {
+      if (connections.length > 0) {
+        console.log("SET INDEX TO 0")
+        setCurrentConnection(connections[0].name)
+      } else {
+        console.log("SET INDEX TO -1")
+        setCurrentConnection(null)
+        setShowServerModal(true)
+      }
+    }
+  }, [connections])
+
   function handlePivotClick(item?: PivotItem) {
     if (item && item.props.itemKey)
-      setCurrentConnectionIndex(parseInt(item.props.itemKey));
+      setCurrentConnection(item.props.itemKey);
   }
 
   async function connectToServer(server: Server) {
     const currentConnections = [...connections];
     const connection = await new KdbConnection(server.host, server.port).connect()
-    
-    setConnections([...currentConnections, {
+    const named = {
       connection,
       // needs better naming logic here
       name: `${server.name} - (${connections.length + 1})`,
-    }]);
-    setCurrentConnectionIndex(connections.length);
+    }
+
+    setConnections([...currentConnections, named]);
+    setCurrentConnection(named.name);
 
     setShowServerModal(false);
   }
 
-  function disconnectFromServer(index: number) {
-    const toRemove = connections[index]
-    toRemove.connection.reset()
-    setConnections(removeAtIndex(connections, index))
-    if (currentConnectionIndex == index && connections.length > 1) {
-      setCurrentConnectionIndex(0)
-    }
+  function disconnectFromServer(name: string) {
+    const index = connections.findIndex((c) => c.name === name)
+    
+    if (index == -1)
+      return
 
-    if (connections.length == 1) {
-      setCurrentConnectionIndex(-1)
-      setShowServerModal(true)
-    }
+    connections[index].connection.reset()
+
+    setConnections(removeAtIndex(connections, index))
   }
 
   function disconnectButtonClicked(key?: string) {
-    if (key) {
-      disconnectFromServer(parseInt(key))
-    }
+    if (key)
+      disconnectFromServer(key)
   }
 
   function customPivotRenderer(
@@ -113,10 +129,11 @@ const MainInterface:FC = () => {
           ...container,
           backgroundColor: theme.palette.neutralLighterAlt
         }}>
+        <span>{currentConnection}</span>
         <Stack horizontal>
           <Stack.Item grow={3}>
             <Pivot 
-              selectedKey={currentConnectionIndex !== -1 ? currentConnectionIndex.toString() : ""}
+              selectedKey={currentConnection || ""}
               style={{
                 ...pivots
               }}
@@ -124,7 +141,7 @@ const MainInterface:FC = () => {
               overflowBehavior="menu">
               {connections.map((c, i) => (
                 <PivotItem 
-                  itemKey={i.toString()} 
+                  itemKey={c.name} 
                   key={i.toString()} 
                   headerText={c.name} 
                   onRenderItemLink={customPivotRenderer}
@@ -142,7 +159,7 @@ const MainInterface:FC = () => {
           <ServerInterface
             key={c.name}
             connection={c.connection} 
-            visible={i === currentConnectionIndex}/>
+            visible={c.name === currentConnection}/>
         ))}
       </Stack>
     </>
