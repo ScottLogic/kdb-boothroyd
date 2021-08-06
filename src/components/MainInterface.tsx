@@ -5,7 +5,7 @@ import KdbConnection from '../server/kdb-connection'
 
 import { container, pivotClose, pivots, serverModal } from '../style'
 import Server from '../types/server'
-import { removeAtIndex } from '../utils'
+import { decryptWithAES, removeAtIndex } from '../utils'
 import ErrorDialog from './ErrorDialog'
 import ServerManager from './server/ServerManager'
 import ServerInterface from './ServerInterface'
