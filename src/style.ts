@@ -75,7 +75,8 @@ export const grabberBar: CSSProperties = {
 export const editorWindow: CSSProperties = {
   flex:"1 1 auto",
   maxWidth:"100%",
-  alignItems: "stretch"
+  alignItems: "stretch",
+  minHeight:50
 }
 
 export const editorWrapper: CSSProperties = {
@@ -87,7 +88,13 @@ export const editorWrapper: CSSProperties = {
 export const resultsWindow: CSSProperties = {
   flex:"1 1 auto",
   position:"relative",
-  overflow:"scroll"
+  overflowY:"scroll",
+  minHeight:50
+}
+
+export const resultsWrapper: CSSProperties = {
+  overflow:"scroll",
+  minHeight:50
 }
 
 export const serverModal: CSSProperties = {

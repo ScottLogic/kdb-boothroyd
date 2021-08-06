@@ -124,8 +124,8 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
   useEffect(() => {
     if (start > 0) {
       if (results) {
-        const processed = ResultsProcessor.process(currentResults, start)
-  
+        const processed = ResultsProcessor.process(currentResults, start, 30, sortColumn, sortDirection)
+        
         if (Array.isArray(processed)) {
           const [_, newRows] = processed as [Array<IColumn>, Array<{}>]
   
