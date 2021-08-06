@@ -6,7 +6,7 @@ import KdbConnection from '../server/kdb-connection'
 import path from 'path';
 import { container, pivotClose, pivots, serverModal } from '../style'
 import Server from '../types/server'
-import { removeAtIndex, replaceAtIndex } from '../utils'
+import { decryptWithAES, removeAtIndex, replaceAtIndex } from '../utils'
 import ErrorDialog from './ErrorDialog'
 import ServerManager from './server/ServerManager'
 import ServerInterface from './ServerInterface'
@@ -57,7 +57,16 @@ const MainInterface:FC = () => {
 
   async function connectToServer(server: Server) {
     const currentConnections = [...connections];
-    const connection = await new KdbConnection(server.host, server.port).connect()
+    const connection = await new KdbConnection(
+      server.host, 
+      server.port,
+      {
+        user: server.username,
+        password: (server.password) ? decryptWithAES(server.password) : undefined,
+        useTLS: server.useTLS || false
+      }
+    ).connect()
+    
     const tab: ConnectionTab = {
       connection,
       id: uuid.v4(),
