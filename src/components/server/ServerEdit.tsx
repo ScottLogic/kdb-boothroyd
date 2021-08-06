@@ -26,16 +26,17 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
   const [port, setPort] = useState<number | undefined>(0);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [tls, setTLS] = useState(false)
+  const [tls, setTLS] = useState(false);
 
   const [changeMade, setChangeMade] = useState(false)
 
   useEffect(() => {
-    setName(server ? server.name : "");
-    setHost(server ? server.host : "");
-    setPort(server ? server.port : 0);
+    setName((server) ? server.name : "");
+    setHost((server) ? server.host : "");
+    setPort((server) ? server.port : 0);
     setUsername((server && server.username) ? server.username : "");
     setPassword((server && server.password) ? decryptWithAES(server.password) : "");
+    setTLS((server) ? !!server.useTLS : false)
 
   }, [server]);
 
