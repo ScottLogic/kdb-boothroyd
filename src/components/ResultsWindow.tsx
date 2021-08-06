@@ -21,7 +21,7 @@ import {
 } from "@fluentui/react"
 import { getFileTypeIconProps } from '@fluentui/react-file-type-icons';
 
-import { resultsWindow, stackTokens } from '../style'
+import { resultsWindow, resultsWrapper, stackTokens } from '../style'
 import { ResultsProcessor } from '../results/processor'
 import { ipcRenderer } from 'electron'
 import Exporter, { ExportFormat } from '../results/exporter';
@@ -65,6 +65,8 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
     }
     
     setStart(0)
+    setSortColumn(undefined)
+    setSortDirection("asc")
 
   }, [results])
 
@@ -128,7 +130,6 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
         
         if (Array.isArray(processed)) {
           const [_, newRows] = processed as [Array<IColumn>, Array<{}>]
-  
           setRows([...rows.slice(0, rows.length - 1), ...newRows])
         }
       }
@@ -218,28 +219,6 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
     }
   ]
 
-  const gridStyles: Partial<IDetailsListStyles> = {
-    root: {
-      overflowX: 'scroll',
-      selectors: {
-        '& [role=grid]': {
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'start',
-          height:"100%"
-        },
-      },
-    },
-    headerWrapper: {
-      flex: '0 0 auto',
-    },
-    contentWrapper: {
-      flex: '1 1 auto',
-      overflowY: 'auto',
-      overflowX: 'hidden',
-    },
-  };
-
   function onColumnClick(ev: React.MouseEvent<HTMLElement>, column: IColumn): void {
     
     if (sortColumn == column.fieldName) {
@@ -248,6 +227,7 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
       setSortColumn(column.fieldName)
       setSortDirection((column.fieldName == "|i|" && sortColumn === undefined) ? "desc" : "asc")
     }
+    setStart(0)
 
   };
 
@@ -260,7 +240,7 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
         items={viewOptions}
         farItems={farItems}
         style={{ flex: "0" }}/>
-        <Stack tokens={stackTokens}>
+        <Stack tokens={stackTokens} style={resultsWrapper}>
         {(isLoading ) ? (
           <Spinner size={SpinnerSize.large}/>
         ) : (
@@ -296,7 +276,6 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
                 columns={columns}
                 items={rows}
                 compact={true}
-                styles={gridStyles}
                 layoutMode={DetailsListLayoutMode.fixedColumns}
                 constrainMode={ConstrainMode.unconstrained}
                 selectionMode={SelectionMode.none}

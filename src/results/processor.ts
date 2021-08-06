@@ -59,16 +59,14 @@ export class ResultsProcessor {
         key: "index",
         name: "#",
         fieldName:"|i|",
-        minWidth:10,
-        maxWidth:50,
+        minWidth:30,
         isRowHeader: false,
         isResizable: true,
         isSorted: (sortColumn == "|i|"),
         isSortedDescending: (sortColumn == "|i|" && sortDirection == "desc"),
         sortAscendingAriaLabel: 'Sorted ASC',
         sortDescendingAriaLabel: 'Sorted DESC',
-        data: Number,
-        isPadded: true
+        data: Number
       })
     }
 
@@ -79,8 +77,7 @@ export class ResultsProcessor {
           key: k.toLowerCase(),
           name: k.toUpperCase(),
           fieldName: k,
-          minWidth:10,
-          maxWidth:200,
+          minWidth:100,
           isRowHeader: false,
           isResizable: true,
           isSorted: (sortColumn == k),
@@ -88,7 +85,6 @@ export class ResultsProcessor {
           sortAscendingAriaLabel: 'Sorted ASC',
           sortDescendingAriaLabel: 'Sorted DESC',
           data: typeof v,
-          isPadded: true
         } as IColumn)
       })
     } else {
