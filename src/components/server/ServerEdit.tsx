@@ -117,19 +117,23 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
             itemKey="auth"
             headerText="Authorisation"
             >
-            <TextField
-              label="Username"
-              value={username}
-              onChange={(_, newValue) => setUsername(newValue!)}
-            />
-            <TextField
-              label="Password"
-              type="password"
-              value={password}
-              canRevealPassword
-              revealPasswordAriaLabel="Show password"
-              onChange={(_, newValue) => setPassword(newValue!)}
-            />
+            <Stack tokens={{
+              childrenGap: "10 0"
+            }}>
+              <TextField
+                label="Username"
+                value={username}
+                onChange={(_, newValue) => setUsername(newValue!)}
+              />
+              <TextField
+                label="Password"
+                type="password"
+                value={password}
+                canRevealPassword
+                revealPasswordAriaLabel="Show password"
+                onChange={(_, newValue) => setPassword(newValue!)}
+              />
+            </Stack>
           </PivotItem>
         </Pivot>
       </Stack>
