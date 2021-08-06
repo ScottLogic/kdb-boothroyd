@@ -3,30 +3,41 @@ import { IColumn } from "@fluentui/react"
 export class ResultsProcessor {
 
   // Main entrypoint, either returns a flat string or a tuple of columns and headers
-  static process(results:any, start:number = 0, limit:number = 30): string | [Array<IColumn>, Array<{} | null>]  {
+  static process(
+    results:any, 
+    start:number = 0, 
+    limit:number = 30, 
+    sortColumn:string = "|i|", 
+    sortDirection: "asc" | "desc" = "asc"
+    ): string | [Array<IColumn>, Array<{} | null>]  {
 
     let cols:IColumn[] = [], 
-        rows:Array<{} | null> = []
-        
+        rows:Array<{} | null> = [],
+        sorted:Array<{} | null> = []
+
+    
     // Get the type of our results
     if (Array.isArray(results)) {
         // We have a list of results, lets convert them to our format for details list
         if (results.length  > 0) {
-          cols = this.prepareHeaders(results[0])
-          rows = this.prepareRows((results as Array<any>).slice(start,start + limit), start)
+          sorted = this.copyAndSort(this.preprocessData(results), sortColumn, sortDirection == "desc")
+          cols = this.prepareHeaders(results[0], true, sortColumn, sortDirection)
+          rows = this.prepareRows((sorted as Array<any>).slice(start,start + limit), start)
 
           if (results.length > (start + limit))
             rows.push(null)
         }
         return [cols, rows]
     } else if (typeof results === "object") {
-      cols = this.prepareHeaders({key:"",value:""}, false)
-      rows = this.prepareRows(Object.entries(results).map(([k,v]) => {
+      const prepped = Object.entries(results).map(([k,v]) => {
         return {
           key:k,
           value: v
         }
-      }))
+      })
+      sorted = this.copyAndSort(this.preprocessData(prepped), sortColumn, sortDirection == "desc")
+      cols = this.prepareHeaders({key:"",value:""}, false, sortColumn, sortDirection)
+      rows = this.prepareRows(sorted)
       return [cols, rows]
     } else if (typeof results === "string") {
       // If it's a string just return it as is
@@ -38,7 +49,7 @@ export class ResultsProcessor {
 
   }
 
-  static prepareHeaders(resultItem:any, includeIndex:boolean = true): Array<IColumn> {
+  static prepareHeaders(resultItem:any, includeIndex:boolean = true, sortColumn: string, sortDirection: string): Array<IColumn> {
 
     const cols:IColumn[] = []
 
@@ -46,14 +57,14 @@ export class ResultsProcessor {
       // Add index column
       cols.push({
         key: "index",
-        name: "",
+        name: "#",
         fieldName:"|i|",
         minWidth:10,
         maxWidth:50,
-        isRowHeader: true,
+        isRowHeader: false,
         isResizable: true,
-        isSorted: false,
-        isSortedDescending: false,
+        isSorted: (sortColumn == "|i|"),
+        isSortedDescending: (sortColumn == "|i|" && sortDirection == "desc"),
         sortAscendingAriaLabel: 'Sorted ASC',
         sortDescendingAriaLabel: 'Sorted DESC',
         data: Number,
@@ -72,8 +83,8 @@ export class ResultsProcessor {
           maxWidth:200,
           isRowHeader: false,
           isResizable: true,
-          isSorted: false,
-          isSortedDescending: false,
+          isSorted: (sortColumn == k),
+          isSortedDescending: (sortColumn == k && sortDirection == "desc"),
           sortAscendingAriaLabel: 'Sorted ASC',
           sortDescendingAriaLabel: 'Sorted DESC',
           data: typeof v,
@@ -89,8 +100,8 @@ export class ResultsProcessor {
         maxWidth:200,
         isRowHeader: true,
         isResizable: true,
-        isSorted: false,
-        isSortedDescending: false,
+        isSorted: (sortColumn == "value"),
+        isSortedDescending: (sortColumn == "value" && sortDirection == "desc"),
         sortAscendingAriaLabel: 'Sorted ASC',
         sortDescendingAriaLabel: 'Sorted DESC',
         data: typeof resultItem,
@@ -106,10 +117,6 @@ export class ResultsProcessor {
     const rows:{}[] = []
 
     results.forEach((v:any, i:number) =>{
-      const item = {
-        "|i|": i + 1 + start
-      }
-
       if (typeof v === "object") {
         const parsed:{[key: string]:string} = {}
 
@@ -117,12 +124,11 @@ export class ResultsProcessor {
           parsed[k] = `${v[k]}`
         }
         rows.push({
-          ...item,
           ...parsed
         })
       } else {
         rows.push({
-          ...item,
+          "|i|": i + 1 + start,
           value:v
         })
       }
@@ -130,5 +136,33 @@ export class ResultsProcessor {
 
     return rows
 
+  }
+
+  static preprocessData<T>(items: T[]) {
+    return items.map((r, i) => {
+      const item = {
+        '|i|': i + 1
+      }
+      if (typeof r == "object") {
+        return {
+          ...item,
+          ...r
+        }
+      } else {
+        return {
+          ...item,
+          value: r
+        }
+      }
+    })
+  }
+
+  static copyAndSort<T>(items: T[], columnKey: string, isSortedDescending?: boolean): T[] {    
+    if (typeof items[0] == "object") {
+      const key = columnKey as keyof T;
+      return items.slice(0).sort((a: T, b: T) => ((isSortedDescending ? a[key] < b[key] : a[key] > b[key]) ? 1 : -1));
+    } else {
+      return items
+    }
   }
 }

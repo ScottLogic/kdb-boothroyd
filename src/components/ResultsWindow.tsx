@@ -47,6 +47,8 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
   const [start, setStart] = useState(0)
   const [currentView, setCurrentView] = useState(ResultsView.Raw)
   const [viewOptions, setViewOptions] = useState<ICommandBarItemProps[]>([])
+  const [sortColumn, setSortColumn] = useState<string | undefined>()
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
 
   const theme = useTheme()
 
@@ -70,21 +72,25 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
   useEffect(() => {
 
     if (currentResults) {
-      const processed = ResultsProcessor.process(currentResults, start)
+      const processed = ResultsProcessor.process(currentResults, start, 30, sortColumn, sortDirection)
 
       if (Array.isArray(processed)) {
         setCurrentView(ResultsView.Table)
         const [cols, rows] = processed as [Array<IColumn>, Array<{}>]
 
-        setColumns(cols)
+        setColumns(cols.map((c) => {
+          c.onColumnClick = onColumnClick
+          return c
+        }))
         setRows(rows)
       } else {
+        setSortColumn(undefined)
         setColumns([])
         setRows([])
       }
     }
 
-  }, [currentResults, error])
+  }, [currentResults, error, sortColumn, sortDirection])
 
   useEffect(() => {
 
@@ -232,6 +238,17 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
       overflowY: 'auto',
       overflowX: 'hidden',
     },
+  };
+
+  function onColumnClick(ev: React.MouseEvent<HTMLElement>, column: IColumn): void {
+    
+    if (sortColumn == column.fieldName) {
+      setSortDirection((sortDirection) => (sortDirection == "asc") ? "desc" : "asc")
+    } else {
+      setSortColumn(column.fieldName)
+      setSortDirection((column.fieldName == "|i|" && sortColumn === undefined) ? "desc" : "asc")
+    }
+
   };
 
   return (
