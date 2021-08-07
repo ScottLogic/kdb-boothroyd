@@ -1,10 +1,11 @@
-import { app, BrowserWindow, ipcMain, nativeTheme, shell, dialog } from "electron";
+import { app, BrowserWindow, ipcMain, nativeTheme, shell, dialog, Menu } from "electron";
 import * as path from "path";
 import * as url from "url";
 import * as fs from "fs";
 
 
 import { download } from "electron-dl"
+import getMenu from "./menu";
 
 let mainWindow: Electron.BrowserWindow | null;
 const iconPath = path.join(__dirname, "..", "build", "icons", "icon.png")
@@ -36,6 +37,8 @@ function createWindow() {
       })
     );
   }
+
+  Menu.setApplicationMenu(getMenu(app.name))
 
   ipcMain.handle("is-dark-mode", () => {
     return nativeTheme.shouldUseDarkColors
