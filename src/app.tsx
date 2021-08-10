@@ -6,11 +6,9 @@ import { initializeFileTypeIcons } from "@fluentui/react-file-type-icons";
 
 import { darkTheme, lightTheme } from './themes'
 import MainInterface from './components/MainInterface'
-import { initStorage } from './storage/storage'
 
 initializeIcons()
 initializeFileTypeIcons();
-initStorage()
 
 const App:FunctionComponent = () => {
 

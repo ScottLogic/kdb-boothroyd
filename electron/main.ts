@@ -79,6 +79,10 @@ function createWindow() {
     } 
   })
 
+  ipcMain.handle("data-path", () => {
+    return app.getPath("userData")
+  })
+
   nativeTheme.on("updated", () => {
     mainWindow?.webContents.send(
       "colour-scheme-changed", 

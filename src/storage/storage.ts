@@ -51,14 +51,8 @@ export function deleteItem(prefix:string, id: string) {
 }
 
 // Set up storage dir
-export function initStorage() {
+export function initStorage(storageDir:string) {
   // Deal with persisting server data
-  const storageDir = path.join(
-    os.homedir(),
-    "AppData",
-    "Local",
-    "kdb studio 2"
-  );
   if (!fs.existsSync(storageDir)) {
     fs.mkdirSync(storageDir, { recursive: true });
   }
