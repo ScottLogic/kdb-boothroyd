@@ -27,12 +27,6 @@ const App:FunctionComponent = () => {
       setCurrentTheme(isDarkMode ? darkTheme : lightTheme)
     })
 
-
-  /*nativeTheme.on("updated", () => {
-    // System theme changed so so should we
-    setCurrentTheme((nativeTheme.shouldUseDarkColors) ? darkTheme : lightTheme)
-  });*/
-
   return (
     <ThemeProvider applyTo="body" theme={currentTheme}>
       <MainInterface/>
