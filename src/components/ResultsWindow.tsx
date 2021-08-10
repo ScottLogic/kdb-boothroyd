@@ -26,6 +26,7 @@ import { ResultsProcessor } from '../results/processor'
 import { ipcRenderer } from 'electron'
 import Exporter, { ExportFormat } from '../results/exporter';
 import Result from '../types/results';
+import { stringify } from 'uuid';
 
 enum ResultsView {
   Table,
@@ -231,6 +232,15 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
 
   };
 
+  function stringify(data:any) {
+    if (Array.isArray(data) && data.length > 10) {
+      const chunk = data.slice(0,10)
+      const str = JSON.stringify(chunk, null, 2)
+      return str.replace(/]$/, "  ...\n]")
+    }
+    return JSON.stringify(data,null,2)
+  }
+
   return (
     <Stack style={{
       ...resultsWindow,
@@ -270,7 +280,7 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
           ) : (
             <>
               {(typeof currentResults === "string" || currentView == ResultsView.Raw) ? (
-                <pre>{currentResults ? JSON.stringify(currentResults,null,2) : ""}</pre>
+                <pre>{currentResults ? stringify(currentResults) : ""}</pre>
               ): (
               <DetailsList
                 columns={columns}
