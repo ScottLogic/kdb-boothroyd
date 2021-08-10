@@ -124,7 +124,7 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
               props.onToggleCollapse!(props.group!);
             };
             const tableSelected = (): void => {
-              onExecuteQuery(props.group!.name);
+              onExecuteQuery(`100#${props.group!.name}`);
             }
             const isCollapsed = props.group!.isCollapsed
             return (
