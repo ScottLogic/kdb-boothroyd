@@ -19,13 +19,14 @@ import { AgGridReact } from 'ag-grid-react';
 import { GridReadyEvent, GridApi, ColDef } from 'ag-grid-community';
 import { ipcRenderer } from 'electron'
 
-import { resultsWindow, resultsWrapper, stackTokens } from '../style'
+import { agWrapper, resultsWindow, resultsWrapper, stackTokens } from '../style'
 import { ResultsProcessor } from '../results/processor'
 import Exporter, { ExportFormat } from '../results/exporter';
 import Result from '../types/results';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-material.css';
+import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import 'ag-grid-community/dist/styles/ag-theme-balham-dark.css';
 
 enum ResultsView {
   Table,
@@ -48,8 +49,16 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
   const [currentView, setCurrentView] = useState(ResultsView.Raw)
   const [viewOptions, setViewOptions] = useState<ICommandBarItemProps[]>([])
   const [gridAPI, setGridAPI] = useState<GridApi | null>(null)
+  const [isDarkMode, setIsDarkMode] = useState(false)
 
   const theme = useTheme()
+
+  // Check current theme
+  ipcRenderer
+    .invoke("is-dark-mode")
+    .then((isDarkMode) => {
+      setIsDarkMode(isDarkMode)
+    })
 
   useEffect(() => {
 
@@ -236,7 +245,9 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
               {(typeof currentResults === "string" || currentView == ResultsView.Raw) ? (
                 <pre>{currentResults ? JSON.stringify(currentResults,null,2) : ""}</pre>
               ): (
-              <div className="ag-theme-material" style={{flex:"1 1 auto"}}>
+              <div 
+                className={`ag-theme-balham${(isDarkMode) ? '-dark' : ''}`}
+                style={agWrapper}>
                 <AgGridReact 
                   rowData={rows} 
                   columnDefs={columns}
