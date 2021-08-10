@@ -67,7 +67,7 @@
     "crypto-js": "^4.1.1",
     "electron-dl": "^3.2.1",
     "electron-json-storage": "^4.5.0",
-    "node-q": "https://github.com/OiNutter/node-q.git",
+    "node-q": "2.x.x",
     "office-ui-fabric-core": "^11.0.0",
     "react": "^17.*",
     "react-dom": "^17.*",
