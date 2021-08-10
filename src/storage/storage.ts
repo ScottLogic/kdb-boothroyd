@@ -51,8 +51,11 @@ export function deleteItem(prefix:string, id: string) {
 }
 
 // Set up storage dir
-export function initStorage(storageDir:string) {
+export function initStorage(userData:string) {
   // Deal with persisting server data
+
+  const storageDir = path.join(userData,"storage")
+  
   if (!fs.existsSync(storageDir)) {
     fs.mkdirSync(storageDir, { recursive: true });
   }
