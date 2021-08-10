@@ -94,7 +94,8 @@ export const resultsWindow: CSSProperties = {
 
 export const resultsWrapper: CSSProperties = {
   overflow:"scroll",
-  minHeight:50
+  minHeight:50,
+  height: "100%"
 }
 
 export const serverModal: CSSProperties = {
