@@ -1,5 +1,5 @@
 import React, { createRef, FunctionComponent, useContext, useEffect, useRef, useState } from 'react'
-import MonacoEditor from 'react-monaco-editor';
+import MonacoEditor, { monaco } from 'react-monaco-editor';
 import { ipcRenderer } from 'electron'
 import { 
   CommandBar, 
@@ -14,10 +14,20 @@ import syntax from '../editor/syntax';
 import theme from '../editor/theme';
 import { editorWindow, editorWrapper } from '../style'
 
+type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor
+
 interface EditorWindowProps {
   onExecuteQuery: (query: string) => void;
   onFilenameChanged: (scriptName: string) => void;
   filename?: string;
+}
+
+// Set some default options for the Monaco Editor
+const editorOptions = {
+  minimap: {
+    enabled: false
+  },
+  automaticLayout: true
 }
 
 const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFilenameChanged: onFilenameChanged, filename}) => {
@@ -44,8 +54,7 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
     .on("file-opened", (_, ...args) => {
       const [script, filename] = args;
       setCurrentScript(script)
-      if (editorRef && editorRef.current)
-        (editorRef.current as any).setValue(script)
+      editorRef.current?.setValue(script)
       onFilenameChanged(filename);
     })
 
@@ -53,52 +62,40 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
   const goRef = createRef<HTMLButtonElement>()
 
   // Store a ref to the editor
-  const editorRef = useRef(null)
+  const editorRef = useRef<IStandaloneCodeEditor | null>(null)
   const wrapper = useRef(null)
 
   useEffect(() => {
     window.addEventListener('resize', () => {
-      if (editorRef.current)
-        (editorRef.current as any).layout({height:"100%", width:"100%"})
+      editorRef.current?.layout({height:100, width:100})
     })
   },[])
 
   useResizeObserver(wrapper, (entry) => {
-    if (editorRef && editorRef.current) {
-      (editorRef.current as any).layout({
-        height: entry.contentRect.height,
-        width: entry.contentRect.width
-      })
-    }
+    editorRef.current?.layout({
+      height: entry.contentRect.height,
+      width: entry.contentRect.width
+    })
   })
 
-
-  // Set some default options for the Monaco Editor
-  const editorOptions = {
-    minimap: {
-      enabled: false
-    },
-    automaticLayout: true
-  }
-
   // Before the editor mounts we need to register our q language
-  function editorWillMount(monaco:any) {
-    if (!monaco.languages.getLanguages().some(({ id }:any) => id === 'kbd/q')) {
+  function editorWillMount(monacoEditor: typeof monaco) {
+    if (!monacoEditor.languages.getLanguages().some(({ id }) => id === 'kbd/q')) {
       // Register a new language
-      monaco.languages.register({ id: 'kbd/q' })
+      monacoEditor.languages.register({ id: 'kbd/q' })
       // Register a tokens provider for the language
-      monaco.languages.setMonarchTokensProvider('kbd/q', syntax)
-      monaco.editor.defineTheme("kbd", theme)
+      monacoEditor.languages.setMonarchTokensProvider('kbd/q', syntax)
+      monacoEditor.editor.defineTheme("kbd", theme)
     }
   }
 
   // Once the editor is mounted we can manipulate it a bit
-  function editorDidMount(editor:any, monaco:any) {
-    // Get round bug with editor and flex layouts where editor gets too big for it's boots, literally
-    editor._domElement.style.maxWidth="100%"
-    editor.layout({height:"100%",width:"100%"})
+  function editorDidMount(editor: IStandaloneCodeEditor) {
+    
+    editor.layout({height:100, width:100})
 
     editorRef.current = editor
+
     // Bind a shortcut key to run current script
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, function() {
       // As currentServer isn't necessarily set when we bind this and this ends up out of scope we
@@ -116,13 +113,11 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
   }
 
   async function loadScript() {
-    const result: any = await ipcRenderer.invoke("load-script");
-    console.log(result);
+    const result = await ipcRenderer.invoke("load-script");
     if (result) {
       const {data, filename} = result;
       setCurrentScript(data)
-      if (editorRef && editorRef.current)
-        (editorRef.current as any).setValue(data)
+      editorRef.current?.setValue(data)
       onFilenameChanged(filename); 
     }
   }
@@ -145,8 +140,8 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
     
     // Get currently highlighted text
     if (editorRef.current) {
-      const editor:any = editorRef.current!
-      selected = editor.getModel().getValueInRange(editor.getSelection())
+      const editor: IStandaloneCodeEditor = editorRef.current!
+      selected = editor.getModel()?.getValueInRange(editor.getSelection()!)
     }
 
     // If selected text use that, otherwise send full script
@@ -203,11 +198,8 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
       title: "Cut selected text",
       iconProps: { iconName: "Cut" },
       onClick: () => {
-        if (editorRef && editorRef.current) {
-          const editor = editorRef.current as any
-          editor.focus()
-          document.execCommand("cut")
-        }
+        editorRef.current?.focus()
+        document.execCommand("cut")
       }
     },
     {
@@ -216,11 +208,8 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
       title: "Copy selected text",
       iconProps: { iconName: "Copy" },
       onClick: () => {
-        if (editorRef && editorRef.current) {
-          const editor = editorRef.current as any
-          editor.focus()
-          document.execCommand("copy")
-        }
+        editorRef.current?.focus()
+        document.execCommand("copy")
       }
     },
     {
@@ -229,11 +218,8 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
       title: "Paste text from the clipboard",
       iconProps: { iconName: "Paste" },
       onClick: () => {
-        if (editorRef && editorRef.current) {
-          const editor = editorRef.current as any
-          editor.focus()
-          document.execCommand("paste")
-        }
+        editorRef.current?.focus()
+        document.execCommand("paste")
       }
     },
     {
@@ -242,11 +228,8 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
       title: "Find text in script",
       iconProps: { iconName: "Search"},
       onClick: () => {
-        if (editorRef && editorRef.current) {
-          const editor = editorRef.current as any
-          editor.focus();
-          editor.getAction("actions.find").run()
-        }
+        editorRef.current?.focus();
+        editorRef.current?.getAction("actions.find").run()
       }
     },
     {
@@ -255,11 +238,8 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
       title: "Replace text in script",
       iconProps: { iconName: "Switch"},
       onClick: () => {
-        if (editorRef && editorRef.current) {
-          const editor = editorRef.current as any
-          editor.focus();
-          editor.getAction("editor.action.startFindReplaceAction").run()
-        }
+        editorRef.current?.focus();
+        editorRef.current?.getAction("editor.action.startFindReplaceAction").run()
       }
     }
   ]
@@ -270,11 +250,8 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
       title: "Undo last change",
       iconProps: { iconName: "Undo" },
       onClick: () => {
-        if (editorRef && editorRef.current) {
-          const editor = (editorRef.current as any)
-          editor.trigger('aaaa', 'undo', 'aaaa')
-          editor.focus()
-        }
+        editorRef.current?.trigger('aaaa', 'undo', 'aaaa')
+        editorRef.current?.focus()
       }
     },
     {
@@ -282,11 +259,8 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
       title: "Redo last change",
       iconProps: { iconName: "Redo" },
       onClick: () => {
-        if (editorRef && editorRef.current) {
-          const editor = (editorRef.current as any)
-          editor.trigger('aaa', 'redo', 'aaa')
-          editor.focus()
-        }
+        editorRef.current?.trigger('aaa', 'redo', 'aaa')
+        editorRef.current?.focus()
       }
     }
   ]
