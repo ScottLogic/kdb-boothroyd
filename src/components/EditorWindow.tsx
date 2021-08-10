@@ -3,10 +3,9 @@ import MonacoEditor, { monaco } from 'react-monaco-editor';
 import { ipcRenderer } from 'electron'
 import { 
   CommandBar, 
-  getTheme, 
+  useTheme, 
   ICommandBarItemProps,
   Stack,
-  Theme,
 } from "@fluentui/react"
 import useResizeObserver from '@react-hook/resize-observer'
 
@@ -32,12 +31,12 @@ const editorOptions = {
 
 const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFilenameChanged: onFilenameChanged, filename}) => {
 
+  const uiTheme = useTheme()
+
   const [currentScript, setCurrentScript] = useState("");
 
   // Find out if system is in dark mode so we can use the appropriate editor theme
-  let [isDarkMode, setIsDarkMode] = useState(false)
-
-  const uiTheme = getTheme()
+  const [isDarkMode, setIsDarkMode] = useState(false)
 
   // Check current theme
   ipcRenderer
@@ -69,7 +68,7 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
     window.addEventListener('resize', () => {
       editorRef.current?.layout({height:100, width:100})
     })
-  },[])
+  },[]) 
 
   useResizeObserver(wrapper, (entry) => {
     editorRef.current?.layout({
