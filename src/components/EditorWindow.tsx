@@ -15,9 +15,13 @@ import { editorWindow, editorWrapper } from '../style'
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor
 
-interface EditorWindowProps {
+interface EditorWindowProps extends EditorWindowStateProps {
   onExecuteQuery: (query: string) => void;
+}
+
+export interface EditorWindowStateProps {
   onFilenameChanged: (scriptName: string) => void;
+  onUnsavedChangesChanges: (unsavedChanges: boolean) => void;
   filename?: string;
 }
 
@@ -29,11 +33,13 @@ const editorOptions = {
   automaticLayout: true
 }
 
-const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFilenameChanged: onFilenameChanged, filename}) => {
+const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFilenameChanged, filename, onUnsavedChangesChanges}) => {
 
   const uiTheme = useTheme()
 
   const [currentScript, setCurrentScript] = useState("");
+  const [savedScript, setSavedScript] = useState("");
+  const [unsavedChanges, setUnsavedChanges] = useState(false);
 
   // Find out if system is in dark mode so we can use the appropriate editor theme
   const [isDarkMode, setIsDarkMode] = useState(false)
@@ -109,6 +115,8 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
   // another server
   function updateScripts(newValue:string) {
     setCurrentScript(newValue)
+    setUnsavedChanges(currentScript !== newValue);
+    onUnsavedChangesChanges(currentScript !== newValue);
   }
 
   async function loadScript() {
@@ -123,12 +131,22 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
 
   async function saveScript() {
     const savedFilename = await ipcRenderer.invoke("save-script", currentScript, filename)
-    onFilenameChanged(savedFilename);
+    if (savedFilename) {
+      setSavedScript(currentScript);
+      setUnsavedChanges(false);
+      onUnsavedChangesChanges(false);
+      onFilenameChanged(savedFilename);
+    }
   }
 
   async function saveScriptAs() {
     const savedFilename = await ipcRenderer.invoke("save-script", currentScript)
-    onFilenameChanged(savedFilename);
+    if (savedFilename) {
+      setSavedScript(currentScript);
+      setUnsavedChanges(false);
+      onUnsavedChangesChanges(false);
+      onFilenameChanged(savedFilename);
+    }
   }
 
   // Send our commands to the server

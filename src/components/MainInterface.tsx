@@ -16,6 +16,7 @@ interface ConnectionTab {
   connection: KdbConnection;
   filename?: string;
   id: string;
+  unsavedChanges: boolean;
 };
 
 function titleForTab(tab: ConnectionTab) {
@@ -70,6 +71,7 @@ const MainInterface:FC = () => {
     const tab: ConnectionTab = {
       connection,
       id: uuid.v4(),
+      unsavedChanges: false
     }
     setConnections([...currentConnections, tab]);
     setCurrentConnection(tab.id);
@@ -93,6 +95,7 @@ const MainInterface:FC = () => {
   }
 
   function customPivotRenderer(
+    tab: ConnectionTab,
     link?: IPivotItemProps,
     defaultRenderer?: (link?: IPivotItemProps) => JSX.Element | null,
   ): JSX.Element | null {
@@ -106,7 +109,7 @@ const MainInterface:FC = () => {
         }}>
         {defaultRenderer({ ...link, itemIcon: undefined })}
         <FontIcon
-          iconName="ChromeClose" 
+          iconName={tab.unsavedChanges ? "LocationFill": "ChromeClose"}
           style={{...pivotClose}}
           onClick={() => disconnectButtonClicked(link.itemKey)}
           />
@@ -150,7 +153,7 @@ const MainInterface:FC = () => {
                   itemKey={c.id} 
                   key={i.toString()} 
                   headerText={titleForTab(c)} 
-                  onRenderItemLink={customPivotRenderer}
+                  onRenderItemLink={(...args) => customPivotRenderer(c, ...args)}
                   />
               ))}
             </Pivot>
@@ -166,8 +169,12 @@ const MainInterface:FC = () => {
             key={c.id}
             filename={c.filename}
             connection={c.connection}
-            onFilenameChanged={(filename: string) => {
+            onFilenameChanged={(filename) => {
               c.filename = filename;
+              setConnections(replaceAtIndex(connections, c, i));
+            }} 
+            onUnsavedChangesChanges={(unsavedChanges) => {
+              c.unsavedChanges = unsavedChanges;
               setConnections(replaceAtIndex(connections, c, i));
             }} 
             visible={c.id === currentConnection}/>
