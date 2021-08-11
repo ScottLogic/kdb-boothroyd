@@ -255,7 +255,6 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
                   onSortChanged={refreshCells}
                   onFilterChanged={refreshCells}
                   applyColumnDefOrder={true}
-                  pagination={true}
                   defaultColDef={{
                     width:120,
                     sortable: true,
