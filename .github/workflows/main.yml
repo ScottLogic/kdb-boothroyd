@@ -29,13 +29,14 @@ jobs:
           node-version: "16"
 
       - name: Install dependencies
-        run: |
-          npm ci
-          npx playwright install-deps
+        run: npm ci
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+      - run: node lib/cli/cli install --with-deps chromium
 
       # Builds for tests
       - name: Build for test environment
         run: npm run build:test
 
       - name: Run tests
-        run: npm test
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm test
