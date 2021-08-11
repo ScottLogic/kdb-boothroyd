@@ -38,11 +38,20 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
   const uiTheme = useTheme()
 
   const [currentScript, setCurrentScript] = useState("");
-  const [savedScript, setSavedScript] = useState("");
-  const [unsavedChanges, setUnsavedChanges] = useState(false);
 
   // Find out if system is in dark mode so we can use the appropriate editor theme
   const [isDarkMode, setIsDarkMode] = useState(false)
+
+  // Store a reference we can use to target the run script button
+  const goRef = createRef<HTMLButtonElement>()
+
+  // Store a ref to the editor
+  const editorRef = useRef<IStandaloneCodeEditor | null>(null)
+  const wrapper = useRef(null)
+
+  // store previous saves script state 
+  const savedScript = useRef<string>("")
+  
 
   // Check current theme
   ipcRenderer
@@ -63,12 +72,6 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
       onFilenameChanged(filename);
     })
 
-  // Store a reference we can use to target the run script button
-  const goRef = createRef<HTMLButtonElement>()
-
-  // Store a ref to the editor
-  const editorRef = useRef<IStandaloneCodeEditor | null>(null)
-  const wrapper = useRef(null)
 
   useEffect(() => {
     window.addEventListener('resize', () => {
@@ -115,8 +118,7 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
   // another server
   function updateScripts(newValue:string) {
     setCurrentScript(newValue)
-    setUnsavedChanges(currentScript !== newValue);
-    onUnsavedChangesChanges(currentScript !== newValue);
+    onUnsavedChangesChanges(savedScript.current !== newValue);
   }
 
   async function loadScript() {
@@ -129,22 +131,12 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
     }
   }
 
-  async function saveScript() {
-    const savedFilename = await ipcRenderer.invoke("save-script", currentScript, filename)
+  async function saveScript(saveAs = false) {
+    const withFilename = saveAs ? undefined : filename;
+    const savedFilename = await ipcRenderer.invoke("save-script", currentScript, withFilename)
     if (savedFilename) {
-      setSavedScript(currentScript);
-      setUnsavedChanges(false);
-      onUnsavedChangesChanges(false);
-      onFilenameChanged(savedFilename);
-    }
-  }
-
-  async function saveScriptAs() {
-    const savedFilename = await ipcRenderer.invoke("save-script", currentScript)
-    if (savedFilename) {
-      setSavedScript(currentScript);
-      setUnsavedChanges(false);
-      onUnsavedChangesChanges(false);
+      savedScript.current = currentScript;
+      onUnsavedChangesChanges(savedScript.current !== currentScript);
       onFilenameChanged(savedFilename);
     }
   }
@@ -194,7 +186,7 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
       iconProps: { iconName: "SaveAs" },
       disabled: !(currentScript && currentScript != ""),
       onClick: () => {
-        saveScriptAs();
+        saveScript(true);
       }
     },
     {
