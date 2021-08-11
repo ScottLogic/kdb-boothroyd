@@ -17,6 +17,7 @@ const ServeConnectionError: FC<ServeConnectionErrorProps> = ({
 }) => {
   return (
     <MessageBar
+      className="connection-error"
       messageBarType={MessageBarType.error}
       isMultiline={true}
       onDismiss={onDismiss}

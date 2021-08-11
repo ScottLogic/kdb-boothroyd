@@ -123,6 +123,7 @@ const MainInterface:FC = () => {
   return (
     <>
       <Modal
+        containerClassName="server-management-modal"
         titleAriaId="Manage Servers"
         isOpen={showServerModal}
         styles={{ "main": serverModal as IStyle }}

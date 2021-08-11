@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 
-const isDevelopment = process.env.NODE_ENV !== 'production';
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 module.exports = {
   resolve: {
@@ -54,7 +54,7 @@ module.exports = {
     isDevelopment && new ReactRefreshWebpackPlugin(),
     new MonacoWebpackPlugin(),
     new HtmlWebpackPlugin({
-      title: "KBD Studio 2"
+      title: "KDB Studio 2"
     }),
-  ],
+  ].filter(Boolean),
 };

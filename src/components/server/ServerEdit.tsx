@@ -81,13 +81,14 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
   return (
     <Stack grow={true} tokens={stackTokens}>
       <Stack tokens={stackTokens}>
-        <Text variant={"large" as ITextProps["variant"]}>
+        <Text variant={"large" as ITextProps["variant"]} className="header">
           {server ? "Edit" : "Add"} Server
         </Text>
-        <Pivot>
+        <Pivot className="edit-tabs">
           <PivotItem
             itemKey="server"
             headerText="Server"
+            className="server-tab"
             >
             <Stack tokens={{
               childrenGap: "10 0"
@@ -117,6 +118,7 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
           <PivotItem
             itemKey="auth"
             headerText="Authorisation"
+            className="auth-tab"
             >
             <Stack tokens={{
               childrenGap: "10 0"

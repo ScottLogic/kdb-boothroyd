@@ -124,6 +124,7 @@ const ServerManager: FC<ServerManagerProps> = ({ onConnect }) => {
         <Nav
           selectedKey={selectedServerId}
           ariaLabel="Server List"
+          className="server-list"
           groups={groups}
           onLinkClick={serverSelected}
         />
