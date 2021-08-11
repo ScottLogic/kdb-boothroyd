@@ -31,7 +31,7 @@ describe("Server List", () => {
   it ("should enable the Delete button if I select a server", async function () {
     (await this.modal.$(":nth-match(.server-list li, 1)")).click() 
     // Give time for re-render
-    await this.appWindow.waitForTimeout(1000);
+    await this.appWindow.waitForTimeout(100);
     const button = await this.modal.$('button:has-text("Delete")')
     assert.notStrictEqual(button, null)
     assert.strictEqual(await button.getAttribute("aria-disabled"), null)

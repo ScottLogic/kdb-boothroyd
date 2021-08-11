@@ -96,21 +96,25 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
               <TextField
                 label="Name"
                 value={name}
+                className="name-input"
                 onChange={(_, newValue) => setName(newValue!)}
               />
               <TextField
                 label="Host"
                 value={host}
+                className="host-input"
                 onChange={(_, newValue) => setHost(newValue!)}
               />
               <TextField
                 label="Port"
                 value={(port !== undefined) ? port.toString() : ""}
+                className="port-input"
                 placeholder="5001"
                 onChange={(_, newValue) => setPort(parseInt(newValue!) || undefined)}
               />
               <Checkbox
                 label="Use tls?" 
+                className="tls-check"
                 checked={tls} 
                 onChange={(_, checked?:boolean) => setTLS(checked || false)} />
             </Stack>
@@ -126,12 +130,14 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
               <TextField
                 label="Username"
                 value={username}
+                className="username-input"
                 onChange={(_, newValue) => setUsername(newValue!)}
               />
               <TextField
                 label="Password"
                 type="password"
                 value={password}
+                className="password-input"
                 canRevealPassword
                 revealPasswordAriaLabel="Show password"
                 onChange={(_, newValue) => setPassword(newValue!)}
