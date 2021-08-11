@@ -29,10 +29,11 @@ jobs:
           node-version: "16"
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci
+          npx playwright install-deps chromium
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
-      - run: npx playwright install-deps chromium
 
       # Builds for tests
       - name: Build for test environment
