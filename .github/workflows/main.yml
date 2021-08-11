@@ -32,7 +32,7 @@ jobs:
         run: npm ci
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
-      - run: node lib/cli/cli install --with-deps chromium
+      - run: npx playwright install-deps chromium
 
       # Builds for tests
       - name: Build for test environment
