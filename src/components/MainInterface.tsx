@@ -11,6 +11,8 @@ import ErrorDialog from './ErrorDialog'
 import ServerManager from './server/ServerManager'
 import ServerInterface from './ServerInterface'
 import uuid from 'uuid';
+import UnsavedChangesDialog, { UnsavedChangesAction } from './UnsavedChangesDialog'
+import { useRef } from 'react'
 
 interface ConnectionTab {
   connection: KdbConnection;
@@ -30,8 +32,11 @@ const MainInterface:FC = () => {
   const [connections, setConnections] = useState<ConnectionTab[]>([]);
   const [showError, setShowError] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
+  const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false)
 
   const theme = useTheme()
+
+  const tabToClose = useRef<ConnectionTab | undefined>();
 
   ipcRenderer.on("show-error", (_, error:string) => {
     setErrorMessage(error)
@@ -89,9 +94,13 @@ const MainInterface:FC = () => {
     setConnections(removeAtIndex(connections, index))
   }
 
-  function disconnectButtonClicked(key?: string) {
-    if (key)
+  function onCloseTab(tab: ConnectionTab, key: string) {
+    if (tab.unsavedChanges) {
+      tabToClose.current = tab;
+      setShowUnsavedChangesDialog(true);
+    } else {
       disconnectFromServer(key)
+    }
   }
 
   function customPivotRenderer(
@@ -111,17 +120,28 @@ const MainInterface:FC = () => {
         <FontIcon
           iconName={tab.unsavedChanges ? "LocationFill": "ChromeClose"}
           style={{...pivotClose}}
-          onClick={() => disconnectButtonClicked(link.itemKey)}
+          onClick={() => onCloseTab(tab, link.itemKey!)}
           />
       </span>
     );
   }
 
-  function onDialogDismissed() {
-    setShowError(false)
-  }
 
-  const emojiIcon: IIconProps = { iconName: 'Database' };
+  function onUnsavedChangesDismissed(action: UnsavedChangesAction) {
+    setShowUnsavedChangesDialog(false);
+
+    switch (action) {
+      case UnsavedChangesAction.DontSave:
+        disconnectFromServer(tabToClose.current!.id);
+        break;
+      case UnsavedChangesAction.Save:
+        // how do I message bac to the EditorWindow?!
+        break;
+      case UnsavedChangesAction.Cancel:
+      default:
+        break;
+    }
+  }
 
   return (
     <>
@@ -134,7 +154,8 @@ const MainInterface:FC = () => {
       > 
         <ServerManager onConnect={connectToServer}/>
       </Modal>
-      <ErrorDialog hidden={!showError} message={errorMessage} onDialogDismissed={onDialogDismissed}/>
+      <ErrorDialog hidden={!showError} message={errorMessage} onDialogDismissed={() => setShowError(false)}/>
+      <UnsavedChangesDialog hidden={!showUnsavedChangesDialog} filename="foo" onDialogDismissed={onUnsavedChangesDismissed}/>
       <Stack style={{
           ...container,
           backgroundColor: theme.palette.neutralLighterAlt
@@ -159,7 +180,7 @@ const MainInterface:FC = () => {
             </Pivot>
           </Stack.Item>
           <ActionButton 
-            iconProps={emojiIcon} 
+            iconProps={{ iconName: 'Database' }} 
             onClick={() => setShowServerModal(true)}>
               Servers
           </ActionButton>
