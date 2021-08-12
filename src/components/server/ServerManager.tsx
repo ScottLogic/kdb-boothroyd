@@ -7,6 +7,8 @@ import {
   Stack,
 } from "@fluentui/react";
 import React, { FC, useEffect, useState } from "react";
+import uuid from "uuid"
+
 import Server, { SERVER_PREFIX } from "../../types/server";
 import { getItems, saveItem, deleteItem } from "../../storage/storage";
 import ServerEdit from "./ServerEdit";
@@ -71,9 +73,11 @@ const ServerManager: FC<ServerManagerProps> = ({ onConnect }) => {
       const index = servers.findIndex((s) => s.id === server.id);
       setServers(replaceAtIndex(servers, server, index));
     } else {
+      server.id = uuid.v4()
       setServers([...servers, server]);
     }
     saveItem(SERVER_PREFIX, server);
+    setSelectedServerId(server.id)
   }
 
   const selectedServer =
