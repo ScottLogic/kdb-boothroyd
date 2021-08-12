@@ -94,8 +94,8 @@ describe ("Server Management", function () {
       assert.strictEqual(await servers[0].innerText(), "Localhost")
       assert.strictEqual(await servers[1].innerText(), "Test 1")
       
-      //const link = await servers[1].$('.ms-Nav-compositeLink.is-selected')
-      //assert.notStrictEqual(link, null)
+      const link = await servers[1].$('.ms-Nav-compositeLink.is-selected')
+      assert.notStrictEqual(link, null)
 
     })
 
