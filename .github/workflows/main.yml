@@ -71,7 +71,5 @@ jobs:
         run: npm ci
       - name: Build app
         run: npm run build
-      - name: Compile Executables
-        run: npm run dist -- -mwl
-      - name: Publish to GitHub
-        run: npm run publish
+      - name: Compile Executables and Publish
+        run: npm run dist -- -mwl --publish always
