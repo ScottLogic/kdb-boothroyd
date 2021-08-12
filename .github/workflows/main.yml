@@ -31,7 +31,9 @@ jobs:
       - name: Run Q Server
         run: |
           unzip tests/fixtures/q.zip
-          tests/fixtures/q -p 5001
+          chown -R root ./q
+          chmod a+x ./q/l32/q
+          ./q/l32/q -p 5001
 
       - name: Install dependencies
         run: |
