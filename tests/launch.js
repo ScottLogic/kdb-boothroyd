@@ -16,8 +16,8 @@ describe("Application Launch", function () {
   it("should show the server manager dialog on launch", async function () {
     const appWindow = await this.app.firstWindow();
     await appWindow.waitForLoadState("domcontentloaded");
-    const dialogs = await appWindow.$$(".server-management-modal");
+    const dialog = await appWindow.$(".server-management-modal");
 
-    assert.strictEqual(dialogs.length, 1);
+    assert.notStrictEqual(dialog, null);
   });
 });

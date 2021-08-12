@@ -176,6 +176,7 @@ const MainInterface: FC = () => {
             </Pivot>
           </Stack.Item>
           <ActionButton
+            className="show-servers-button"
             iconProps={emojiIcon}
             onClick={() => setShowServerModal(true)}
           >

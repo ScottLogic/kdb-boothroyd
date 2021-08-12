@@ -176,6 +176,7 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
   return (
     <>
       <Stack
+        className="table-list"
         tokens={stackTokens}
         style={{
           ...tablePanel,
@@ -195,6 +196,7 @@ const TablePanel: FunctionComponent<TabelPanelProps> = ({
           )}
           <IconButton
             style={{ flex: "0" }}
+            className="collapse-panel-button"
             iconProps={{
               iconName: isCollapsed ? "OpenPaneMirrored" : "ClosePaneMirrored",
             }}
