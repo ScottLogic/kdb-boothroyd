@@ -22,7 +22,11 @@ describe("Server List", () => {
     assert.strictEqual(await button.getAttribute("aria-disabled"), null)
   })
 
-  it ("should have a disabled Delete button", async function (){
+  it ("should have a disabled Delete button if no server selected", async function (){
+    const addButton = await this.modal.$('button:has-text("Add")')
+    await addButton.click()
+    await this.appWindow.waitForTimeout(100)
+
     const button = await this.modal.$('button:has-text("Delete")')
     assert.notStrictEqual(button, null)
     assert.strictEqual(await button.getAttribute("aria-disabled"), "true")
