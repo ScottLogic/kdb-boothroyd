@@ -12,6 +12,12 @@ To run this project.
   npm install
 ```
 
+- To set up the precommit hooks run:
+
+```
+  npm run prepare
+```
+
 - Now run these two commands in separate consoles.
 
 ```bash
