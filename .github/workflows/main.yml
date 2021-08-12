@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 env:
-  QHOME: ${{ env.GITHUB_WORKSPACE }}/q/l32/q
+  QHOME: $GITHUB_WORKSPACE/q/l32/q
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
