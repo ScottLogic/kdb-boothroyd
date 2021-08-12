@@ -1,11 +1,4 @@
-import React, {
-  FunctionComponent,
-  useCallback,
-  useContext,
-  useEffect,
-  useReducer,
-  useState,
-} from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import {
   CommandBar,
   IColumn,
@@ -23,7 +16,7 @@ import {
 } from "@fluentui/react";
 import { getFileTypeIconProps } from "@fluentui/react-file-type-icons";
 import { AgGridReact } from "ag-grid-react";
-import { GridReadyEvent, GridApi, ColDef } from "ag-grid-community";
+import { GridReadyEvent, GridApi } from "ag-grid-community";
 import { ipcRenderer } from "electron";
 
 import {
@@ -35,7 +28,6 @@ import {
 import { ResultsProcessor } from "../results/processor";
 import Exporter, { ExportFormat } from "../results/exporter";
 import Result from "../types/results";
-import { stringify } from "uuid";
 
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-balham.css";
