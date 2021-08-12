@@ -250,6 +250,9 @@ describe ("Server Management", function () {
       assert.strictEqual(await servers[0].innerText(), "Localhost")
       assert.strictEqual(await servers[1].innerText(), "Test 1")
 
+      const savedFiles = await readdir(this.storageDir)
+      assert.strictEqual(savedFiles.length, 2)
+
     })
 
   })
