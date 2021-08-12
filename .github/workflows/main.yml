@@ -69,7 +69,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-      - name: "Build apps"
+      - name: Build app
+        run: npm run build
+      - name: Compile Executables
         run: npm run dist -- -mwl
-      - name: "Publish to GitHub"
+      - name: Publish to GitHub
         run: npm run publish
