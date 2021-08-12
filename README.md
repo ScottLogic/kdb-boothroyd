@@ -37,6 +37,7 @@ To test the project you'll need a q server running on port 5001. Then run:
 - [Electron](https://www.electronjs.org/): We're using electron to wrap everything as a desktop app
 - [Typescript](https://www.typescriptlang.org/): Everything is written in Typescript for extra safety
 - [FluentUI](https://developer.microsoft.com/en-us/fluentui#/controls/web): We're using FluentUI and it's built React components for layout and trying to follow their design language where possible.
+- [Playwright](https://playwright.dev/docs/api/class-electron): We're using Playwright to run our automated integration tests.
 
 ## What's KDB+ and q?
 
