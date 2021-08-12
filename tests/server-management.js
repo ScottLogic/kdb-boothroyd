@@ -117,18 +117,19 @@ describe ("Server Management", function () {
       const nameField = await this.modal.$('.server-tab .name-input input')
       const hostField = await this.modal.$('.server-tab .host-input input')
       const portField = await this.modal.$('.server-tab .port-input input')
-      const tlsCheck = await this.modal.$('.server-tab .tls-check input')
+      const tlsLabel = await this.modal.$('.server-tab .tls-check label')
+      const tlsInput = await this.modal.$('.server-tab .tls-check input')
   
       await nameField.type("Test 2")
       await hostField.type("0.0.0.0")
       await portField.selectText()
       await portField.type("5001")
-      await tlsCheck.evaluate(node => node.checked = true)
+      await tlsLabel.click()
       
       assert.strictEqual(await nameField.inputValue(), "Test 2", "Name field is not updated")
       assert.strictEqual(await hostField.inputValue(), "0.0.0.0", "Host field is not updated")
       assert.strictEqual(await portField.inputValue(), "5001", "Port field is not updated")
-      assert.strictEqual(await tlsCheck.isChecked(), true, "TLS checkbox is not checked")
+      assert.strictEqual(await tlsInput.isChecked(), true, "TLS checkbox is not checked")
   
       const authTab = await this.modal.$(".edit-tabs button:has-text('Authorisation')")
       await authTab.click()
