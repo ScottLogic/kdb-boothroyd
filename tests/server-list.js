@@ -4,6 +4,7 @@ describe("Server List", () => {
   
   before(async function () {
     this.appWindow = await this.app.firstWindow()
+    await this.appWindow.reload()
     await this.appWindow.waitForLoadState('domcontentloaded')
     this.modal = await this.appWindow.$('.server-management-modal')
   })
