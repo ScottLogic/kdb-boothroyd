@@ -1,4 +1,5 @@
 const assert = require("assert")
+const { readdir } = require("fs/promises")
 
 describe ("Server Management", function () {
   
@@ -97,6 +98,9 @@ describe ("Server Management", function () {
       const link = await servers[1].$('.ms-Nav-compositeLink.is-selected')
       assert.notStrictEqual(link, null)
 
+      const savedFiles = await readdir(this.storageDir)
+      assert.strictEqual(savedFiles.length, 2)
+
     })
 
     it ("should add a new server with tls and username and password", async function () {
@@ -154,6 +158,9 @@ describe ("Server Management", function () {
       
       const link = await servers[2].$('.ms-Nav-compositeLink.is-selected')
       assert.notStrictEqual(link, null)
+
+      const savedFiles = await readdir(this.storageDir)
+      assert.strictEqual(savedFiles.length, 3)
   
     })
   describe("Delete Server", function () {
