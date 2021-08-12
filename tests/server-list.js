@@ -25,7 +25,6 @@ describe("Server List", () => {
     const button = await this.modal.$('button:has-text("Delete")')
     assert.notStrictEqual(button, null)
     assert.strictEqual(await button.getAttribute("aria-disabled"), "true")
-    await this.appWindow.screenshot({path:"./screenshots/disabled.png"})
   })
 
   it ("should enable the Delete button if I select a server", async function () {
