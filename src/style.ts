@@ -99,6 +99,11 @@ export const resultsWindow: CSSProperties = {
 export const resultsWrapper: CSSProperties = {
   overflow: "scroll",
   minHeight: 50,
+  height: "100%",
+};
+
+export const agWrapper: CSSProperties = {
+  flex: "1 1 auto",
 };
 
 export const serverModal: CSSProperties = {
