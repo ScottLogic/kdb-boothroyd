@@ -15,11 +15,13 @@ import uuid from 'uuid';
 interface ConnectionTab {
   connection: KdbConnection;
   filename?: string;
+  name?: string;
   id: string;
 };
 
 function titleForTab(tab: ConnectionTab) {
-  return tab.filename ? `${tab.connection.host} - ${path.basename(tab.filename)}` : tab.connection.host;
+  const name = tab.name || tab.connection.host
+  return tab.filename ? `${name} - ${path.basename(tab.filename)}` : name;
 }
 
 const MainInterface:FC = () => {
@@ -68,6 +70,7 @@ const MainInterface:FC = () => {
     ).connect()
     
     const tab: ConnectionTab = {
+      name: server.name,
       connection,
       id: uuid.v4(),
     }
