@@ -22,6 +22,15 @@ To run this project.
   npm run dev:electron
 ```
 
+## Testing
+
+To test the project you'll need a q server running on port 5001. Then run:
+
+```bash
+  npm run build:test
+  npm test
+```
+
 ## What We've Used
 
 - [React](https://reactjs.org/): The main app structure is built using React Functional Components
