@@ -59,6 +59,10 @@ describe ("Server Management", function () {
 
     it ("should add a new server without tls or username and password", async function () {
 
+      const button = await this.modal.$('button:has-text("Add")')
+      await button.click()
+      await this.appWindow.waitForTimeout(100)
+
       const serverTab = await this.modal.$(".edit-tabs button:has-text('Server')")
       await serverTab.click()
       await this.appWindow.waitForTimeout(100)
