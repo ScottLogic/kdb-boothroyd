@@ -99,6 +99,63 @@ describe ("Server Management", function () {
 
     })
 
+    it ("should add a new server with tls and username and password", async function () {
+      this.timeout(5000)
+
+      const button = await this.modal.$('button:has-text("Add")')
+      await button.click()
+      await this.appWindow.waitForTimeout(100)
+
+      const serverTab = await this.modal.$(".edit-tabs button:has-text('Server')")
+      await serverTab.click()
+      await this.appWindow.waitForTimeout(100)
+  
+      const nameField = await this.modal.$('.server-tab .name-input input')
+      const hostField = await this.modal.$('.server-tab .host-input input')
+      const portField = await this.modal.$('.server-tab .port-input input')
+      const tlsCheck = await this.modal.$('.server-tab .tls-check input')
+  
+      await nameField.type("Test 2")
+      await hostField.type("0.0.0.0")
+      await portField.selectText()
+      await portField.type("5001")
+      await tlsCheck.evaluate(node => node.checked = true)
+      
+      assert.strictEqual(await nameField.inputValue(), "Test 2", "Name field is not updated")
+      assert.strictEqual(await hostField.inputValue(), "0.0.0.0", "Host field is not updated")
+      assert.strictEqual(await portField.inputValue(), "5001", "Port field is not updated")
+      assert.strictEqual(await tlsCheck.isChecked(), true, "TLS checkbox is not checked")
+  
+      const authTab = await this.modal.$(".edit-tabs button:has-text('Authorisation')")
+      await authTab.click()
+      await this.appWindow.waitForTimeout(100)
+  
+      const usernameField = await this.modal.$('.auth-tab .username-input input')
+      const passwordField = await this.modal.$('.auth-tab .password-input input')
+  
+      await usernameField.type("user")
+      await passwordField.type("password")
+
+      assert.strictEqual(await usernameField.inputValue(), "user", "Username field is not blank")
+      assert.strictEqual(await passwordField.inputValue(), "password", "Password field is not blank")
+  
+      const saveButton = await this.modal.$('button:has-text("Save")')
+  
+      assert.strictEqual(await saveButton.getAttribute("aria-disabled"), null, "Save button is still disabled")
+      await saveButton.click()
+      await this.appWindow.waitForTimeout(100)
+  
+      const servers = await this.modal.$$(".server-list li")
+    
+      assert.strictEqual(servers.length, 3, "New server not listed")
+      assert.strictEqual(await servers[0].innerText(), "Localhost")
+      assert.strictEqual(await servers[1].innerText(), "Test 1")
+      assert.strictEqual(await servers[2].innerText(), "Test 2")
+      
+      const link = await servers[2].$('.ms-Nav-compositeLink.is-selected')
+      assert.notStrictEqual(link, null)
+  
+    })
   })
   
 })
