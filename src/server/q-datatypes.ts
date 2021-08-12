@@ -1,4 +1,4 @@
-export const QDataTypes:{[key:string]:string} = {
+export const QDataTypes: { [key: string]: string } = {
   "*": "list",
   b: "boolean",
   g: "guid",
@@ -17,8 +17,12 @@ export const QDataTypes:{[key:string]:string} = {
   n: "timespan",
   u: "minute",
   v: "second",
-  t: "time"
-}
+  t: "time",
+};
 
-export type QColDict = {c:string}
-export type QMetaDict = {t:string|null, f:string|null, a:string|null}
+export type QColDict = { c: string };
+export type QMetaDict = {
+  t: string | null;
+  f: string | null;
+  a: string | null;
+};
