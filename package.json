@@ -38,7 +38,10 @@
       "output": "dist"
     },
     "icon": "build/icons/icon.png",
-    "publish": "github"
+    "publish": "github",
+    "snap": {
+      "publish": "github"
+    }
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
