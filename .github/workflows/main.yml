@@ -57,7 +57,7 @@ jobs:
     needs: test
     runs-on: macos-latest
 
-    if: contains(github.ref, release-and-update)
+    if: contains(github.ref, 'release-and-update')
     steps:
       - name: "Build apps"
         run: npm run dist -- -publish
