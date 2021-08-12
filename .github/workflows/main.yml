@@ -31,7 +31,6 @@ jobs:
       - name: Run Q Server
         run: |
           unzip tests/fixtures/q.zip
-          chown -R root ./q
           chmod a+x ./q/l32/q
           ./q/l32/q -p 5001
 
