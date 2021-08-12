@@ -6,9 +6,9 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ feature/integration-tests ]
+    branches: [feature/integration-tests]
   pull_request:
-    branches: [ feature/integration-tests ]
+    branches: [feature/integration-tests]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -25,7 +25,7 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2.4.0
-        with: 
+        with:
           node-version: "16"
 
       - name: Run Q Server
@@ -43,6 +43,10 @@ jobs:
           npx playwright install-deps chromium
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+
+      # Test code formatting
+      - name: "Check formatting with Prettier"
+        run: npx prettier --check .
 
       # Builds for tests
       - name: Build for test environment
