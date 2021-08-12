@@ -67,4 +67,4 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: "Build apps"
-        run: npm run dist -- -publish
+        run: npm run dist -- -mwlp
