@@ -90,7 +90,7 @@ describe ("Server Management", function () {
 
       const servers = await this.modal.$$(".server-list li")
     
-      assert.strictEqual(servers.length, 2)
+      assert.strictEqual(servers.length, 2, "New server not listed")
       assert.strictEqual(await servers[0].innerText(), "Localhost")
       assert.strictEqual(await servers[1].innerText(), "Test 1")
       
