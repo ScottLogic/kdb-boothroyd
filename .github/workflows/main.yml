@@ -71,5 +71,7 @@ jobs:
         run: npm ci
       - name: Build app
         run: npm run build
+      - name: Create Release
+        run: npx semantic-release
       - name: Compile Executables and Publish
-        run: npm run dist -- -mwl --publish always
+        run: npm run dist -- -mwl

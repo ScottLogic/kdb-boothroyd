@@ -1,6 +1,6 @@
 {
   "name": "kdb-studio-2",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "description": "GUI for KDB/q database",
   "main": "./dist/main.js",
   "scripts": {
@@ -38,10 +38,29 @@
       "output": "dist"
     },
     "icon": "build/icons/icon.png",
-    "publish": "github",
+    "publish": {
+      "provider": "github",
+      "vPrefixedTagName": true
+    },
     "snap": {
       "publish": "github"
     }
+  },
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "package.json"
+          ],
+          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }
+      ]
+    ]
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
@@ -51,6 +70,7 @@
     "@babel/preset-typescript": "^7.9.0",
     "@babel/runtime": "^7.14.6",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.4.3",
+    "@semantic-release/git": "^9.0.0",
     "@types/crypto-js": "^4.0.2",
     "@types/electron-json-storage": "^4.5.0",
     "@types/uuid": "^8.3.1",
