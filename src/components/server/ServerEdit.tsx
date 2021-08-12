@@ -47,7 +47,7 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
         name != server.name ||
         host != server.host ||
         port != server.port ||
-        username != server.username ||
+        username != (server.username || "") ||
         password != decryptWithAES(server.password || "") ||
         tls != server.useTLS
       )
@@ -57,7 +57,7 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
         host != ""
       )
     }
-  }, [server, name, host, port, username, password])
+  }, [server, name, host, port, username, password, tls])
 
   const stateToServer = () => {
 
