@@ -147,11 +147,13 @@ const MainInterface:FC = () => {
               style={{
                 ...pivots
               }}
+              className="connection-tabs"
               onLinkClick={handlePivotClick}
               overflowBehavior="menu">
               {connections.map((c, i) => (
                 <PivotItem 
-                  itemKey={c.id} 
+                  itemKey={c.id}
+                  className={`connection-tab-${c.id}`}
                   key={i.toString()} 
                   headerText={titleForTab(c)} 
                   onRenderItemLink={customPivotRenderer}
