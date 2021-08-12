@@ -32,7 +32,7 @@ jobs:
         run: |
           unzip tests/fixtures/q.zip
           chmod a+x ./q/l32/q
-          set QHOME = $GITHUB_WORKSPACE/q/l32/q
+          set QHOME = $GITHUB_WORKSPACE/q
           ./q/l32/q -p 5001
 
       - name: Install dependencies
