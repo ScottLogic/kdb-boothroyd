@@ -1,17 +1,12 @@
 import React, { FunctionComponent, useCallback, useContext, useEffect, useReducer, useState } from 'react'
 import { 
-  CommandBar, 
-  ConstrainMode, 
-  DetailsList, 
-  DetailsListLayoutMode,  
+  CommandBar,
   IColumn, 
   ICommandBarItemProps,
   IContextualMenuItem,
-  IDetailsListStyles,
   ITextProps,
   MessageBar,
   MessageBarType,
-  SelectionMode,
   Shimmer,
   Spinner,
   SpinnerSize,
@@ -20,18 +15,25 @@ import {
   useTheme,
 } from "@fluentui/react"
 import { getFileTypeIconProps } from '@fluentui/react-file-type-icons';
-
-import { resultsWindow, resultsWrapper, stackTokens } from '../style'
-import { ResultsProcessor } from '../results/processor'
+import { AgGridReact } from 'ag-grid-react';
+import { GridReadyEvent, GridApi, ColDef } from 'ag-grid-community';
 import { ipcRenderer } from 'electron'
+
+import { agWrapper, resultsWindow, resultsWrapper, stackTokens } from '../style'
+import { ResultsProcessor } from '../results/processor'
 import Exporter, { ExportFormat } from '../results/exporter';
 import Result from '../types/results';
 import { stringify } from 'uuid';
+
+import 'ag-grid-community/dist/styles/ag-grid.css';
+import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import 'ag-grid-community/dist/styles/ag-theme-balham-dark.css';
 
 enum ResultsView {
   Table,
   Raw
 }
+
 interface ResultsWindowProps {
   results: Result | undefined;
   isLoading: boolean;
@@ -43,15 +45,21 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
   const [currentResults,setCurrentResults] = useState<any>(null)
   const [currentScript, setCurrentScript] = useState<string | undefined>()
   const [error, setError] = useState<string | undefined>()
-  const [columns, setColumns] = useState<IColumn[]>([])
-  const [rows, setRows] = useState<Array<{}|string>>([])
-  const [start, setStart] = useState(0)
+  const [columns, setColumns] = useState<ColDef[]>([])
+  const [rows, setRows] = useState<{}[]>([])
   const [currentView, setCurrentView] = useState(ResultsView.Raw)
   const [viewOptions, setViewOptions] = useState<ICommandBarItemProps[]>([])
-  const [sortColumn, setSortColumn] = useState<string | undefined>()
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
+  const [gridAPI, setGridAPI] = useState<GridApi | null>(null)
+  const [isDarkMode, setIsDarkMode] = useState(false)
 
   const theme = useTheme()
+
+  // Check current theme
+  ipcRenderer
+    .invoke("is-dark-mode")
+    .then((isDarkMode) => {
+      setIsDarkMode(isDarkMode)
+    })
 
   useEffect(() => {
 
@@ -64,40 +72,32 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
       setError(undefined)
       setCurrentResults(null)
     }
-    
-    setStart(0)
-    setSortColumn(undefined)
-    setSortDirection("asc")
-
+  
   }, [results])
 
   // Format the results for display (needs extracting out)
   useEffect(() => {
 
     if (currentResults) {
-      const processed = ResultsProcessor.process(currentResults, start, 30, sortColumn, sortDirection)
+      const processed = ResultsProcessor.process(currentResults)
 
       if (Array.isArray(processed)) {
         setCurrentView(ResultsView.Table)
         const [cols, rows] = processed as [Array<IColumn>, Array<{}>]
 
-        setColumns(cols.map((c) => {
-          c.onColumnClick = onColumnClick
-          return c
-        }))
+        setColumns(cols)
         setRows(rows)
-      } else {
-        setSortColumn(undefined)
-        setColumns([])
-        setRows([])
       }
     }
 
-  }, [currentResults, error, sortColumn, sortDirection])
+    gridAPI?.refreshCells({force:true})
+    //gridAPI?.refreshHeader()
+
+  }, [currentResults, error])
 
   useEffect(() => {
 
-    if (rows.length > 0) {
+    if (Array.isArray(currentResults) && currentResults.length > 0) {
       setViewOptions([
         {
           key: "table",
@@ -122,34 +122,11 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
       setViewOptions([])
     }
 
-  }, [currentView, rows])
-
-  useEffect(() => {
-    if (start > 0) {
-      if (results) {
-        const processed = ResultsProcessor.process(currentResults, start, 30, sortColumn, sortDirection)
-        
-        if (Array.isArray(processed)) {
-          const [_, newRows] = processed as [Array<IColumn>, Array<{}>]
-          setRows([...rows.slice(0, rows.length - 1), ...newRows])
-        }
-      }
-    }
-  }, [start])
+  }, [currentView, currentResults])
 
   ipcRenderer.on("download-complete", (_, file) => {
     Exporter.cleanup(file)
   })
-              
-
-  const parseMoreResults = (index?: number) => {
-    setTimeout(() => {
-      setStart(index || 0)
-    }, 100)
-    
-    return (<Shimmer isDataLoaded={false}></Shimmer>)
-  }
-
 
   const farItems: ICommandBarItemProps[] = [
     {
@@ -164,7 +141,7 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
       key: "excel",
       title: "Open in Excel",
       iconProps: { iconName: "ExcelLogo" },
-      disabled: (!rows || rows.length == 0),
+      disabled: (!currentResults || currentResults.length == 0),
       onClick: () => {
         const file = Exporter.export(currentResults!, ExportFormat.xlsx)
         if (file) {
@@ -179,7 +156,7 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
       text: "Export",
       title: "Export result set",
       iconProps: { iconName: "Export" },
-      disabled: (!rows || rows.length == 0),
+      disabled: (!currentResults || currentResults.length == 0),
       subMenuProps: {
         onItemClick: (_, item?: IContextualMenuItem) => {
           if (item && item.key) {
@@ -220,17 +197,13 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
     }
   ]
 
-  function onColumnClick(ev: React.MouseEvent<HTMLElement>, column: IColumn): void {
-    
-    if (sortColumn == column.fieldName) {
-      setSortDirection((sortDirection) => (sortDirection == "asc") ? "desc" : "asc")
-    } else {
-      setSortColumn(column.fieldName)
-      setSortDirection((column.fieldName == "|i|" && sortColumn === undefined) ? "desc" : "asc")
-    }
-    setStart(0)
+  function onGridReady(e:GridReadyEvent) {
+    setGridAPI(e.api)
+  }
 
-  };
+  function refreshCells() {
+    gridAPI?.refreshCells()
+  }
 
   function stringify(data:any) {
     if (Array.isArray(data) && data.length > 10) {
@@ -282,14 +255,23 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
               {(typeof currentResults === "string" || currentView == ResultsView.Raw) ? (
                 <pre>{currentResults ? stringify(currentResults) : ""}</pre>
               ): (
-              <DetailsList
-                columns={columns}
-                items={rows}
-                compact={true}
-                layoutMode={DetailsListLayoutMode.fixedColumns}
-                constrainMode={ConstrainMode.unconstrained}
-                selectionMode={SelectionMode.none}
-                onRenderMissingItem={parseMoreResults}/>
+              <div 
+                className={`ag-theme-balham${(isDarkMode) ? '-dark' : ''}`}
+                style={agWrapper}>
+                <AgGridReact 
+                  rowData={rows} 
+                  columnDefs={columns}
+                  onGridReady={onGridReady}
+                  onSortChanged={refreshCells}
+                  onFilterChanged={refreshCells}
+                  applyColumnDefOrder={true}
+                  defaultColDef={{
+                    width:120,
+                    sortable: true,
+                    resizable: true,
+                    filter: true
+                  }}/>
+              </div>
               )}
             </>
           )
