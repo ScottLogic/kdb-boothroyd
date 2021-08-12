@@ -13,9 +13,6 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-env:
-  QHOME: $GITHUB_WORKSPACE/q/l32/q
-
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -35,6 +32,7 @@ jobs:
         run: |
           unzip tests/fixtures/q.zip
           chmod a+x ./q/l32/q
+          set QHOME = $GITHUB_WORKSPACE/q/l32/q
           ./q/l32/q -p 5001
 
       - name: Install dependencies
