@@ -1,1 +1,7 @@
-{"name":"Localhost","host":"0.0.0.0","port":5001,"useTLS":false,"id":"36dd0cfd-fe5f-4fc6-b8c7-ed77dd82f95d"}
+{
+  "name": "Localhost",
+  "host": "0.0.0.0",
+  "port": 5001,
+  "useTLS": false,
+  "id": "36dd0cfd-fe5f-4fc6-b8c7-ed77dd82f95d"
+}

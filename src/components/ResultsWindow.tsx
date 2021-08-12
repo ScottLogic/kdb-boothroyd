@@ -1,10 +1,17 @@
-import React, { FunctionComponent, useCallback, useContext, useEffect, useReducer, useState } from 'react'
-import { 
-  CommandBar, 
-  ConstrainMode, 
-  DetailsList, 
-  DetailsListLayoutMode,  
-  IColumn, 
+import React, {
+  FunctionComponent,
+  useCallback,
+  useContext,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
+import {
+  CommandBar,
+  ConstrainMode,
+  DetailsList,
+  DetailsListLayoutMode,
+  IColumn,
   ICommandBarItemProps,
   IContextualMenuItem,
   IDetailsListStyles,
@@ -18,19 +25,19 @@ import {
   Stack,
   Text,
   useTheme,
-} from "@fluentui/react"
-import { getFileTypeIconProps } from '@fluentui/react-file-type-icons';
+} from "@fluentui/react";
+import { getFileTypeIconProps } from "@fluentui/react-file-type-icons";
 
-import { resultsWindow, resultsWrapper, stackTokens } from '../style'
-import { ResultsProcessor } from '../results/processor'
-import { ipcRenderer } from 'electron'
-import Exporter, { ExportFormat } from '../results/exporter';
-import Result from '../types/results';
-import { stringify } from 'uuid';
+import { resultsWindow, resultsWrapper, stackTokens } from "../style";
+import { ResultsProcessor } from "../results/processor";
+import { ipcRenderer } from "electron";
+import Exporter, { ExportFormat } from "../results/exporter";
+import Result from "../types/results";
+import { stringify } from "uuid";
 
 enum ResultsView {
   Table,
-  Raw
+  Raw,
 }
 interface ResultsWindowProps {
   results: Result | undefined;
@@ -38,118 +45,127 @@ interface ResultsWindowProps {
   onExecuteQuery: (query: string) => void;
 }
 
-const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoading, onExecuteQuery }) => {
+const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
+  results,
+  isLoading,
+  onExecuteQuery,
+}) => {
+  const [currentResults, setCurrentResults] = useState<any>(null);
+  const [currentScript, setCurrentScript] = useState<string | undefined>();
+  const [error, setError] = useState<string | undefined>();
+  const [columns, setColumns] = useState<IColumn[]>([]);
+  const [rows, setRows] = useState<Array<{} | string>>([]);
+  const [start, setStart] = useState(0);
+  const [currentView, setCurrentView] = useState(ResultsView.Raw);
+  const [viewOptions, setViewOptions] = useState<ICommandBarItemProps[]>([]);
+  const [sortColumn, setSortColumn] = useState<string | undefined>();
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
-  const [currentResults,setCurrentResults] = useState<any>(null)
-  const [currentScript, setCurrentScript] = useState<string | undefined>()
-  const [error, setError] = useState<string | undefined>()
-  const [columns, setColumns] = useState<IColumn[]>([])
-  const [rows, setRows] = useState<Array<{}|string>>([])
-  const [start, setStart] = useState(0)
-  const [currentView, setCurrentView] = useState(ResultsView.Raw)
-  const [viewOptions, setViewOptions] = useState<ICommandBarItemProps[]>([])
-  const [sortColumn, setSortColumn] = useState<string | undefined>()
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
-
-  const theme = useTheme()
+  const theme = useTheme();
 
   useEffect(() => {
-
     if (results) {
-      setCurrentScript(results.script)
-      setError(results.error)
-      setCurrentResults(results.data)
+      setCurrentScript(results.script);
+      setError(results.error);
+      setCurrentResults(results.data);
     } else {
-      setCurrentScript(undefined)
-      setError(undefined)
-      setCurrentResults(null)
+      setCurrentScript(undefined);
+      setError(undefined);
+      setCurrentResults(null);
     }
-    
-    setStart(0)
-    setSortColumn(undefined)
-    setSortDirection("asc")
 
-  }, [results])
+    setStart(0);
+    setSortColumn(undefined);
+    setSortDirection("asc");
+  }, [results]);
 
   // Format the results for display (needs extracting out)
   useEffect(() => {
-
     if (currentResults) {
-      const processed = ResultsProcessor.process(currentResults, start, 30, sortColumn, sortDirection)
+      const processed = ResultsProcessor.process(
+        currentResults,
+        start,
+        30,
+        sortColumn,
+        sortDirection
+      );
 
       if (Array.isArray(processed)) {
-        setCurrentView(ResultsView.Table)
-        const [cols, rows] = processed as [Array<IColumn>, Array<{}>]
+        setCurrentView(ResultsView.Table);
+        const [cols, rows] = processed as [Array<IColumn>, Array<{}>];
 
-        setColumns(cols.map((c) => {
-          c.onColumnClick = onColumnClick
-          return c
-        }))
-        setRows(rows)
+        setColumns(
+          cols.map((c) => {
+            c.onColumnClick = onColumnClick;
+            return c;
+          })
+        );
+        setRows(rows);
       } else {
-        setSortColumn(undefined)
-        setColumns([])
-        setRows([])
+        setSortColumn(undefined);
+        setColumns([]);
+        setRows([]);
       }
     }
-
-  }, [currentResults, error, sortColumn, sortDirection])
+  }, [currentResults, error, sortColumn, sortDirection]);
 
   useEffect(() => {
-
     if (rows.length > 0) {
       setViewOptions([
         {
           key: "table",
           text: "Table",
           iconProps: { iconName: "Table" },
-          checked: (currentView == ResultsView.Table),
+          checked: currentView == ResultsView.Table,
           onClick: () => {
-            setCurrentView(ResultsView.Table)
-          }
+            setCurrentView(ResultsView.Table);
+          },
         },
         {
           key: "text",
           text: "Raw",
           iconProps: { iconName: "RawSource" },
-          checked: (currentView == ResultsView.Raw),
+          checked: currentView == ResultsView.Raw,
           onClick: () => {
-            setCurrentView(ResultsView.Raw)
-          }
-        }
-      ])
+            setCurrentView(ResultsView.Raw);
+          },
+        },
+      ]);
     } else {
-      setViewOptions([])
+      setViewOptions([]);
     }
-
-  }, [currentView, rows])
+  }, [currentView, rows]);
 
   useEffect(() => {
     if (start > 0) {
       if (results) {
-        const processed = ResultsProcessor.process(currentResults, start, 30, sortColumn, sortDirection)
-        
+        const processed = ResultsProcessor.process(
+          currentResults,
+          start,
+          30,
+          sortColumn,
+          sortDirection
+        );
+
         if (Array.isArray(processed)) {
-          const [_, newRows] = processed as [Array<IColumn>, Array<{}>]
-          setRows([...rows.slice(0, rows.length - 1), ...newRows])
+          const [_, newRows] = processed as [Array<IColumn>, Array<{}>];
+          setRows([...rows.slice(0, rows.length - 1), ...newRows]);
         }
       }
     }
-  }, [start])
+  }, [start]);
 
   ipcRenderer.on("download-complete", (_, file) => {
-    Exporter.cleanup(file)
-  })
-              
+    Exporter.cleanup(file);
+  });
 
   const parseMoreResults = (index?: number) => {
     setTimeout(() => {
-      setStart(index || 0)
-    }, 100)
-    
-    return (<Shimmer isDataLoaded={false}></Shimmer>)
-  }
+      setStart(index || 0);
+    }, 100);
 
+    return <Shimmer isDataLoaded={false}></Shimmer>;
+  };
 
   const farItems: ICommandBarItemProps[] = [
     {
@@ -158,19 +174,19 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
       disabled: !(results && results.data),
       onClick: () => {
         onExecuteQuery(results!.script);
-      }
+      },
     },
     {
       key: "excel",
       title: "Open in Excel",
       iconProps: { iconName: "ExcelLogo" },
-      disabled: (!rows || rows.length == 0),
+      disabled: !rows || rows.length == 0,
       onClick: () => {
-        const file = Exporter.export(currentResults!, ExportFormat.xlsx)
+        const file = Exporter.export(currentResults!, ExportFormat.xlsx);
         if (file) {
           ipcRenderer.send("open-file", {
-            url: file
-          })
+            url: file,
+          });
         }
       },
     },
@@ -179,18 +195,21 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
       text: "Export",
       title: "Export result set",
       iconProps: { iconName: "Export" },
-      disabled: (!rows || rows.length == 0),
+      disabled: !rows || rows.length == 0,
       subMenuProps: {
         onItemClick: (_, item?: IContextualMenuItem) => {
           if (item && item.key) {
-            const file = Exporter.export(currentResults!,item.key as ExportFormat)
+            const file = Exporter.export(
+              currentResults!,
+              item.key as ExportFormat
+            );
             if (file) {
               ipcRenderer.send("download", {
                 url: file,
                 properties: {
-                  saveAs:true
-                }
-              })
+                  saveAs: true,
+                },
+              });
             }
           }
         },
@@ -198,90 +217,92 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
           {
             key: ExportFormat.csv,
             text: "CSV (comma separated)",
-            iconProps: getFileTypeIconProps({extension:"csv"})
+            iconProps: getFileTypeIconProps({ extension: "csv" }),
           },
           {
             key: ExportFormat.txt,
             text: "TXT (tab separated)",
-            iconProps: getFileTypeIconProps({extension:"txt"})
+            iconProps: getFileTypeIconProps({ extension: "txt" }),
           },
           {
             key: ExportFormat.xml,
             text: "XML",
-            iconProps: getFileTypeIconProps({extension:"xml"})
+            iconProps: getFileTypeIconProps({ extension: "xml" }),
           },
           {
             key: ExportFormat.xlsx,
             text: "XLSX",
-            iconProps: getFileTypeIconProps({extension:"xlsx"})
-          }
-        ]
-      }
-    }
-  ]
+            iconProps: getFileTypeIconProps({ extension: "xlsx" }),
+          },
+        ],
+      },
+    },
+  ];
 
-  function onColumnClick(ev: React.MouseEvent<HTMLElement>, column: IColumn): void {
-    
+  function onColumnClick(
+    ev: React.MouseEvent<HTMLElement>,
+    column: IColumn
+  ): void {
     if (sortColumn == column.fieldName) {
-      setSortDirection((sortDirection) => (sortDirection == "asc") ? "desc" : "asc")
+      setSortDirection((sortDirection) =>
+        sortDirection == "asc" ? "desc" : "asc"
+      );
     } else {
-      setSortColumn(column.fieldName)
-      setSortDirection((column.fieldName == "|i|" && sortColumn === undefined) ? "desc" : "asc")
+      setSortColumn(column.fieldName);
+      setSortDirection(
+        column.fieldName == "|i|" && sortColumn === undefined ? "desc" : "asc"
+      );
     }
-    setStart(0)
+    setStart(0);
+  }
 
-  };
-
-  function stringify(data:any) {
+  function stringify(data: any) {
     if (Array.isArray(data) && data.length > 10) {
-      const chunk = data.slice(0,10)
-      const str = JSON.stringify(chunk, null, 2)
-      return str.replace(/]$/, "  ...\n]")
+      const chunk = data.slice(0, 10);
+      const str = JSON.stringify(chunk, null, 2);
+      return str.replace(/]$/, "  ...\n]");
     }
-    return JSON.stringify(data,null,2)
+    return JSON.stringify(data, null, 2);
   }
 
   return (
-    <Stack style={{
-      ...resultsWindow,
-      backgroundColor: theme.palette.white
-    }}>
-      <CommandBar 
+    <Stack
+      style={{
+        ...resultsWindow,
+        backgroundColor: theme.palette.white,
+      }}
+    >
+      <CommandBar
         items={viewOptions}
         farItems={farItems}
-        style={{ flex: "0" }}/>
-        <Stack tokens={stackTokens} style={resultsWrapper}>
-        {(isLoading ) ? (
-          <Spinner size={SpinnerSize.large}/>
+        style={{ flex: "0" }}
+      />
+      <Stack tokens={stackTokens} style={resultsWrapper}>
+        {isLoading ? (
+          <Spinner size={SpinnerSize.large} />
+        ) : error ? (
+          <MessageBar messageBarType={MessageBarType.error} isMultiline={true}>
+            <Text
+              block
+              variant={"large" as ITextProps["variant"]}
+              style={{ color: "inherit" }}
+            >
+              Error when executing query
+            </Text>
+            <br />
+            <Text block style={{ color: "inherit" }}>
+              Query: {currentScript}
+            </Text>
+            <Text block style={{ color: "inherit" }}>
+              {error}
+            </Text>
+          </MessageBar>
         ) : (
-          (error) ? (
-            <MessageBar
-              messageBarType={MessageBarType.error}
-              isMultiline={true}
-              >
-              <Text 
-                block 
-                variant={"large" as ITextProps['variant']}
-                style={{color:"inherit"}}>
-                Error when executing query
-              </Text>
-              <br/>
-              <Text 
-                block
-                style={{color:"inherit"}}>
-                Query: {currentScript}
-              </Text>
-              <Text 
-                block
-                style={{color:"inherit"}}>
-                {error}
-              </Text>
-            </MessageBar>
-          ) : (
-            <>
-              {(typeof currentResults === "string" || currentView == ResultsView.Raw) ? (
-                <pre>{currentResults ? stringify(currentResults) : ""}</pre>
-              ): (
+          <>
+            {typeof currentResults === "string" ||
+            currentView == ResultsView.Raw ? (
+              <pre>{currentResults ? stringify(currentResults) : ""}</pre>
+            ) : (
               <DetailsList
                 columns={columns}
                 items={rows}
@@ -289,14 +310,14 @@ const ResultsWindow:FunctionComponent<ResultsWindowProps> = ({ results, isLoadin
                 layoutMode={DetailsListLayoutMode.fixedColumns}
                 constrainMode={ConstrainMode.unconstrained}
                 selectionMode={SelectionMode.none}
-                onRenderMissingItem={parseMoreResults}/>
-              )}
-            </>
-          )
+                onRenderMissingItem={parseMoreResults}
+              />
+            )}
+          </>
         )}
-        </Stack>
+      </Stack>
     </Stack>
-  )
-}
+  );
+};
 
-export default ResultsWindow
+export default ResultsWindow;

@@ -29,53 +29,49 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
   const [password, setPassword] = useState("");
   const [tls, setTLS] = useState(false);
 
-  const [changeMade, setChangeMade] = useState(false)
+  const [changeMade, setChangeMade] = useState(false);
 
   useEffect(() => {
-    setName((server) ? server.name : "");
-    setHost((server) ? server.host : "");
-    setPort((server) ? server.port : 0);
-    setUsername((server && server.username) ? server.username : "");
-    setPassword((server && server.password) ? decryptWithAES(server.password) : "");
-    setTLS((server) ? !!server.useTLS : false)
-
+    setName(server ? server.name : "");
+    setHost(server ? server.host : "");
+    setPort(server ? server.port : 0);
+    setUsername(server && server.username ? server.username : "");
+    setPassword(
+      server && server.password ? decryptWithAES(server.password) : ""
+    );
+    setTLS(server ? !!server.useTLS : false);
   }, [server]);
 
   useEffect(() => {
     if (server) {
       setChangeMade(
         name != server.name ||
-        host != server.host ||
-        port != server.port ||
-        username != (server.username || "") ||
-        password != decryptWithAES(server.password || "") ||
-        tls != server.useTLS
-      )
+          host != server.host ||
+          port != server.port ||
+          username != (server.username || "") ||
+          password != decryptWithAES(server.password || "") ||
+          tls != server.useTLS
+      );
     } else {
-      setChangeMade(
-        name != "" &&
-        host != ""
-      )
+      setChangeMade(name != "" && host != "");
     }
-  }, [server, name, host, port, username, password, tls])
+  }, [server, name, host, port, username, password, tls]);
 
   const stateToServer = () => {
+    const p = port !== undefined ? port : 5001;
+    let pwd;
+    if (password != "") pwd = encryptWithAES(password);
 
-    const p = (port !== undefined) ? port : 5001
-    let pwd
-    if (password != "")
-      pwd = encryptWithAES(password)
-
-    return ({
+    return {
       name,
       host,
       port: p,
-      username: (username != "") ? username : undefined,
+      username: username != "" ? username : undefined,
       password: pwd,
-      useTLS:tls,
+      useTLS: tls,
       id: server ? server.id : undefined,
-    } as Server)
-  }
+    } as Server;
+  };
 
   const connectEnabled = name !== "" && host !== "" && port !== 0;
 
@@ -90,10 +86,12 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
             itemKey="server"
             headerText="Server"
             className="server-tab"
+          >
+            <Stack
+              tokens={{
+                childrenGap: "10 0",
+              }}
             >
-            <Stack tokens={{
-              childrenGap: "10 0"
-            }}>
               <TextField
                 label="Name"
                 value={name}
@@ -108,26 +106,31 @@ const ServerEdit: FC<ServerEditProps> = ({ server, onSave, onConnect }) => {
               />
               <TextField
                 label="Port"
-                value={(port !== undefined) ? port.toString() : ""}
+                value={port !== undefined ? port.toString() : ""}
                 className="port-input"
                 placeholder="5001"
-                onChange={(_, newValue) => setPort(parseInt(newValue!) || undefined)}
+                onChange={(_, newValue) =>
+                  setPort(parseInt(newValue!) || undefined)
+                }
               />
               <Checkbox
-                label="Use tls?" 
+                label="Use tls?"
                 className="tls-check"
-                checked={tls} 
-                onChange={(_, checked?:boolean) => setTLS(checked || false)} />
+                checked={tls}
+                onChange={(_, checked?: boolean) => setTLS(checked || false)}
+              />
             </Stack>
           </PivotItem>
           <PivotItem
             itemKey="auth"
             headerText="Authorisation"
             className="auth-tab"
+          >
+            <Stack
+              tokens={{
+                childrenGap: "10 0",
+              }}
             >
-            <Stack tokens={{
-              childrenGap: "10 0"
-            }}>
               <TextField
                 label="Username"
                 value={username}

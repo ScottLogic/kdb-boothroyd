@@ -1,4 +1,10 @@
-import { DefaultButton, Dialog, DialogFooter, DialogType, PrimaryButton } from "@fluentui/react";
+import {
+  DefaultButton,
+  Dialog,
+  DialogFooter,
+  DialogType,
+  PrimaryButton,
+} from "@fluentui/react";
 import React, { FC } from "react";
 
 interface ServerDeleteConfirmationProps {
@@ -7,13 +13,17 @@ interface ServerDeleteConfirmationProps {
   onCancel: () => void;
 }
 
-const ServerDeleteConfirmation: FC<ServerDeleteConfirmationProps> = ({hidden, onDelete, onCancel}) => {
+const ServerDeleteConfirmation: FC<ServerDeleteConfirmationProps> = ({
+  hidden,
+  onDelete,
+  onCancel,
+}) => {
   return (
     <Dialog
       hidden={hidden}
       modalProps={{
-        isBlocking:true,
-        className: "server-delete-confirmation"
+        isBlocking: true,
+        className: "server-delete-confirmation",
       }}
       onDismiss={onCancel}
       dialogContentProps={{
@@ -25,10 +35,7 @@ const ServerDeleteConfirmation: FC<ServerDeleteConfirmationProps> = ({hidden, on
     >
       <DialogFooter>
         <PrimaryButton onClick={onDelete} text="Delete" />
-        <DefaultButton
-          onClick={onCancel}
-          text="Cancel"
-        />
+        <DefaultButton onClick={onCancel} text="Cancel" />
       </DialogFooter>
     </Dialog>
   );

@@ -1,16 +1,21 @@
-import { app, BrowserWindow, ipcMain, nativeTheme, shell, dialog } from "electron";
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  nativeTheme,
+  shell,
+  dialog,
+} from "electron";
 import * as path from "path";
 import * as url from "url";
 import * as fs from "fs";
 
-
-import { download } from "electron-dl"
+import { download } from "electron-dl";
 
 let mainWindow: Electron.BrowserWindow | null;
-const iconPath = path.join(__dirname, "..", "build", "icons", "icon.png")
+const iconPath = path.join(__dirname, "..", "build", "icons", "icon.png");
 
 function createWindow() {
-
   mainWindow = new BrowserWindow({
     title: "KDB Studio 2",
     width: 900,
@@ -21,7 +26,7 @@ function createWindow() {
       enableRemoteModule: false,
       webSecurity: false,
     },
-    icon: iconPath
+    icon: iconPath,
   });
 
   if (process.env.NODE_ENV === "development") {
@@ -38,8 +43,8 @@ function createWindow() {
   }
 
   ipcMain.handle("is-dark-mode", () => {
-    return nativeTheme.shouldUseDarkColors
-  })
+    return nativeTheme.shouldUseDarkColors;
+  });
 
   ipcMain.handle("save-script", async (_, ...args) => {
     let [script, filename] = args;
@@ -47,55 +52,54 @@ function createWindow() {
       // if a filename is not given, open the save-as dialog
       filename = dialog.showSaveDialogSync({
         title: "Save Query",
-        filters:[{name:"Q Files", extensions:["*.q"]}],
+        filters: [{ name: "Q Files", extensions: ["*.q"] }],
       });
     }
     if (filename) {
       fs.writeFileSync(filename, script);
     }
     return filename;
-  })
+  });
 
-  ipcMain.on("open-file", async(_, info) => {
+  ipcMain.on("open-file", async (_, info) => {
     // Open a local file in the default app
-    const dl = await download(BrowserWindow.getFocusedWindow()!, info.url)
-    shell.openPath(dl.getSavePath())
-    mainWindow?.webContents.send("download-complete", dl.getURL())
-  })
+    const dl = await download(BrowserWindow.getFocusedWindow()!, info.url);
+    shell.openPath(dl.getSavePath());
+    mainWindow?.webContents.send("download-complete", dl.getURL());
+  });
 
   ipcMain.handle("load-script", async () => {
     const response = await dialog.showOpenDialog({
-      filters:[{name:"Q Files", extensions:["*.q"]}],
-      properties: ['openFile'] 
-    })
+      filters: [{ name: "Q Files", extensions: ["*.q"] }],
+      properties: ["openFile"],
+    });
 
     if (!response.canceled) {
-      const filename = response.filePaths[0]
-      const data = fs.readFileSync(filename)
+      const filename = response.filePaths[0];
+      const data = fs.readFileSync(filename);
       return {
         data: data.toString(),
-        filename
+        filename,
       };
-    } 
-  })
+    }
+  });
 
   ipcMain.handle("data-path", () => {
-    return app.getPath("userData")
-  })
+    return app.getPath("userData");
+  });
 
   nativeTheme.on("updated", () => {
     mainWindow?.webContents.send(
-      "colour-scheme-changed", 
+      "colour-scheme-changed",
       nativeTheme.shouldUseDarkColors
-    )
-  })
+    );
+  });
 
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
 }
 
-app
-  .on("ready", createWindow)
-  
+app.on("ready", createWindow);
+
 app.allowRendererProcessReuse = true;

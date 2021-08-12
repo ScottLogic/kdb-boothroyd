@@ -7,7 +7,7 @@ import {
   Stack,
 } from "@fluentui/react";
 import React, { FC, useEffect, useState } from "react";
-import uuid from "uuid"
+import uuid from "uuid";
 
 import Server, { SERVER_PREFIX } from "../../types/server";
 import { getItems, saveItem, deleteItem } from "../../storage/storage";
@@ -15,7 +15,7 @@ import ServerEdit from "./ServerEdit";
 import ServerDeleteConfirmation from "./ServerDeleteConfirmation";
 import ServerConnectionError from "./ServerConnectionError";
 import { stackTokens, serverPanel } from "../../style";
-import { removeAtIndex, replaceAtIndex} from "../../utils";
+import { removeAtIndex, replaceAtIndex } from "../../utils";
 
 type ServerManagerProps = {
   onConnect: (server: Server) => Promise<void>;
@@ -40,16 +40,12 @@ const ServerManager: FC<ServerManagerProps> = ({ onConnect }) => {
     {
       links: servers
         .sort((a, b) => {
-          if (!a.name)
-            return -1
-          
-          if (!b.name)
-            return 1
+          if (!a.name) return -1;
 
-          if (a.name == b.name)
-            return 0
-          else 
-            return (a.name < b.name) ? -1 : 1
+          if (!b.name) return 1;
+
+          if (a.name == b.name) return 0;
+          else return a.name < b.name ? -1 : 1;
         })
         .map(
           (s) =>
@@ -73,11 +69,11 @@ const ServerManager: FC<ServerManagerProps> = ({ onConnect }) => {
       const index = servers.findIndex((s) => s.id === server.id);
       setServers(replaceAtIndex(servers, server, index));
     } else {
-      server.id = uuid.v4()
+      server.id = uuid.v4();
       setServers([...servers, server]);
     }
     saveItem(SERVER_PREFIX, server);
-    setSelectedServerId(server.id)
+    setSelectedServerId(server.id);
   }
 
   const selectedServer =
