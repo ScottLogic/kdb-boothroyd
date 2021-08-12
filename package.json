@@ -37,7 +37,8 @@
     "directories": {
       "output": "dist"
     },
-    "icon": "build/icons/icon.png"
+    "icon": "build/icons/icon.png",
+    "publish": "github"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
