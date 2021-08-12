@@ -18,7 +18,7 @@ jobs:
   # This workflow contains a single job called "build"
   test:
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -54,3 +54,12 @@ jobs:
 
       - name: Run tests
         run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm test
+
+  release:
+    needs: test
+    runs-on: macos-latest
+
+    if: contains(github.ref, "main")
+    steps:
+      - name: "Build apps"
+        run: npm run dist -- -publish
