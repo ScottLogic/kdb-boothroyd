@@ -35,7 +35,7 @@ jobs:
           export QHOME=$GITHUB_WORKSPACE/q
           echo $GITHUB_WORKSPACE
           echo $QHOME
-          ./q/l32/q -p 5001
+          nohup ./q/l32/q -p 5001 >output.log </dev/null &
 
       - name: Install dependencies
         run: |
