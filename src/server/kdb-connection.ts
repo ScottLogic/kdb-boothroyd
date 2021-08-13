@@ -5,15 +5,12 @@ import { promisify } from "util";
 const qSend = (conn: Connection, value: string) =>
   new Promise((resolve, reject) => {
     try {
-      conn
-        .on("error", (e) => {
-          reject(e);
-        })
-        .k(value, function (err, res) {
-          if (err) reject(err);
+      conn.on("error", reject).k(value, function (err, res) {
+        if (err) reject(err);
 
-          resolve(res);
-        });
+        conn.off("error", reject);
+        resolve(res);
+      });
     } catch (e) {
       reject(e);
     }

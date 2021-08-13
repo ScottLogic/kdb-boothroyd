@@ -6,6 +6,7 @@ import { initializeFileTypeIcons } from "@fluentui/react-file-type-icons";
 
 import { darkTheme, lightTheme } from "./themes";
 import MainInterface from "./components/MainInterface";
+import { useEffect } from "react";
 
 initializeIcons();
 initializeFileTypeIcons();
@@ -19,9 +20,14 @@ const App: FunctionComponent = () => {
   });
 
   // Handle theme updates
-  ipcRenderer.on("colour-scheme-changed", (_, isDarkMode) => {
-    setCurrentTheme(isDarkMode ? darkTheme : lightTheme);
-  });
+  useEffect(() => {
+    ipcRenderer.on("colour-scheme-changed", (_, isDarkMode) => {
+      setCurrentTheme(isDarkMode ? darkTheme : lightTheme);
+    });
+    return () => {
+      ipcRenderer.removeAllListeners("colour-scheme-changed");
+    };
+  }, []);
 
   return (
     <ThemeProvider applyTo="body" theme={currentTheme}>
