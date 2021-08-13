@@ -52,7 +52,7 @@ export class ResultsProcessor {
 
     if (typeof resultItem === "object") {
       // Set column headers
-      Object.entries(resultItem).forEach(([k, v]) => {
+      Object.entries(resultItem).forEach(([k]) => {
         cols.push({
           field: k,
         });
@@ -75,7 +75,12 @@ export class ResultsProcessor {
         };
       });
     } else {
-      return results;
+      return results.map((r, i) => {
+        return {
+          "|i|": i + 1,
+          value: r,
+        };
+      });
     }
   }
 }
