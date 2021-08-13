@@ -1,18 +1,26 @@
-import React, { createRef, FunctionComponent, useContext, useEffect, useRef, useState } from 'react'
-import MonacoEditor from 'react-monaco-editor';
-import { ipcRenderer } from 'electron'
-import { 
-  CommandBar, 
-  getTheme, 
+import React, {
+  createRef,
+  FunctionComponent,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import MonacoEditor, { monaco } from "react-monaco-editor";
+import { ipcRenderer } from "electron";
+import {
+  CommandBar,
+  useTheme,
   ICommandBarItemProps,
   Stack,
-  Theme,
-} from "@fluentui/react"
-import useResizeObserver from '@react-hook/resize-observer'
+} from "@fluentui/react";
+import useResizeObserver from "@react-hook/resize-observer";
 
-import syntax from '../editor/syntax';
-import theme from '../editor/theme';
-import { editorWindow, editorWrapper } from '../style'
+import syntax from "../editor/syntax";
+import theme from "../editor/theme";
+import { editorWindow, editorWrapper } from "../style";
+
+type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 
 interface EditorWindowProps {
   onExecuteQuery: (query: string) => void;
@@ -20,140 +28,144 @@ interface EditorWindowProps {
   filename?: string;
 }
 
-const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFilenameChanged: onFilenameChanged, filename}) => {
+// Set some default options for the Monaco Editor
+const editorOptions = {
+  minimap: {
+    enabled: false,
+  },
+  automaticLayout: true,
+};
+
+const EditorWindow: FunctionComponent<EditorWindowProps> = ({
+  onExecuteQuery,
+  onFilenameChanged: onFilenameChanged,
+  filename,
+}) => {
+  const uiTheme = useTheme();
 
   const [currentScript, setCurrentScript] = useState("");
 
   // Find out if system is in dark mode so we can use the appropriate editor theme
-  let [isDarkMode, setIsDarkMode] = useState(false)
-
-  const uiTheme = getTheme()
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Check current theme
-  ipcRenderer
-    .invoke("is-dark-mode")
-    .then((isDarkMode) => {
-      setIsDarkMode(isDarkMode)
-    })
-  
+  ipcRenderer.invoke("is-dark-mode").then((isDarkMode) => {
+    setIsDarkMode(isDarkMode);
+  });
+
   // Handle theme updates
   ipcRenderer
     .on("colour-scheme-changed", (_, isDarkMode) => {
-      setIsDarkMode(isDarkMode)
+      setIsDarkMode(isDarkMode);
     })
     .on("file-opened", (_, ...args) => {
       const [script, filename] = args;
-      setCurrentScript(script)
-      if (editorRef && editorRef.current)
-        (editorRef.current as any).setValue(script)
+      setCurrentScript(script);
+      editorRef.current?.setValue(script);
       onFilenameChanged(filename);
-    })
+    });
 
   // Store a reference we can use to target the run script button
-  const goRef = createRef<HTMLButtonElement>()
+  const goRef = createRef<HTMLButtonElement>();
 
   // Store a ref to the editor
-  const editorRef = useRef(null)
-  const wrapper = useRef(null)
+  const editorRef = useRef<IStandaloneCodeEditor | null>(null);
+  const wrapper = useRef(null);
 
   useEffect(() => {
-    window.addEventListener('resize', () => {
-      if (editorRef.current)
-        (editorRef.current as any).layout({height:"100%", width:"100%"})
-    })
-  },[])
+    window.addEventListener("resize", () => {
+      editorRef.current?.layout({ height: 100, width: 100 });
+    });
+  }, []);
 
   useResizeObserver(wrapper, (entry) => {
-    if (editorRef && editorRef.current) {
-      (editorRef.current as any).layout({
-        height: entry.contentRect.height,
-        width: entry.contentRect.width
-      })
-    }
-  })
-
-
-  // Set some default options for the Monaco Editor
-  const editorOptions = {
-    minimap: {
-      enabled: false
-    },
-    automaticLayout: true
-  }
+    editorRef.current?.layout({
+      height: entry.contentRect.height,
+      width: entry.contentRect.width,
+    });
+  });
 
   // Before the editor mounts we need to register our q language
-  function editorWillMount(monaco:any) {
-    if (!monaco.languages.getLanguages().some(({ id }:any) => id === 'kbd/q')) {
+  function editorWillMount(monacoEditor: typeof monaco) {
+    if (
+      !monacoEditor.languages.getLanguages().some(({ id }) => id === "kbd/q")
+    ) {
       // Register a new language
-      monaco.languages.register({ id: 'kbd/q' })
+      monacoEditor.languages.register({ id: "kbd/q" });
       // Register a tokens provider for the language
-      monaco.languages.setMonarchTokensProvider('kbd/q', syntax)
-      monaco.editor.defineTheme("kbd", theme)
+      monacoEditor.languages.setMonarchTokensProvider("kbd/q", syntax);
+      monacoEditor.editor.defineTheme("kbd", theme);
     }
   }
 
   // Once the editor is mounted we can manipulate it a bit
-  function editorDidMount(editor:any, monaco:any) {
-    // Get round bug with editor and flex layouts where editor gets too big for it's boots, literally
-    editor._domElement.style.maxWidth="100%"
-    editor.layout({height:"100%",width:"100%"})
+  function editorDidMount(editor: IStandaloneCodeEditor) {
+    editor.layout({ height: 100, width: 100 });
 
-    editorRef.current = editor
+    editorRef.current = editor;
+
     // Bind a shortcut key to run current script
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, function() {
-      // As currentServer isn't necessarily set when we bind this and this ends up out of scope we
-      // can make the rest happen in React land by just triggering the click action on the play button.
-      // Yes it's a hack, and I don't like it, but it works
-      if (goRef && goRef.current)
-        goRef.current.click()
-    })
+    editor.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+      function () {
+        // As currentServer isn't necessarily set when we bind this and this ends up out of scope we
+        // can make the rest happen in React land by just triggering the click action on the play button.
+        // Yes it's a hack, and I don't like it, but it works
+        if (goRef && goRef.current) goRef.current.click();
+      }
+    );
   }
 
-  // As we write scripts we need to update our store of them so we don't lose stuff when switching to 
+  // As we write scripts we need to update our store of them so we don't lose stuff when switching to
   // another server
-  function updateScripts(newValue:string) {
-    setCurrentScript(newValue)
+  function updateScripts(newValue: string) {
+    setCurrentScript(newValue);
   }
 
   async function loadScript() {
-    const result: any = await ipcRenderer.invoke("load-script");
-    console.log(result);
+    const result = await ipcRenderer.invoke("load-script");
     if (result) {
-      const {data, filename} = result;
-      setCurrentScript(data)
-      if (editorRef && editorRef.current)
-        (editorRef.current as any).setValue(data)
-      onFilenameChanged(filename); 
+      const { data, filename } = result;
+      setCurrentScript(data);
+      editorRef.current?.setValue(data);
+      onFilenameChanged(filename);
     }
   }
 
   async function saveScript() {
-    const savedFilename = await ipcRenderer.invoke("save-script", currentScript, filename)
+    const savedFilename = await ipcRenderer.invoke(
+      "save-script",
+      currentScript,
+      filename
+    );
     onFilenameChanged(savedFilename);
   }
 
   async function saveScriptAs() {
-    const savedFilename = await ipcRenderer.invoke("save-script", currentScript)
+    const savedFilename = await ipcRenderer.invoke(
+      "save-script",
+      currentScript
+    );
     onFilenameChanged(savedFilename);
   }
 
   // Send our commands to the server
   async function runScript() {
-    let script = ""
+    let script = "";
     // Reset results to trigger loading animation
-    let selected
-    
+    let selected;
+
     // Get currently highlighted text
     if (editorRef.current) {
-      const editor:any = editorRef.current!
-      selected = editor.getModel().getValueInRange(editor.getSelection())
+      const editor: IStandaloneCodeEditor = editorRef.current!;
+      selected = editor.getModel()?.getValueInRange(editor.getSelection()!);
     }
 
     // If selected text use that, otherwise send full script
-    script = (selected && selected != "") ? selected : currentScript
-    
+    script = selected && selected != "" ? selected : currentScript;
+
     // Load actual results
-    onExecuteQuery(script)
+    onExecuteQuery(script);
   }
 
   // Set up our command bar items
@@ -165,8 +177,8 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
       disabled: !(currentScript && currentScript != ""),
       elementRef: goRef,
       onClick: () => {
-        runScript()
-      }
+        runScript();
+      },
     },
     {
       key: "open",
@@ -174,7 +186,7 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
       iconProps: { iconName: "OpenFolderHorizontal" },
       onClick: () => {
         loadScript();
-      }
+      },
     },
     {
       key: "save-as",
@@ -183,7 +195,7 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
       disabled: !(currentScript && currentScript != ""),
       onClick: () => {
         saveScriptAs();
-      }
+      },
     },
     {
       key: "save",
@@ -192,9 +204,9 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
       disabled: !(currentScript && currentScript != "") || !filename,
       onClick: () => {
         saveScript();
-      }
-    }
-  ]
+      },
+    },
+  ];
 
   const overflowItems: ICommandBarItemProps[] = [
     {
@@ -203,12 +215,9 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
       title: "Cut selected text",
       iconProps: { iconName: "Cut" },
       onClick: () => {
-        if (editorRef && editorRef.current) {
-          const editor = editorRef.current as any
-          editor.focus()
-          document.execCommand("cut")
-        }
-      }
+        editorRef.current?.focus();
+        document.execCommand("cut");
+      },
     },
     {
       key: "copy",
@@ -216,12 +225,9 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
       title: "Copy selected text",
       iconProps: { iconName: "Copy" },
       onClick: () => {
-        if (editorRef && editorRef.current) {
-          const editor = editorRef.current as any
-          editor.focus()
-          document.execCommand("copy")
-        }
-      }
+        editorRef.current?.focus();
+        document.execCommand("copy");
+      },
     },
     {
       key: "paste",
@@ -229,40 +235,33 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
       title: "Paste text from the clipboard",
       iconProps: { iconName: "Paste" },
       onClick: () => {
-        if (editorRef && editorRef.current) {
-          const editor = editorRef.current as any
-          editor.focus()
-          document.execCommand("paste")
-        }
-      }
+        editorRef.current?.focus();
+        document.execCommand("paste");
+      },
     },
     {
       key: "find",
       text: "Find",
       title: "Find text in script",
-      iconProps: { iconName: "Search"},
+      iconProps: { iconName: "Search" },
       onClick: () => {
-        if (editorRef && editorRef.current) {
-          const editor = editorRef.current as any
-          editor.focus();
-          editor.getAction("actions.find").run()
-        }
-      }
+        editorRef.current?.focus();
+        editorRef.current?.getAction("actions.find").run();
+      },
     },
     {
       key: "replace",
       text: "Replace",
       title: "Replace text in script",
-      iconProps: { iconName: "Switch"},
+      iconProps: { iconName: "Switch" },
       onClick: () => {
-        if (editorRef && editorRef.current) {
-          const editor = editorRef.current as any
-          editor.focus();
-          editor.getAction("editor.action.startFindReplaceAction").run()
-        }
-      }
-    }
-  ]
+        editorRef.current?.focus();
+        editorRef.current
+          ?.getAction("editor.action.startFindReplaceAction")
+          .run();
+      },
+    },
+  ];
 
   const rightItems: ICommandBarItemProps[] = [
     {
@@ -270,45 +269,40 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
       title: "Undo last change",
       iconProps: { iconName: "Undo" },
       onClick: () => {
-        if (editorRef && editorRef.current) {
-          const editor = (editorRef.current as any)
-          editor.trigger('aaaa', 'undo', 'aaaa')
-          editor.focus()
-        }
-      }
+        editorRef.current?.trigger("aaaa", "undo", "aaaa");
+        editorRef.current?.focus();
+      },
     },
     {
       key: "redo",
       title: "Redo last change",
       iconProps: { iconName: "Redo" },
       onClick: () => {
-        if (editorRef && editorRef.current) {
-          const editor = (editorRef.current as any)
-          editor.trigger('aaa', 'redo', 'aaa')
-          editor.focus()
-        }
-      }
-    }
-  ]
-
+        editorRef.current?.trigger("aaa", "redo", "aaa");
+        editorRef.current?.focus();
+      },
+    },
+  ];
 
   return (
-    <Stack 
-      style={{ 
+    <Stack
+      style={{
         ...editorWindow,
-        backgroundColor: uiTheme.palette.white
-      }}>
-      <CommandBar 
-          items={items}
-          overflowItems={overflowItems}
-          farItems={rightItems}
-          style={{
-            flex: "0" 
-          }}/>
-      <div ref={wrapper} style={{...editorWrapper}}>
+        backgroundColor: uiTheme.palette.white,
+      }}
+    >
+      <CommandBar
+        items={items}
+        overflowItems={overflowItems}
+        farItems={rightItems}
+        style={{
+          flex: "0",
+        }}
+      />
+      <div ref={wrapper} style={{ ...editorWrapper }}>
         <MonacoEditor
           language="kbd/q"
-          theme={(isDarkMode) ? "vs-dark" : "vs-light"}
+          theme={isDarkMode ? "vs-dark" : "vs-light"}
           options={editorOptions}
           editorWillMount={editorWillMount}
           editorDidMount={editorDidMount}
@@ -316,7 +310,7 @@ const EditorWindow:FunctionComponent<EditorWindowProps> = ({onExecuteQuery, onFi
         />
       </div>
     </Stack>
-  )
-}
+  );
+};
 
-export default EditorWindow
+export default EditorWindow;

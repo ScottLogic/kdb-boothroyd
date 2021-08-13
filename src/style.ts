@@ -1,4 +1,8 @@
-import { IComboBoxOptionStyles, ICommandBarStyles, IStackTokens } from "@fluentui/react";
+import {
+  IComboBoxOptionStyles,
+  ICommandBarStyles,
+  IStackTokens,
+} from "@fluentui/react";
 import { CSSProperties } from "react";
 
 export const commandBar: Partial<ICommandBarStyles> = {
@@ -20,7 +24,7 @@ export const container: CSSProperties = {
   maxWidth: "100vw",
   //backgroundColor: "#ccc",
   padding: "5px",
-  boxSizing: "border-box"
+  boxSizing: "border-box",
 };
 
 export const panel: CSSProperties = {
@@ -28,81 +32,86 @@ export const panel: CSSProperties = {
   //backgroundColor: "#fff",
   display: "flex",
   flexDirection: "column",
-  justifyContent: "flex-start"
-}
+  justifyContent: "flex-start",
+};
 
 export const serverPanel: CSSProperties = {
-  flex:"0",
-  minWidth:"200px"
-}
+  flex: "0",
+  minWidth: "200px",
+};
 
 export const tablePanel: CSSProperties = {
-  flex: "0"
-}
+  flex: "0",
+};
 
 export const tableListIcon: CSSProperties = {
-  flex:"0",
-  cursor:"pointer"
-}
+  flex: "0",
+  cursor: "pointer",
+};
 
 export const tableListName: CSSProperties = {
-  flex:"1 1 auto"
-}
+  flex: "1 1 auto",
+};
 
 export const tableListColumn: CSSProperties = {
-  paddingLeft:"20px",
-  height: "38px"
-}
+  paddingLeft: "20px",
+  height: "38px",
+};
 
 export const pivots: CSSProperties = {
-  flex: "0 0 none"
-}
+  flex: "0 0 none",
+};
 
 export const pivotClose: CSSProperties = {
   marginLeft: "10px",
   width: 8,
   height: 8,
-  fontSize: 8
-}
+  fontSize: 8,
+};
 
 export const grabberBar: CSSProperties = {
   width: 10,
   height: 10,
   fontSize: 10,
-  cursor: "row-resize"
-}
+  cursor: "row-resize",
+};
 
 export const editorWindow: CSSProperties = {
-  flex:"1 1 auto",
-  maxWidth:"100%",
+  flex: "1 1 auto",
+  maxWidth: "100%",
   alignItems: "stretch",
-  minHeight:50
-}
+  minHeight: 50,
+};
 
 export const editorWrapper: CSSProperties = {
-  flex:"1 1 auto", 
-  overflow:"hidden",
-  padding: 10
-}
+  flex: "1 1 auto",
+  overflow: "hidden",
+  padding: 10,
+};
 
 export const resultsWindow: CSSProperties = {
-  flex:"1 1 auto",
-  position:"relative",
-  overflowY:"scroll",
-  minHeight:50
-}
+  flex: "1 1 auto",
+  position: "relative",
+  overflowY: "scroll",
+  minHeight: 50,
+};
 
 export const resultsWrapper: CSSProperties = {
-  overflow:"scroll",
-  minHeight:50
-}
+  overflow: "scroll",
+  minHeight: 50,
+  height: "100%",
+};
+
+export const agWrapper: CSSProperties = {
+  flex: "1 1 auto",
+};
 
 export const serverModal: CSSProperties = {
   width: "75%",
-  height: "75%"
-}
+  height: "75%",
+};
 
-export const stackTokens:IStackTokens = {
+export const stackTokens: IStackTokens = {
   childrenGap: 10,
   padding: 10,
-}
+};

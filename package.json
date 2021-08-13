@@ -1,6 +1,6 @@
 {
   "name": "kdb-studio-2",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "GUI for KDB/q database",
   "main": "./dist/main.js",
   "scripts": {
@@ -10,7 +10,13 @@
     "build:react": "NODE_ENV=production webpack --config webpack.react.config.js --mode production",
     "build": "npm run build:electron && npm run build:react",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "publish": "electron-builder --publish always",
+    "test:electron": "NODE_ENV=test webpack --config webpack.electron.config.js --mode production",
+    "test:react": "NODE_ENV=test webpack --config webpack.react.config.js --mode production",
+    "build:test": "npm run test:electron && npm run test:react",
+    "test": "cross-env NODE_ENV=test mocha --require ./tests/hooks.js ./tests",
+    "prepare": "husky install"
   },
   "keywords": [],
   "contributors": [
@@ -31,7 +37,30 @@
     "directories": {
       "output": "dist"
     },
-    "icon": "build/icons/icon.png"
+    "icon": "build/icons/icon.png",
+    "publish": {
+      "provider": "github",
+      "vPrefixedTagName": true
+    },
+    "snap": {
+      "publish": "github"
+    }
+  },
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "package.json"
+          ],
+          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }
+      ]
+    ]
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
@@ -41,6 +70,7 @@
     "@babel/preset-typescript": "^7.9.0",
     "@babel/runtime": "^7.14.6",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.4.3",
+    "@semantic-release/git": "^9.0.0",
     "@types/crypto-js": "^4.0.2",
     "@types/electron-json-storage": "^4.5.0",
     "@types/uuid": "^8.3.1",
@@ -52,7 +82,12 @@
     "electron-devtools-installer": "^3.2.0",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^4.5.2",
+    "husky": "^7.0.0",
+    "mocha": "^9.0.3",
     "monaco-editor-webpack-plugin": "^4.1.1",
+    "playwright": "^1.13.1",
+    "prettier": "^2.3.2",
+    "pretty-quick": "^3.1.1",
     "react-refresh": "^0.9.0",
     "style-loader": "^3.1.0",
     "webpack-cli": "^4.*",
@@ -64,10 +99,13 @@
     "@react-hook/resize-observer": "^1.2.2",
     "@types/react": "^17.*",
     "@types/react-dom": "^17.*",
+    "ag-grid-community": "^25.3.0",
+    "ag-grid-react": "^25.3.0",
     "crypto-js": "^4.1.1",
     "electron-dl": "^3.2.1",
     "electron-json-storage": "^4.5.0",
-    "node-q": "https://github.com/OiNutter/node-q.git",
+    "electron-updater": "^4.3.9",
+    "node-q": "2.x.x",
     "office-ui-fabric-core": "^11.0.0",
     "react": "^17.*",
     "react-dom": "^17.*",

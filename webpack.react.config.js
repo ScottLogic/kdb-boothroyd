@@ -1,9 +1,9 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
-const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin");
+const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 
-const isDevelopment = process.env.NODE_ENV !== 'production';
+const isDevelopment = process.env.NODE_ENV === "development";
 
 module.exports = {
   resolve: {
@@ -24,19 +24,19 @@ module.exports = {
             // ... other options
             plugins: [
               // ... other plugins
-              isDevelopment && require.resolve('react-refresh/babel'),
+              isDevelopment && require.resolve("react-refresh/babel"),
             ].filter(Boolean),
           },
         },
       },
       {
-				test: /\.css$/,
-				use: ['style-loader', 'css-loader']
-			},
-			{
-				test: /!(node_modules)\.ttf$/,
-				use: ['file-loader']
-			}
+        test: /\.css$/,
+        use: ["style-loader", "css-loader"],
+      },
+      {
+        test: /!(node_modules)\.ttf$/,
+        use: ["file-loader"],
+      },
     ],
   },
   devServer: {
@@ -47,14 +47,14 @@ module.exports = {
     port: 4000,
   },
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'app.js'
+    path: path.resolve(__dirname, "dist"),
+    filename: "app.js",
   },
   plugins: [
     isDevelopment && new ReactRefreshWebpackPlugin(),
     new MonacoWebpackPlugin(),
     new HtmlWebpackPlugin({
-      title: "KBD Studio 2"
+      title: "KDB Studio 2",
     }),
-  ],
+  ].filter(Boolean),
 };
