@@ -12,6 +12,7 @@ import * as url from "url";
 import * as fs from "fs";
 
 import { download } from "electron-dl";
+import { autoUpdater } from "electron-updater";
 import getMenu from "./menu";
 
 let mainWindow: Electron.BrowserWindow | null;
