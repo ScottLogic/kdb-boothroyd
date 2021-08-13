@@ -54,16 +54,24 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
   });
 
   // Handle theme updates
-  ipcRenderer
-    .on("colour-scheme-changed", (_, isDarkMode) => {
-      setIsDarkMode(isDarkMode);
-    })
-    .on("file-opened", (_, ...args) => {
-      const [script, filename] = args;
-      setCurrentScript(script);
-      editorRef.current?.setValue(script);
-      onFilenameChanged(filename);
-    });
+  useEffect(() => {
+    ipcRenderer
+      .on("colour-scheme-changed", (_, isDarkMode) => {
+        setIsDarkMode(isDarkMode);
+      })
+      .on("file-opened", (_, ...args) => {
+        const [script, filename] = args;
+        setCurrentScript(script);
+        editorRef.current?.setValue(script);
+        onFilenameChanged(filename);
+      });
+
+    return () => {
+      ipcRenderer
+        .removeAllListeners("colour-scheme-changed")
+        .removeAllListeners("file-opened");
+    };
+  }, []);
 
   // Store a reference we can use to target the run script button
   const goRef = createRef<HTMLButtonElement>();

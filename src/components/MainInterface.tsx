@@ -46,10 +46,16 @@ const MainInterface: FC = () => {
 
   const theme = useTheme();
 
-  ipcRenderer.on("show-error", (_, error: string) => {
-    setErrorMessage(error);
-    setShowError(true);
-  });
+  useEffect(() => {
+    ipcRenderer.on("show-error", (_, error: string) => {
+      setErrorMessage(error);
+      setShowError(true);
+    });
+
+    return () => {
+      ipcRenderer.removeAllListeners("show-error");
+    };
+  }, []);
 
   useEffect(() => {
     const index = connections.findIndex((c) => c.id === currentConnection);

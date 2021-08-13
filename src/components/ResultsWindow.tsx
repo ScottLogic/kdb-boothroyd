@@ -94,9 +94,6 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
         setRows(rows);
       }
     }
-
-    gridAPI?.refreshCells({ force: true });
-    //gridAPI?.refreshHeader()
   }, [currentResults, error]);
 
   useEffect(() => {
@@ -126,9 +123,15 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
     }
   }, [currentView, currentResults]);
 
-  ipcRenderer.on("download-complete", (_, file) => {
-    Exporter.cleanup(file);
-  });
+  useEffect(() => {
+    ipcRenderer.on("download-complete", (_, file) => {
+      Exporter.cleanup(file);
+    });
+
+    return () => {
+      ipcRenderer.removeAllListeners("download-complete");
+    };
+  }, []);
 
   const farItems: ICommandBarItemProps[] = [
     {
