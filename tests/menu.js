@@ -17,7 +17,7 @@ const expected = {
         ],
       }
     : {}),
-  File: ["Close Window"],
+  File: [isMac ? "Close Window" : "Quit"],
   Editor: [
     "Undo",
     "Redo",
