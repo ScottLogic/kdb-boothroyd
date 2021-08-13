@@ -45,7 +45,7 @@ function createWindow() {
     );
   }
 
-  Menu.setApplicationMenu(getMenu(app.name));
+  Menu.setApplicationMenu(getMenu(app.name, mainWindow));
 
   ipcMain.handle("is-dark-mode", () => {
     return nativeTheme.shouldUseDarkColors;

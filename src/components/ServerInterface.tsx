@@ -1,6 +1,8 @@
 import { FontIcon, Stack } from "@fluentui/react";
-import React, { FC, useState } from "react";
+import React, { FC, useState, useEffect } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import Split from "react-split";
+import { ipcRenderer } from "electron";
 
 import KdbConnection from "../server/kdb-connection";
 import { grabberBar, stackTokens } from "../style";
@@ -8,7 +10,6 @@ import Result from "../types/results";
 import EditorWindow from "./EditorWindow";
 import ResultsWindow from "./ResultsWindow";
 import TablePanel from "./TablePanel";
-import Split from "react-split";
 
 type ServerInterfaceProps = {
   connection: KdbConnection;
@@ -53,6 +54,16 @@ const ServerInterface: FC<ServerInterfaceProps> = ({
       setIsLoading(false);
     }
   }
+
+  useEffect(() => {
+    ipcRenderer.on("refresh-results", () => {
+      if (visible && results && results.script) executeQuery(results.script);
+    });
+
+    return () => {
+      ipcRenderer.removeAllListeners("refresh-results");
+    };
+  }, [visible, results]);
 
   function renderGutter(_: number, direction: string) {
     const className = `gutter gutter-${direction}`;
