@@ -1,6 +1,6 @@
 const assert = require("assert");
 
-describe.only("Table List", function () {
+describe("Table List", function () {
   before(async function () {
     this.appWindow = await this.app.firstWindow();
     await this.appWindow.waitForLoadState("domcontentloaded");
