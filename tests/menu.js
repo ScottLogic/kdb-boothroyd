@@ -31,9 +31,8 @@ const expected = {
   ],
   Results: ["Refresh"],
   Window: [
-    ...(isMac
-      ? ["Minimize", "Zoom", "", "Bring All to Front", "", "Window"]
-      : ["Close"]),
+    ...["Minimize", "Zoom"],
+    ...(isMac ? [, "", "Bring All to Front", "", "Window"] : ["Close"]),
   ],
   Help: ["Learn More"],
 };
