@@ -30,7 +30,11 @@ const expected = {
     "Select All",
   ],
   Results: ["Refresh"],
-  Window: ["Minimize", "Zoom", "", "Bring All to Front", "", "Window"],
+  Window: [
+    ...(isMac
+      ? ["Minimize", "Zoom", "", "Bring All to Front", "", "Window"]
+      : ["Close"]),
+  ],
   Help: ["Learn More"],
 };
 
