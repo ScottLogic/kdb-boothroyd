@@ -103,6 +103,7 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
           key: "table",
           text: "Table",
           iconProps: { iconName: "Table" },
+          className: "table-view-tab",
           checked: currentView == ResultsView.Table,
           onClick: () => {
             setCurrentView(ResultsView.Table);
@@ -112,6 +113,7 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
           key: "text",
           text: "Raw",
           iconProps: { iconName: "RawSource" },
+          className: "raw-view-tab",
           checked: currentView == ResultsView.Raw,
           onClick: () => {
             setCurrentView(ResultsView.Raw);
