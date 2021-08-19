@@ -184,6 +184,7 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
       iconProps: { iconName: "Play" },
       disabled: !(currentScript && currentScript != ""),
       elementRef: goRef,
+      className: "go-button",
       onClick: () => {
         runScript();
       },
@@ -192,6 +193,7 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
       key: "open",
       title: "Open",
       iconProps: { iconName: "OpenFolderHorizontal" },
+      className: "open-button",
       onClick: () => {
         loadScript();
       },
@@ -201,6 +203,7 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
       title: "Save As",
       iconProps: { iconName: "SaveAs" },
       disabled: !(currentScript && currentScript != ""),
+      className: "save-as-button",
       onClick: () => {
         saveScriptAs();
       },
@@ -210,6 +213,7 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
       title: "Save",
       iconProps: { iconName: "Save" },
       disabled: !(currentScript && currentScript != "") || !filename,
+      className: "save-button",
       onClick: () => {
         saveScript();
       },

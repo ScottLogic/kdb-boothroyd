@@ -275,10 +275,14 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
           <>
             {typeof currentResults === "string" ||
             currentView == ResultsView.Raw ? (
-              <pre>{currentResults ? stringify(currentResults) : ""}</pre>
+              <pre className="raw-results-view">
+                {currentResults ? stringify(currentResults) : ""}
+              </pre>
             ) : (
               <div
-                className={`ag-theme-balham${isDarkMode ? "-dark" : ""}`}
+                className={`table-results-view ag-theme-balham${
+                  isDarkMode ? "-dark" : ""
+                }`}
                 style={agWrapper}
               >
                 <AgGridReact
