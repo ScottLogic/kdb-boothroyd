@@ -64,6 +64,8 @@ describe("Table List", function () {
   });
 
   it("should show the correct details for a table", async function () {
+    this.timeout(10000);
+
     const editor = await this.appWindow.$(".monaco-editor textarea");
 
     const query = "t:flip `name`iq!(`Dent`Beeblebrox`Prefect;98 42 126)";
