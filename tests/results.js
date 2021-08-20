@@ -21,6 +21,7 @@ describe("Results Window", function () {
   });
 
   it("should display the results of an instruction as the raw response", async function () {
+    this.timeout(5000);
     const editor = await this.appWindow.$(".monaco-editor textarea");
 
     const query = "d:`a`b`c!100 200 300";
@@ -35,6 +36,7 @@ describe("Results Window", function () {
   });
 
   it("should display a dictionary correctly", async function () {
+    this.timeout(5000);
     const editor = await this.appWindow.$(".monaco-editor textarea");
 
     const query = "d";
@@ -67,6 +69,7 @@ describe("Results Window", function () {
   });
 
   it("should display a table correctly", async function () {
+    this.timeout(5000);
     const editor = await this.appWindow.$(".monaco-editor textarea");
 
     const query = "t:flip `name`iq!(`Dent`Beeblebrox`Prefect;98 42 126);t";

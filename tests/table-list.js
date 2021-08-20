@@ -64,7 +64,7 @@ describe("Table List", function () {
   });
 
   it("should show the correct details for a table", async function () {
-    this.timeout(20000);
+    this.timeout(5000);
 
     const editor = await this.appWindow.$(".monaco-editor textarea");
 
@@ -73,38 +73,32 @@ describe("Table List", function () {
     await editor.type(query);
     await editor.press(`${isMac ? "Meta" : "Control"}+Enter`);
 
-    console.log("1");
     await this.appWindow.waitForSelector(
       ":nth-match(.table-list .ms-GroupedList-group, 1)"
     );
-    console.log("2");
+
     const tableList = await this.appWindow.$$(
       ".table-list .ms-GroupedList-group"
     );
-
-    console.log("3");
     assert.strictEqual(tableList.length, 1);
 
     const label = await tableList[0].$(":nth-match(.ms-Stack button, 1)");
     assert.strictEqual(await label.textContent(), "t");
 
-    console.log("4");
     const toggle = await tableList[0].$(":nth-match(.ms-Stack > i,1)");
 
-    console.log("5");
     await toggle.click();
     await tableList[0].waitForSelector(".ms-List");
-    console.log("6");
 
     const columns = await tableList[0].$$(".ms-List .ms-List-cell");
 
-    console.log("7");
     assert.strictEqual(columns.length, 2);
     assert.strictEqual(await columns[0].innerText(), "name (symbol)");
     assert.strictEqual(await columns[1].innerText(), "iq (long)");
   });
 
   it("should query the table when I click on it", async function () {
+    this.timeout(5000);
     const tableEntry = await this.appWindow.$(
       ":nth-match(.table-list .ms-GroupedList-group, 1)"
     );

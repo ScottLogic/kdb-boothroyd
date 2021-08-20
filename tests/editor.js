@@ -40,6 +40,7 @@ describe("Editor Window", function () {
   });
 
   it("should execute a query from pressing the go button", async function () {
+    this.timeout(5000);
     const editor = await this.appWindow.$(".monaco-editor textarea");
 
     const query = "t:flip `name`iq!(`Dent`Beeblebrox`Prefect;98 42 126)";
@@ -67,6 +68,7 @@ describe("Editor Window", function () {
   });
 
   it("should execute a query from Ctrl+Enter", async function () {
+    this.timeout(5000);
     const editor = await this.appWindow.$(".monaco-editor textarea");
 
     const query = "t2:flip `name`iq!(`Dent`Beeblebrox`Prefect;98 42 126)";

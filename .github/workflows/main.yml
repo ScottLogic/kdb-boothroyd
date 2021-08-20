@@ -32,15 +32,6 @@ jobs:
         with:
           node-version: "16"
 
-      #- name: Run Q Server
-      #  run: |
-      #    unzip tests/fixtures/q.zip
-      #    chmod a+x ./q/l32/q
-      #    export QHOME=$GITHUB_WORKSPACE/q
-      #    echo $GITHUB_WORKSPACE
-      #    echo $QHOME
-      #    nohup ./q/l32/q -p 5001 >output.log </dev/null &
-
       - name: Install dependencies
         run: |
           npm ci
@@ -58,13 +49,6 @@ jobs:
 
       - name: Run tests
         run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm test
-
-      #- name: Archive kdb log
-      #  if: ${{ always() }}
-      #  uses: actions/upload-artifact@v2
-      #  with:
-      #    name: kdb-output.log
-      #    path: output.log
 
   release:
     needs: test
