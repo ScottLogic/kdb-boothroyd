@@ -64,7 +64,7 @@ describe("Table List", function () {
   });
 
   it("should show the correct details for a table", async function () {
-    this.timeout(10000);
+    this.timeout(20000);
 
     const editor = await this.appWindow.$(".monaco-editor textarea");
 
@@ -98,7 +98,7 @@ describe("Table List", function () {
   });
 
   it("should query the table when I click on it", async function () {
-    this.timeout(10000);
+    this.timeout(20000);
     const tableEntry = await this.appWindow.$(
       ":nth-match(.table-list .ms-GroupedList-group, 1)"
     );
