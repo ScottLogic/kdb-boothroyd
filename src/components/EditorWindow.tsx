@@ -311,7 +311,7 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
           flex: "0",
         }}
       />
-      <div ref={wrapper} style={{ ...editorWrapper }}>
+      <div ref={wrapper} style={editorWrapper}>
         <MonacoEditor
           language="kbd/q"
           theme={isDarkMode ? "vs-dark" : "vs-light"}

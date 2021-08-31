@@ -86,7 +86,6 @@ export const editorWindow: CSSProperties = {
 export const editorWrapper: CSSProperties = {
   flex: "1 1 auto",
   overflow: "hidden",
-  padding: 10,
 };
 
 export const resultsWindow: CSSProperties = {
