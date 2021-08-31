@@ -3,7 +3,7 @@ const cleanupDB = require("./cleanup");
 
 const isMac = process.platform === "darwin";
 
-describe("Results Window", function () {
+describe.skip("Results Window", function () {
   before(async function () {
     this.appWindow = await this.app.firstWindow();
     await this.appWindow.waitForLoadState("domcontentloaded");
