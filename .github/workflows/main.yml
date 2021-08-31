@@ -71,4 +71,4 @@ jobs:
       - name: Create Release
         run: npx semantic-release
       - name: Compile Executables and Publish
-        run: npm run dist -- -mwl
+        run: npm run dist -- -mwl -p always
