@@ -236,7 +236,7 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
         farItems={farItems}
         style={{ flex: "0" }}
       />
-      <Stack tokens={stackTokens} style={resultsWrapper}>
+      <Stack style={resultsWrapper}>
         {isLoading ? (
           <Spinner size={SpinnerSize.large} />
         ) : error ? (
