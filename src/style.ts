@@ -92,12 +92,11 @@ export const editorWrapper: CSSProperties = {
 export const resultsWindow: CSSProperties = {
   flex: "1 1 auto",
   position: "relative",
-  overflowY: "scroll",
   minHeight: 50,
 };
 
 export const resultsWrapper: CSSProperties = {
-  overflow: "scroll",
+  overflow: "auto",
   minHeight: 50,
   height: "100%",
 };
