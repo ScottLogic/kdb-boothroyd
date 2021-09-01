@@ -49,16 +49,10 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
   isLoading,
   onExecuteQuery,
 }) => {
-  const [currentResults, setCurrentResults] = useState<any>(null);
-  const [currentScript, setCurrentScript] = useState<string | undefined>();
-  const [error, setError] = useState<string | undefined>();
   const [columns, setColumns] = useState<IColumn[]>([]);
   const [rows, setRows] = useState<Array<{} | string>>([]);
-  const [start, setStart] = useState(0);
   const [currentView, setCurrentView] = useState(ResultsView.Raw);
   const [viewOptions, setViewOptions] = useState<ICommandBarItemProps[]>([]);
-  const [sortColumn, setSortColumn] = useState<string | undefined>();
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [gridAPI, setGridAPI] = useState<GridApi | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -69,17 +63,9 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
     setIsDarkMode(isDarkMode);
   });
 
-  useEffect(() => {
-    if (results) {
-      setCurrentScript(results.script);
-      setError(results.error);
-      setCurrentResults(results.data);
-    } else {
-      setCurrentScript(undefined);
-      setError(undefined);
-      setCurrentResults(null);
-    }
-  }, [results]);
+  const currentResults = results?.data;
+  const error = results?.error;
+  const currentScript = results?.script;
 
   // Format the results for display (needs extracting out)
   useEffect(() => {
