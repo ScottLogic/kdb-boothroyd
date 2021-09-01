@@ -49,16 +49,13 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
   isLoading,
   onExecuteQuery,
 }) => {
-  const [columns, setColumns] = useState<IColumn[]>([]);
-  const [rows, setRows] = useState<Array<{} | string>>([]);
-  const [currentView, setCurrentView] = useState(ResultsView.Raw);
+  const [currentView, setCurrentView] = useState(ResultsView.Table);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const gridAPI = useRef<GridApi | null>(null);
 
   const theme = useTheme();
 
-  // Check current theme
   ipcRenderer.invoke("is-dark-mode").then((isDarkMode) => {
     setIsDarkMode(isDarkMode);
   });
@@ -67,20 +64,19 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
   const error = results?.error;
   const currentScript = results?.script;
 
-  // Format the results for display (needs extracting out)
-  useEffect(() => {
-    if (currentResults) {
-      const processed = ResultsProcessor.process(currentResults);
+  let rows: Array<{} | string> = [];
+  let columns: Array<IColumn> = [];
 
-      if (Array.isArray(processed)) {
+  if (currentResults) {
+    const processed = ResultsProcessor.process(currentResults);
+
+    if (Array.isArray(processed)) {
+      if (currentView !== ResultsView.Table) {
         setCurrentView(ResultsView.Table);
-        const [cols, rows] = processed as [Array<IColumn>, Array<{}>];
-
-        setColumns(cols);
-        setRows(rows);
       }
+      [columns, rows] = processed as [Array<IColumn>, Array<{}>];
     }
-  }, [currentResults, error]);
+  }
 
   let viewOptions: ICommandBarItemProps[] = [];
   if (Array.isArray(currentResults) && currentResults.length > 0) {
