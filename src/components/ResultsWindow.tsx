@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import {
   CommandBar,
   IColumn,
@@ -52,8 +52,9 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
   const [columns, setColumns] = useState<IColumn[]>([]);
   const [rows, setRows] = useState<Array<{} | string>>([]);
   const [currentView, setCurrentView] = useState(ResultsView.Raw);
-  const [gridAPI, setGridAPI] = useState<GridApi | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const gridAPI = useRef<GridApi | null>(null);
 
   const theme = useTheme();
 
@@ -190,11 +191,11 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
   ];
 
   function onGridReady(e: GridReadyEvent) {
-    setGridAPI(e.api);
+    gridAPI.current = e.api;
   }
 
   function refreshCells() {
-    gridAPI?.refreshCells();
+    gridAPI.current?.refreshCells();
   }
 
   function stringify(data: any) {
