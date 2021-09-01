@@ -89,6 +89,8 @@ const ServerInterface: FC<ServerInterfaceProps> = ({
         sizes={[40, 60]}
         gutterSize={10}
         gutter={renderGutter}
+        minSize={100}
+        snapOffset={0}
         style={{
           display: "flex",
           flexDirection: "column",
