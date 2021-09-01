@@ -52,7 +52,6 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
   const [columns, setColumns] = useState<IColumn[]>([]);
   const [rows, setRows] = useState<Array<{} | string>>([]);
   const [currentView, setCurrentView] = useState(ResultsView.Raw);
-  const [viewOptions, setViewOptions] = useState<ICommandBarItemProps[]>([]);
   const [gridAPI, setGridAPI] = useState<GridApi | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -82,34 +81,31 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
     }
   }, [currentResults, error]);
 
-  useEffect(() => {
-    if (Array.isArray(currentResults) && currentResults.length > 0) {
-      setViewOptions([
-        {
-          key: "table",
-          text: "Table",
-          iconProps: { iconName: "Table" },
-          className: "table-view-tab",
-          checked: currentView == ResultsView.Table,
-          onClick: () => {
-            setCurrentView(ResultsView.Table);
-          },
+  let viewOptions: ICommandBarItemProps[] = [];
+  if (Array.isArray(currentResults) && currentResults.length > 0) {
+    viewOptions = [
+      {
+        key: "table",
+        text: "Table",
+        iconProps: { iconName: "Table" },
+        className: "table-view-tab",
+        checked: currentView == ResultsView.Table,
+        onClick: () => {
+          setCurrentView(ResultsView.Table);
         },
-        {
-          key: "text",
-          text: "Raw",
-          iconProps: { iconName: "RawSource" },
-          className: "raw-view-tab",
-          checked: currentView == ResultsView.Raw,
-          onClick: () => {
-            setCurrentView(ResultsView.Raw);
-          },
+      },
+      {
+        key: "text",
+        text: "Raw",
+        iconProps: { iconName: "RawSource" },
+        className: "raw-view-tab",
+        checked: currentView == ResultsView.Raw,
+        onClick: () => {
+          setCurrentView(ResultsView.Raw);
         },
-      ]);
-    } else {
-      setViewOptions([]);
-    }
-  }, [currentView, currentResults]);
+      },
+    ];
+  }
 
   useEffect(() => {
     ipcRenderer.on("download-complete", (_, file) => {
