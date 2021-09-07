@@ -15,7 +15,7 @@
     "test:electron": "NODE_ENV=test webpack --config webpack.electron.config.js --mode production",
     "test:react": "NODE_ENV=test webpack --config webpack.react.config.js --mode production",
     "build:test": "npm run test:electron && npm run test:react",
-    "test": "cross-env NODE_ENV=test mocha --require ./tests/hooks.js ./tests",
+    "test": "cross-env NODE_ENV=test mocha --require ./tests/hooks.js --retries 2 ./tests",
     "prepare": "husky install"
   },
   "keywords": [],
