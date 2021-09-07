@@ -56,10 +56,6 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
 
   const theme = useTheme();
 
-  ipcRenderer.invoke("is-dark-mode").then((isDarkMode) => {
-    setIsDarkMode(isDarkMode);
-  });
-
   const currentResults = results?.data;
   const error = results?.error;
   const currentScript = results?.script;
@@ -107,6 +103,10 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
   useEffect(() => {
     ipcRenderer.on("download-complete", (_, file) => {
       Exporter.cleanup(file);
+    });
+
+    ipcRenderer.invoke("is-dark-mode").then((isDarkMode) => {
+      setIsDarkMode(isDarkMode);
     });
 
     return () => {
