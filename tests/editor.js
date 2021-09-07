@@ -3,7 +3,7 @@ const cleanupDB = require("./cleanup");
 
 const isMac = process.platform === "darwin";
 
-describe.skip("Editor Window", function () {
+describe("Editor Window", function () {
   before(async function () {
     this.appWindow = await this.app.firstWindow();
     await this.appWindow.waitForLoadState("domcontentloaded");
@@ -65,6 +65,8 @@ describe.skip("Editor Window", function () {
 
     const resultsView = await this.appWindow.$(".raw-results-view");
     assert.strictEqual(await resultsView.innerText(), `"${query}"`);
+
+    await this.appWindow.waitForTimeout(5000);
   });
 
   it("should execute a query from Ctrl+Enter", async function () {
@@ -91,6 +93,7 @@ describe.skip("Editor Window", function () {
 
     const resultsView = await this.appWindow.$(".raw-results-view");
     assert.strictEqual(await resultsView.innerText(), `"${query}"`);
+    await this.appWindow.waitForTimeout(5000);
   });
 
   /*it ("should load a query", async function () {

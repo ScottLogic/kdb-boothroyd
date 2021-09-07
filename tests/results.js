@@ -3,7 +3,7 @@ const cleanupDB = require("./cleanup");
 
 const isMac = process.platform === "darwin";
 
-describe.skip("Results Window", function () {
+describe("Results Window", function () {
   before(async function () {
     this.appWindow = await this.app.firstWindow();
     await this.appWindow.waitForLoadState("domcontentloaded");
@@ -33,6 +33,8 @@ describe.skip("Results Window", function () {
       ".raw-results-view"
     );
     assert.strictEqual(await resultsView.innerText(), `"${query}"`);
+
+    await this.appWindow.waitForTimeout(5000);
   });
 
   it("should display a dictionary correctly", async function () {
@@ -66,6 +68,8 @@ describe.skip("Results Window", function () {
     assert.strictEqual(cells.length, 2);
     assert.strictEqual(await cells[0].innerText(), "a");
     assert.strictEqual(await cells[1].innerText(), "100");
+
+    await this.appWindow.waitForTimeout(5000);
   });
 
   it("should display a table correctly", async function () {
@@ -101,9 +105,13 @@ describe.skip("Results Window", function () {
     assert.strictEqual(await cells[0].innerText(), "1");
     assert.strictEqual(await cells[1].innerText(), "Dent");
     assert.strictEqual(await cells[2].innerText(), "98");
+
+    await this.appWindow.waitForTimeout(5000);
   });
 
   it("should be able to toggle between table and results view", async function () {
+    this.timeout(20000);
+
     const rawTab = await this.appWindow.$(".raw-view-tab");
     await rawTab.click();
 
@@ -128,7 +136,7 @@ describe.skip("Results Window", function () {
     );
 
     const tableTab = await this.appWindow.$(".table-view-tab");
-    this.timeout(20000);
+
     await tableTab.click();
 
     resultsView = await this.appWindow.waitForSelector(".table-results-view");
@@ -153,6 +161,8 @@ describe.skip("Results Window", function () {
     assert.strictEqual(await cells[0].innerText(), "1");
     assert.strictEqual(await cells[1].innerText(), "Dent");
     assert.strictEqual(await cells[2].innerText(), "98");
+
+    await this.appWindow.waitForTimeout(5000);
   });
 
   after(async function () {

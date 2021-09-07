@@ -3,7 +3,7 @@ const cleanupDB = require("./cleanup");
 
 const isMac = process.platform === "darwin";
 
-describe.skip("Table List", function () {
+describe("Table List", function () {
   before(async function () {
     this.appWindow = await this.app.firstWindow();
     await this.appWindow.waitForLoadState("domcontentloaded");
@@ -95,6 +95,8 @@ describe.skip("Table List", function () {
     assert.strictEqual(columns.length, 2);
     assert.strictEqual(await columns[0].innerText(), "name (symbol)");
     assert.strictEqual(await columns[1].innerText(), "iq (long)");
+
+    await this.appWindow.waitForTimeout(5000);
   });
 
   it("should query the table when I click on it", async function () {
@@ -130,6 +132,8 @@ describe.skip("Table List", function () {
     assert.strictEqual(await cells[0].innerText(), "1");
     assert.strictEqual(await cells[1].innerText(), "Dent");
     assert.strictEqual(await cells[2].innerText(), "98");
+
+    await this.appWindow.waitForTimeout(5000);
   });
 
   after(async function () {
