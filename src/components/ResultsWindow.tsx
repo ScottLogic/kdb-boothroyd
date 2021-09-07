@@ -60,6 +60,9 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
   const error = results?.error;
   const currentScript = results?.script;
 
+  const previousResultsRef = useRef();
+  const previousResults = previousResultsRef.current;
+
   let rows: Array<{} | string> = [];
   let columns: Array<IColumn> = [];
 
@@ -67,12 +70,19 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
     const processed = ResultsProcessor.process(currentResults);
 
     if (Array.isArray(processed)) {
-      if (currentView !== ResultsView.Table) {
+      if (
+        currentView !== ResultsView.Table &&
+        currentResults != previousResults
+      )
         setCurrentView(ResultsView.Table);
-      }
+
       [columns, rows] = processed as [Array<IColumn>, Array<{}>];
     }
   }
+
+  useEffect(() => {
+    previousResultsRef.current = currentResults;
+  });
 
   let viewOptions: ICommandBarItemProps[] = [];
   if (Array.isArray(currentResults) && currentResults.length > 0) {
@@ -238,7 +248,7 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
         ) : (
           <>
             {typeof currentResults === "string" ||
-            currentView == ResultsView.Raw ? (
+            currentView === ResultsView.Raw ? (
               <pre className="raw-results-view">
                 {currentResults ? stringify(currentResults) : ""}
               </pre>
