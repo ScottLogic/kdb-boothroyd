@@ -65,8 +65,6 @@ describe("Editor Window", function () {
 
     const resultsView = await this.appWindow.$(".raw-results-view");
     assert.strictEqual(await resultsView.innerText(), `"${query}"`);
-
-    await this.appWindow.waitForTimeout(5000);
   });
 
   it("should execute a query from Ctrl+Enter", async function () {
@@ -93,7 +91,6 @@ describe("Editor Window", function () {
 
     const resultsView = await this.appWindow.$(".raw-results-view");
     assert.strictEqual(await resultsView.innerText(), `"${query}"`);
-    await this.appWindow.waitForTimeout(5000);
   });
 
   /*it ("should load a query", async function () {

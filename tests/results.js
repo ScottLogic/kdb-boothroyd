@@ -33,8 +33,6 @@ describe("Results Window", function () {
       ".raw-results-view"
     );
     assert.strictEqual(await resultsView.innerText(), `"${query}"`);
-
-    await this.appWindow.waitForTimeout(5000);
   });
 
   it("should display a dictionary correctly", async function () {
@@ -68,8 +66,6 @@ describe("Results Window", function () {
     assert.strictEqual(cells.length, 2);
     assert.strictEqual(await cells[0].innerText(), "a");
     assert.strictEqual(await cells[1].innerText(), "100");
-
-    await this.appWindow.waitForTimeout(5000);
   });
 
   it("should display a table correctly", async function () {
@@ -105,13 +101,10 @@ describe("Results Window", function () {
     assert.strictEqual(await cells[0].innerText(), "1");
     assert.strictEqual(await cells[1].innerText(), "Dent");
     assert.strictEqual(await cells[2].innerText(), "98");
-
-    await this.appWindow.waitForTimeout(5000);
   });
 
   it("should be able to toggle between table and results view", async function () {
     this.timeout(20000);
-
     const rawTab = await this.appWindow.$(".raw-view-tab");
     await rawTab.click();
 
@@ -161,8 +154,6 @@ describe("Results Window", function () {
     assert.strictEqual(await cells[0].innerText(), "1");
     assert.strictEqual(await cells[1].innerText(), "Dent");
     assert.strictEqual(await cells[2].innerText(), "98");
-
-    await this.appWindow.waitForTimeout(5000);
   });
 
   after(async function () {
