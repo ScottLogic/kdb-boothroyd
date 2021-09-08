@@ -44,7 +44,7 @@ jobs:
           unzip tests/fixtures/q.zip
           chmod a+x ./q/m32/q
           export QHOME=$GITHUB_WORKSPACE/q
-          nohup ./q/lm32/q -p 5001 >output.log </dev/null &
+          nohup ./q/m32/q -p 5001 >output.log </dev/null &
 
       - name: Run Q Server
         if: matrix.os == 'windows-latest'
@@ -52,7 +52,7 @@ jobs:
           unzip tests/fixtures/q.zip
           chmod a+x ./q/l32/q
           set QHOME=$GITHUB_WORKSPACE/q
-          nohup ./q/l32/q -p 5001 >NUL
+          ./q/w32/q -p 5001 >NUL
 
       - name: Install dependencies
         run: |
