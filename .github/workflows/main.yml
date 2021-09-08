@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: "16"
 
-      - name: Run Q Server
+      - name: Run Q Server (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
           unzip tests/fixtures/q.zip
@@ -38,7 +38,7 @@ jobs:
           export QHOME=$GITHUB_WORKSPACE/q
           nohup ./q/l32/q -p 5001 >output.log </dev/null &
 
-      - name: Run Q Server
+      - name: Run Q Server (OSX)
         if: matrix.os == 'macos-latest'
         run: |
           unzip tests/fixtures/q.zip
@@ -46,7 +46,7 @@ jobs:
           export QHOME=$GITHUB_WORKSPACE/q
           nohup ./q/m32/q -p 5001 >output.log </dev/null &
 
-      - name: Run Q Server
+      - name: Run Q Server (Windows)
         if: matrix.os == 'windows-latest'
         run: |
           unzip tests/fixtures/q.zip
@@ -69,11 +69,11 @@ jobs:
       - name: Build for test environment
         run: npm run build:test
 
-      - name: Run tests
+      - name: Run tests (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm test
 
-      - name: Run tests
+      - name: Run tests (Windows & OSX)
         if: matrix.os != 'ubuntu-latest'
         run: npm test
 
