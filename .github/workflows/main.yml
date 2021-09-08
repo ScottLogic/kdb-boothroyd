@@ -50,9 +50,9 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           unzip tests/fixtures/q.zip
-          chmod a+x ./q/w32/q
+          chmod a+x q\w32\q
           set QHOME=$GITHUB_WORKSPACE/q
-          ./q/w32/q -p 5001 >NUL
+          q\w32\q -p 5001 >NUL
 
       - name: Install dependencies
         run: |
