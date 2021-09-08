@@ -60,7 +60,7 @@ describe("Server Connection", () => {
   });
 
   it("should handle multiple connections", async function () {
-    this.timeout(10000);
+    this.timeout(15000);
 
     const serversButton = await this.appWindow.$(".show-servers-button");
     await serversButton.click();
