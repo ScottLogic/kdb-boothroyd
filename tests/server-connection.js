@@ -100,6 +100,8 @@ describe("Server Connection", () => {
 
   it("should truncate the tab list if there are too many connections", async function () {
     this.timeout(15000);
+    this.retries(2);
+
     const serversButton = await this.appWindow.$(".show-servers-button");
 
     for (let i = 0; i < 7; i++) {
