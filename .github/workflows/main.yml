@@ -13,7 +13,19 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2.4.0
+        with:
+          node-version: "16"
+
+      # Test code formatting
+      - name: "Check formatting with Prettier"
+        if: matrix.os != 'windows-latest'
+        run: yes | npx prettier --check .
+
   test:
     # The type of runner that the job will run on
     runs-on: ${{ matrix.os }}
@@ -59,10 +71,6 @@ jobs:
           npx playwright install-deps chromium
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
-
-      # Test code formatting
-      - name: "Check formatting with Prettier"
-        run: npx prettier --check .
 
       # Builds for tests
       - name: Build for test environment
