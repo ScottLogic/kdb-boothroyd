@@ -33,7 +33,7 @@ jobs:
       - name: Run Q Server (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
-          unzip tests/fixtures/q.zip
+          unzip tests/fixtures/q-linux.zip
           chmod a+x ./q/l32/q
           export QHOME=$GITHUB_WORKSPACE/q
           nohup ./q/l32/q -p 5001 >output.log </dev/null &
@@ -41,7 +41,7 @@ jobs:
       - name: Run Q Server (OSX)
         if: matrix.os == 'macos-latest'
         run: |
-          unzip tests/fixtures/q.zip
+          unzip tests/fixtures/q-macos.zip
           chmod a+x ./q/m64/q
           export QHOME=$GITHUB_WORKSPACE/q
           nohup ./q/m64/q -p 5001 >output.log </dev/null &
@@ -49,10 +49,9 @@ jobs:
       - name: Run Q Server (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          unzip tests/fixtures/q.zip
-          chmod a+x q\w32\q
+          unzip tests/fixtures/q-windows.zip
           set QHOME=$GITHUB_WORKSPACE/q
-          q\w32\q.exe -p 5001 >NUL
+          q\w32\q -p 5001 >NUL
 
       - name: Install dependencies
         run: |
