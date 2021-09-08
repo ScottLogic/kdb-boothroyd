@@ -51,7 +51,7 @@ jobs:
         run: |
           unzip tests/fixtures/q-windows.zip
           set QHOME=$GITHUB_WORKSPACE/q
-          ./q/w32/q -p 5001 >NUL
+          Start-Job { & ./q/w32/q -p 5001 }
 
       - name: Install dependencies
         run: |
