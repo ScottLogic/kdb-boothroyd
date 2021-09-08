@@ -77,6 +77,13 @@ jobs:
         if: matrix.os != 'ubuntu-latest'
         run: npm test
 
+      - name: Archive kdb log
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: kdb-output.log
+          path: output.log
+
   release:
     needs: test
     runs-on: macos-latest
