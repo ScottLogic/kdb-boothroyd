@@ -21,12 +21,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
 
-    services:
-      kdb:
-        image: kysely/kdbq
-        ports:
-          - 5001:5000
-
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -34,6 +28,15 @@ jobs:
       - uses: actions/setup-node@v2.4.0
         with:
           node-version: "16"
+
+      - name: Run Q Server
+        run: |
+          unzip tests/fixtures/q.zip
+          chmod a+x ./q/l32/q
+          export QHOME=$GITHUB_WORKSPACE/q
+          echo $GITHUB_WORKSPACE
+          echo $QHOME
+          nohup ./q/l32/q -p 5001 >output.log </dev/null &
 
       - name: Install dependencies
         run: |
