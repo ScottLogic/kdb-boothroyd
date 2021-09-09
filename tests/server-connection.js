@@ -24,6 +24,7 @@ describe("Server Connection", () => {
 
   it("should connect to the server successfully", async function () {
     this.timeout(10000);
+    await this.modal.waitForSelector(".server-list li");
     const server = await this.modal.$(":nth-match(.server-list li, 1)");
     await server.click();
     await this.appWindow.waitForTimeout(100);
@@ -69,6 +70,7 @@ describe("Server Connection", () => {
     this.modal = await this.appWindow.$(".server-management-modal");
 
     assert.notStrictEqual(this.modal, null, "Server modal has not appeared");
+    await this.modal.waitForSelector(".server-list li");
 
     const server = await this.modal.$(":nth-match(.server-list li, 1)");
     await server.click();
@@ -99,7 +101,7 @@ describe("Server Connection", () => {
   });
 
   it("should truncate the tab list if there are too many connections", async function () {
-    this.timeout(20000);
+    this.timeout(30000);
     this.retries(2);
 
     const serversButton = await this.appWindow.$(".show-servers-button");
@@ -112,6 +114,7 @@ describe("Server Connection", () => {
 
       assert.notStrictEqual(this.modal, null, "Server modal has not appeared");
 
+      await this.modal.waitForSelector(".server-list li");
       const server = await this.modal.$(":nth-match(.server-list li, 1)");
       await server.click();
       await this.appWindow.waitForTimeout(100);
@@ -120,6 +123,7 @@ describe("Server Connection", () => {
 
       await connectButton.click();
       await this.modal.waitForElementState("hidden");
+      this.appWindow.waitForTimeout(100);
     }
 
     const overflowButton = await this.appWindow.waitForSelector(

@@ -9,6 +9,7 @@ describe("Server List", () => {
   });
 
   it("should display the correct list of servers", async function () {
+    await this.modal.waitForSelector(".server-list li");
     const servers = await this.modal.$$(".server-list li");
 
     assert.strictEqual(servers.length, 1);
