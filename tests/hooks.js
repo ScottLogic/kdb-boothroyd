@@ -31,6 +31,11 @@ exports.mochaHooks = {
       const matchingKeys = allKeys.filter((k) => k.startsWith("server-"));
 
       console.log("matching keys", matchingKeys);
+
+      storage.getMany(matchingKeys, (err, data) => {
+        console.log("ERR", err);
+        console.log("DATA", data);
+      });
     });
 
     console.log("LIST FILES", readdirSync(this.storageDir));
