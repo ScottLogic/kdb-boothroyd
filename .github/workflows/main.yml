@@ -63,7 +63,7 @@ jobs:
         run: |
           unzip tests/fixtures/q-windows.zip
           Start-Job { param($curDir) & $curDir\q\w32\q.exe -p 5001 } -ArgumentList $GITHUB_WORKSPACE
-          Get-Job
+          Receive-Job -Id 1
 
       - name: Install dependencies
         run: |
