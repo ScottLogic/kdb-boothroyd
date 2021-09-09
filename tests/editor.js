@@ -3,7 +3,7 @@ const cleanupDB = require("./cleanup");
 
 const isMac = process.platform === "darwin";
 
-describe.skip("Editor Window", function () {
+describe("Editor Window", function () {
   before(async function () {
     this.appWindow = await this.app.firstWindow();
     await this.appWindow.waitForLoadState("domcontentloaded");
@@ -42,6 +42,8 @@ describe.skip("Editor Window", function () {
 
   it("should execute a query from pressing the go button", async function () {
     this.timeout(20000);
+    this.retries(2);
+
     const editor = await this.appWindow.$(".monaco-editor textarea");
 
     const query = "t:flip `name`iq!(`Dent`Beeblebrox`Prefect;98 42 126)";
@@ -70,6 +72,8 @@ describe.skip("Editor Window", function () {
 
   it("should execute a query from Ctrl+Enter", async function () {
     this.timeout(20000);
+    this.retries(2);
+
     const editor = await this.appWindow.$(".monaco-editor textarea");
 
     const query = "t2:flip `name`iq!(`Dent`Beeblebrox`Prefect;98 42 126)";

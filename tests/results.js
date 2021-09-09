@@ -3,7 +3,7 @@ const cleanupDB = require("./cleanup");
 
 const isMac = process.platform === "darwin";
 
-describe.skip("Results Window", function () {
+describe("Results Window", function () {
   before(async function () {
     this.appWindow = await this.app.firstWindow();
     await this.appWindow.waitForLoadState("domcontentloaded");
@@ -23,6 +23,8 @@ describe.skip("Results Window", function () {
 
   it("should display the results of an instruction as the raw response", async function () {
     this.timeout(20000);
+    this.retries(2);
+
     const editor = await this.appWindow.$(".monaco-editor textarea");
 
     const query = "d:`a`b`c!100 200 300";
@@ -38,6 +40,8 @@ describe.skip("Results Window", function () {
 
   it("should display a dictionary correctly", async function () {
     this.timeout(20000);
+    this.retries(2);
+
     const editor = await this.appWindow.$(".monaco-editor textarea");
 
     const query = "d";
@@ -71,6 +75,8 @@ describe.skip("Results Window", function () {
 
   it("should display a table correctly", async function () {
     this.timeout(20000);
+    this.retries(2);
+
     const editor = await this.appWindow.$(".monaco-editor textarea");
 
     const query = "t:flip `name`iq!(`Dent`Beeblebrox`Prefect;98 42 126);t";
@@ -105,6 +111,9 @@ describe.skip("Results Window", function () {
   });
 
   it("should be able to toggle between table and results view", async function () {
+    this.timeout(20000);
+    this.retries(2);
+
     const rawTab = await this.appWindow.$(".raw-view-tab");
     await rawTab.click();
 
@@ -129,7 +138,7 @@ describe.skip("Results Window", function () {
     );
 
     const tableTab = await this.appWindow.$(".table-view-tab");
-    this.timeout(20000);
+
     await tableTab.click();
 
     resultsView = await this.appWindow.waitForSelector(".table-results-view");

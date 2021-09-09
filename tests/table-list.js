@@ -3,7 +3,7 @@ const cleanupDB = require("./cleanup");
 
 const isMac = process.platform === "darwin";
 
-describe.skip("Table List", function () {
+describe("Table List", function () {
   before(async function () {
     this.appWindow = await this.app.firstWindow();
     await this.appWindow.waitForLoadState("domcontentloaded");
@@ -66,6 +66,7 @@ describe.skip("Table List", function () {
 
   it("should show the correct details for a table", async function () {
     this.timeout(20000);
+    this.retries(2);
 
     const editor = await this.appWindow.$(".monaco-editor textarea");
 
@@ -100,6 +101,8 @@ describe.skip("Table List", function () {
 
   it("should query the table when I click on it", async function () {
     this.timeout(20000);
+    this.retries(2);
+
     const tableEntry = await this.appWindow.$(
       ":nth-match(.table-list .ms-GroupedList-group, 1)"
     );
