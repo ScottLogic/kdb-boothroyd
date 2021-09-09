@@ -62,8 +62,6 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           unzip tests/fixtures/q-windows.zip
-          $QHOME=$GITHUB_WORKSPACE/q
-          $QHOME
           Start-Job { param($curDir) & $curDir\q\w32\q.exe -p 5001" } -ArgumentList $GITHUB_WORKSPACE
           Get-Job
 
