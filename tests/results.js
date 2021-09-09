@@ -5,6 +5,7 @@ const isMac = process.platform === "darwin";
 
 describe("Results Window", function () {
   before(async function () {
+    this.timeout(5000);
     this.appWindow = await this.app.firstWindow();
     await this.appWindow.waitForLoadState("domcontentloaded");
     this.modal = await this.appWindow.$(".server-management-modal");
