@@ -8,8 +8,6 @@ describe("Results Window", function () {
     this.appWindow = await this.app.firstWindow();
     await this.appWindow.waitForLoadState("domcontentloaded");
     this.modal = await this.appWindow.$(".server-management-modal");
-    const serverList = await this.modal.$(".server-list");
-    serverList.waitForElementState("visible");
     await this.modal.waitForSelector(".server-list li");
     const server = await this.modal.$(":nth-match(.server-list li, 1)");
     await server.click();
