@@ -1,6 +1,6 @@
 const { _electron: electron } = require("playwright");
 const path = require("path");
-const { existsSync } = require("fs");
+const { existsSync, readdirSync } = require("fs");
 const fs = require("fs/promises");
 
 exports.mochaHooks = {
@@ -11,6 +11,8 @@ exports.mochaHooks = {
     const userData = await this.app.evaluate(({ app }) => {
       return app.getPath("userData");
     });
+
+    console.log("USER DATA", userData);
     this.storageDir = path.join(userData, "storage");
 
     if (!existsSync(this.storageDir)) await fs.mkdir(this.storageDir);
@@ -20,6 +22,7 @@ exports.mochaHooks = {
       path.join(this.storageDir, "server-sample.json")
     );
 
+    console.log("LIST FILES", readdirSync(this.storageDir));
     const window = await this.app.firstWindow();
     await window.reload();
   },
