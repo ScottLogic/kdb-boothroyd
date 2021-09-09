@@ -2,6 +2,7 @@ const { _electron: electron } = require("playwright");
 const path = require("path");
 const { existsSync, readdirSync } = require("fs");
 const fs = require("fs/promises");
+const storage = require("electron-json-storage");
 
 exports.mochaHooks = {
   beforeAll: async function () {
@@ -21,6 +22,16 @@ exports.mochaHooks = {
       path.join(__dirname, "fixtures", "server-sample.json"),
       path.join(this.storageDir, "server-sample.json")
     );
+
+    storage.setDataPath(this.storageDir);
+    storage.keys((error, allKeys) => {
+      console.log("error", error);
+      console.log("keys", allKeys);
+
+      const matchingKeys = allKeys.filter((k) => k.startsWith("server-"));
+
+      console.log("matching keys", matchingKeys);
+    });
 
     console.log("LIST FILES", readdirSync(this.storageDir));
     const window = await this.app.firstWindow();
