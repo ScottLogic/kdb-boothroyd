@@ -13,7 +13,6 @@ exports.mochaHooks = {
       return app.getPath("userData");
     });
 
-    console.log("USER DATA", userData);
     this.storageDir = path.join(userData, "storage");
 
     if (!existsSync(this.storageDir)) await fs.mkdir(this.storageDir);
@@ -23,22 +22,6 @@ exports.mochaHooks = {
       path.join(this.storageDir, "server-sample.json")
     );
 
-    storage.setDataPath(this.storageDir);
-    storage.keys((error, allKeys) => {
-      console.log("error", error);
-      console.log("keys", allKeys);
-
-      const matchingKeys = allKeys.filter((k) => k.startsWith("server-"));
-
-      console.log("matching keys", matchingKeys);
-
-      storage.getMany(matchingKeys, (err, data) => {
-        console.log("ERR", err);
-        console.log("DATA", data);
-      });
-    });
-
-    console.log("LIST FILES", readdirSync(this.storageDir));
     const window = await this.app.firstWindow();
     await window.reload();
   },
