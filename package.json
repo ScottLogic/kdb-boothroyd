@@ -27,11 +27,7 @@
   "license": "ISC",
   "build": {
     "win": {
-      "asar": {
-        "asarUnpack": [
-          "**/*.node"
-        ]
-      }
+      "asar": false
     },
     "files": [
       "dist/",
