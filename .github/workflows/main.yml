@@ -42,28 +42,9 @@ jobs:
         with:
           node-version: "16"
 
-      - name: Run Q Server (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
+      - name: Run Q Server
         run: |
-          unzip tests/fixtures/q-linux.zip
-          chmod a+x ./q/l32/q
-          export QHOME=$GITHUB_WORKSPACE/q
-          nohup ./q/l32/q -p 5001 >output.log </dev/null &
-
-      - name: Run Q Server (OSX)
-        if: matrix.os == 'macos-latest'
-        run: |
-          unzip tests/fixtures/q-macos.zip
-          chmod a+x ./q/m64/q
-          export QHOME=$GITHUB_WORKSPACE/q
-          nohup ./q/m64/q -p 5001 >output.log </dev/null &
-
-      - name: Run Q Server (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          unzip tests/fixtures/q-windows.zip
-          Start-Job { param($curDir) & $curDir\q\w32\q.exe -p 5001 } -ArgumentList $GITHUB_WORKSPACE
-          Receive-Job -Id 1
+          docker run -p 5001:5000 -d kysely/kdbq
 
       - name: Install dependencies
         run: |
