@@ -251,7 +251,7 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
           <>
             {typeof processed === "string" ||
             currentView === ResultsView.Raw ? (
-              <pre className="raw-results-view">
+              <pre className="raw-results-view" style={preBlock}>
                 {currentResults ? stringify(currentResults) : ""}
               </pre>
             ) : (
