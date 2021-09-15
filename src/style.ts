@@ -113,3 +113,7 @@ export const stackTokens: IStackTokens = {
   childrenGap: 10,
   padding: 10,
 };
+
+export const preBlock: CSSProperties = {
+  padding: 10,
+};

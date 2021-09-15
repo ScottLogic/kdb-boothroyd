@@ -37,6 +37,23 @@ describe("Results Window", function () {
     assert.strictEqual(await resultsView.innerText(), `"${query}"`);
   });
 
+  it("should dislay an atom correctly", async function () {
+    this.timeout(20000);
+    this.retries(2);
+
+    const editor = await this.appWindow.$(".monaco-editor textarea");
+
+    const query = "2+2";
+    await editor.press(`${isMac ? "Meta" : "Control"}+a`);
+    await editor.type(query);
+    await editor.press(`${isMac ? "Meta" : "Control"}+Enter`);
+
+    const resultsView = await this.appWindow.waitForSelector(
+      ".raw-results-view"
+    );
+    assert.strictEqual(await resultsView.innerText(), `4`);
+  });
+
   it("should display a dictionary correctly", async function () {
     this.timeout(20000);
     this.retries(2);

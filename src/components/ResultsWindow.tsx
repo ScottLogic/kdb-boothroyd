@@ -21,6 +21,7 @@ import { ipcRenderer } from "electron";
 
 import {
   agWrapper,
+  preBlock,
   resultsWindow,
   resultsWrapper,
   stackTokens,
@@ -66,8 +67,9 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
   let rows: Array<{} | string> = [];
   let columns: Array<IColumn> = [];
 
+  let processed;
   if (currentResults) {
-    const processed = ResultsProcessor.process(currentResults);
+    processed = ResultsProcessor.process(currentResults);
 
     if (Array.isArray(processed)) {
       if (
@@ -247,7 +249,7 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
           </MessageBar>
         ) : (
           <>
-            {typeof currentResults === "string" ||
+            {typeof processed === "string" ||
             currentView === ResultsView.Raw ? (
               <pre className="raw-results-view">
                 {currentResults ? stringify(currentResults) : ""}

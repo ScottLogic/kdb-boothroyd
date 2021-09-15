@@ -7,6 +7,8 @@ export class ResultsProcessor {
     let cols: ColDef[] = [],
       rows: Array<{} | null> = [];
 
+    console.log("results", results, typeof results);
+
     // Get the type of our results
     if (Array.isArray(results)) {
       // We have a list of results, lets convert them to our format for details list
@@ -25,10 +27,11 @@ export class ResultsProcessor {
       //sorted = this.copyAndSort(this.preprocessData(prepped), sortColumn, sortDirection == "desc")
       cols = this.prepareHeaders({ key: "", value: "" }, false);
       return [cols, rows];
-    } else if (typeof results === "string") {
+    } else if (typeof results === "string" || results.toString()) {
       // If it's a string just return it as is
-      return results;
+      return results.toString();
     } else {
+      console.log("Couldn't Parse");
       // If we can't do anything with the results return an error and results as string
       return `Resultset could not be parsed.\n\n${JSON.stringify(results)}`;
     }
