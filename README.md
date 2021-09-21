@@ -49,6 +49,21 @@ To test the project you'll need a q server running on port 5001. Then run:
 
 KDB is a database and q is the programming language used to interact with it. To learn more go [here](https://code.kx.com/q/learn/)
 
+## Custom Authentication Plugins
+
+Kdb Studio 2 supports chainable custom authentication plugins that can be used to do some pre-processing of server details before attempting a connection. First you need to add a `customAuthPlugin` key to your `settings.json` file, which can be found in the `APPDATA` folder for the app. This key is an array of strings, specifying the path to your plugins, order is important as they applied in sequence. Examples plugins can be found in `tests/fixtures`. They are javascript files that expect a `server` object to be available in their global scope. You should manipulate the server object which will then be returned to the application at the end of the script. The `server` object has the following properties:
+
+```typescript
+interface Server {
+  name: string;
+  host: string;
+  port: number;
+  username?: string;
+  password?: string;
+  useTLS?: boolean;
+}
+```
+
 ## What needs doing?
 
 Check out our Issues list for what's still outstanding. You can also make suggestions for new features/improvements here which will then be approved by one of the core team. Once something is approved feel free to pick it up and implement it. Be sure to work on a feature branch and submit a pull request when ready.
