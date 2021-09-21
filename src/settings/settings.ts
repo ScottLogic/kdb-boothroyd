@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs/promises";
 
 interface SettingsData {
-  customAuthPlugin?: string;
+  customAuthPlugin?: string[];
 }
 
 export default class Settings {

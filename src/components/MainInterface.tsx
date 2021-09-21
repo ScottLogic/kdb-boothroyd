@@ -84,7 +84,9 @@ const MainInterface: FC = () => {
     const currentConnections = [...connections];
     const settings = Settings.getInstance();
     if (settings && settings.get("customAuthPlugin")) {
-      server = applyCustomAuth(settings.get("customAuthPlugin"), server);
+      settings.get("customAuthPlugin").forEach((p: string) => {
+        server = applyCustomAuth(p, server);
+      });
     }
     const connection = await new KdbConnection(server.host, server.port, {
       user: server.username,
