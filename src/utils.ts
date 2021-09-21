@@ -28,10 +28,8 @@ export function applyCustomAuth(pluginPath: string, server: Server): Server {
     const context = { server };
     const script = new Script(plugin);
     script.runInNewContext(context);
-    console.log("Context", context);
     return context.server;
   } catch (e) {
-    console.log("e", e);
     return server;
   }
 }
