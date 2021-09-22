@@ -48,6 +48,8 @@
     },
     "snap": {
       "publish": "github"
+    },
+    "nsis": {
     }
   },
   "release": {
