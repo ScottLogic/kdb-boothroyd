@@ -28,6 +28,14 @@
   "build": {
     "win": {
       "asar": false
+      "target": [
+        {
+          "target": "nsis"
+        },
+        {
+          "target": "nsis-web"
+        }
+      ]
     },
     "files": [
       "dist/",
@@ -50,6 +58,10 @@
       "publish": "github"
     },
     "nsis": {
+    },
+    "nsisWeb": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
     }
   },
   "release": {
