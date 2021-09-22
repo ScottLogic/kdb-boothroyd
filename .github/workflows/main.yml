@@ -131,4 +131,4 @@ jobs:
       - name: Build app
         run: npm run build
       - name: Compile Executables and Publish
-        run: npm run dist -- -${matrix.target} -p always
+        run: npm run dist -- -${{matrix.target}} -p always
