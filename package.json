@@ -135,6 +135,7 @@
     "electron-dl": "^3.2.1",
     "electron-json-storage": "^4.5.0",
     "electron-updater": "^4.3.9",
+    "electron-window-state": "^5.0.3",
     "node-q": "2.x.x",
     "office-ui-fabric-core": "^11.0.0",
     "react": "^17.*",
