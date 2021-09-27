@@ -54,7 +54,7 @@ module.exports = {
     isDevelopment && new ReactRefreshWebpackPlugin(),
     new MonacoWebpackPlugin(),
     new HtmlWebpackPlugin({
-      title: "KDB Studio 2",
+      title: "Boothroyd",
     }),
   ].filter(Boolean),
 };

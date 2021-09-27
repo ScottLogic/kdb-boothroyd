@@ -1,5 +1,5 @@
 {
-  "name": "kdb-studio-2",
+  "name": "kdb-boothroyd",
   "version": "1.0.1",
   "description": "GUI for KDB/q database",
   "main": "./dist/main.js",
@@ -45,8 +45,8 @@
       "node_modules/",
       "package.json"
     ],
-    "productName": "KDB Studio 2",
-    "appId": "com.scottlogic.kdbstudio2",
+    "productName": "KDB Boothroyd",
+    "appId": "com.scottlogic.kdbboothroyd",
     "directories": {
       "output": "dist"
     },

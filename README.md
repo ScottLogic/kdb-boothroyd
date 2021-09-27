@@ -1,4 +1,4 @@
-# KDB Studio 2.
+# Boothroyd.
 
 A GUI for KDB+/q database built with React on Electron.
 

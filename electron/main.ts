@@ -18,7 +18,7 @@ const iconPath = path.join(__dirname, "..", "build", "icons", "icon.png");
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    title: "KDB Studio 2",
+    title: "Boothroyd",
     width: 900,
     height: 700,
     webPreferences: {
