@@ -47,6 +47,13 @@ const MainInterface: FC = () => {
   const theme = useTheme();
 
   useEffect(() => {
+    const connection = connections.find((c) => c.id === currentConnection);
+    if (connection) {
+      ipcRenderer.send("update-title", titleForTab(connection));
+    }
+  }, [currentConnection, connections]);
+
+  useEffect(() => {
     ipcRenderer.on("show-error", (_, error: string) => {
       setErrorMessage(error);
       setShowError(true);
