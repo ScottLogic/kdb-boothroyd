@@ -22,11 +22,14 @@ import { editorWindow, editorWrapper } from "../style";
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 
-interface EditorWindowProps {
-  onExecuteQuery: (query: string) => void;
+export interface FileManagementProps {
   onFilenameChanged: (scriptName: string) => void;
   onUnsavedChangesChanged: (unsavedChanges: boolean) => void;
   filename?: string;
+}
+
+interface EditorWindowProps extends FileManagementProps {
+  onExecuteQuery: (query: string) => void;
 }
 
 // Set some default options for the Monaco Editor
