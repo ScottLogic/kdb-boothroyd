@@ -62,7 +62,10 @@ function createWindow() {
       // if a filename is not given, open the save-as dialog
       filename = dialog.showSaveDialogSync({
         title: "Save Query",
-        filters: [{ name: "Q Files", extensions: ["*.q"] }],
+        filters: [
+          { name: "Q Files", extensions: ["q"] },
+          { name: "All Files", extensions: ["*"] },
+        ],
       });
     }
     if (filename) {
@@ -84,7 +87,10 @@ function createWindow() {
 
   ipcMain.handle("load-script", async () => {
     const response = await dialog.showOpenDialog({
-      filters: [{ name: "Q Files", extensions: ["*.q"] }],
+      filters: [
+        { name: "Q Files", extensions: ["q"] },
+        { name: "All Files", extensions: ["*"] },
+      ],
       properties: ["openFile"],
     });
 
