@@ -71,6 +71,10 @@ function createWindow() {
     return filename;
   });
 
+  ipcMain.on("update-title", (_, title) => {
+    mainWindow?.setTitle(title);
+  });
+
   ipcMain.on("open-file", async (_, info) => {
     // Open a local file in the default app
     const dl = await download(BrowserWindow.getFocusedWindow()!, info.url);
