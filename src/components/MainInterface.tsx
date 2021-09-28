@@ -33,11 +33,7 @@ interface ConnectionTab {
 
 function titleForTab(tab: ConnectionTab) {
   const name = tab.name || tab.connection.host;
-  return tab.filename
-    ? `${name} - ${path.basename(tab.filename)} ${
-        tab.unsavedChanges ? "*" : ""
-      }`
-    : name;
+  return tab.filename ? `${name} - ${path.basename(tab.filename)}` : name;
 }
 
 const MainInterface: FC = () => {
@@ -120,6 +116,7 @@ const MainInterface: FC = () => {
   }
 
   function customPivotRenderer(
+    tab: ConnectionTab,
     link?: IPivotItemProps,
     defaultRenderer?: (link?: IPivotItemProps) => JSX.Element | null
   ): JSX.Element | null {
@@ -135,7 +132,7 @@ const MainInterface: FC = () => {
       >
         {defaultRenderer({ ...link, itemIcon: undefined })}
         <FontIcon
-          iconName="ChromeClose"
+          iconName={tab.unsavedChanges ? "LocationFill" : "ChromeClose"}
           style={{ ...pivotClose }}
           onClick={() => disconnectButtonClicked(link.itemKey)}
         />
@@ -189,7 +186,9 @@ const MainInterface: FC = () => {
                   className={`connection-tab-${c.id}`}
                   key={i.toString()}
                   headerText={titleForTab(c)}
-                  onRenderItemLink={customPivotRenderer}
+                  onRenderItemLink={(...args) =>
+                    customPivotRenderer(c, ...args)
+                  }
                 />
               ))}
             </Pivot>
