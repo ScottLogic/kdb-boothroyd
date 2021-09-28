@@ -50,7 +50,10 @@ const MainInterface: FC = () => {
   useEffect(() => {
     const connection = connections.find((c) => c.id === currentConnection);
     if (connection) {
-      ipcRenderer.send("update-title", titleForTab(connection));
+      ipcRenderer.send(
+        "update-title",
+        `${titleForTab(connection)} ${connection.unsavedChanges ? "*" : ""}`
+      );
     }
   }, [currentConnection, connections]);
 
