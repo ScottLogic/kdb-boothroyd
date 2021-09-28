@@ -25,6 +25,7 @@ type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 interface EditorWindowProps {
   onExecuteQuery: (query: string) => void;
   onFilenameChanged: (scriptName: string) => void;
+  onUnsavedChangesChanged: (unsavedChanges: boolean) => void;
   filename?: string;
 }
 
@@ -38,8 +39,9 @@ const editorOptions = {
 
 const EditorWindow: FunctionComponent<EditorWindowProps> = ({
   onExecuteQuery,
-  onFilenameChanged: onFilenameChanged,
+  onFilenameChanged,
   filename,
+  onUnsavedChangesChanged,
 }) => {
   const uiTheme = useTheme();
 
@@ -75,6 +77,9 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
 
   // Store a reference we can use to target the run script button
   const goRef = createRef<HTMLButtonElement>();
+
+  // store previous saved script state
+  const savedScript = useRef<string>("");
 
   // Store a ref to the editor
   const editorRef = useRef<IStandaloneCodeEditor | null>(null);
@@ -128,6 +133,7 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
   // another server
   function updateScripts(newValue: string) {
     setCurrentScript(newValue);
+    onUnsavedChangesChanged(newValue !== savedScript.current);
   }
 
   async function loadScript() {
@@ -135,6 +141,8 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
     if (result) {
       const { data, filename } = result;
       setCurrentScript(data);
+      savedScript.current = data;
+      onUnsavedChangesChanged(false);
       editorRef.current?.setValue(data);
       onFilenameChanged(filename);
     }
@@ -146,6 +154,8 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
       currentScript,
       filename
     );
+    savedScript.current = currentScript;
+    onUnsavedChangesChanged(false);
     onFilenameChanged(savedFilename);
   }
 
@@ -154,6 +164,8 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
       "save-script",
       currentScript
     );
+    savedScript.current = currentScript;
+    onUnsavedChangesChanged(false);
     onFilenameChanged(savedFilename);
   }
 
