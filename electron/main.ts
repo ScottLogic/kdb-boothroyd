@@ -10,6 +10,7 @@ import { autoUpdater } from "electron-updater";
 import * as path from "path";
 import * as url from "url";
 import * as fs from "fs";
+import windowStateKeeper from "electron-window-state";
 
 import { download } from "electron-dl";
 
@@ -17,10 +18,16 @@ let mainWindow: Electron.BrowserWindow | null;
 const iconPath = path.join(__dirname, "..", "build", "icons", "icon.png");
 
 function createWindow() {
+  let mainWindowState = windowStateKeeper({
+    defaultWidth: 1000,
+    defaultHeight: 800,
+  });
   mainWindow = new BrowserWindow({
     title: "Boothroyd",
-    width: 900,
-    height: 700,
+    x: mainWindowState.x,
+    y: mainWindowState.y,
+    width: mainWindowState.width,
+    height: mainWindowState.height,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -29,6 +36,8 @@ function createWindow() {
     },
     icon: iconPath,
   });
+
+  mainWindowState.manage(mainWindow);
 
   if (process.env.NODE_ENV === "development") {
     mainWindow.loadURL(`http://localhost:4000`);
@@ -60,6 +69,10 @@ function createWindow() {
       fs.writeFileSync(filename, script);
     }
     return filename;
+  });
+
+  ipcMain.on("update-title", (_, title) => {
+    mainWindow?.setTitle(title);
   });
 
   ipcMain.on("open-file", async (_, info) => {
