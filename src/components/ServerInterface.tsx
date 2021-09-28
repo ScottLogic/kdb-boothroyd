@@ -15,12 +15,14 @@ type ServerInterfaceProps = {
   visible: boolean;
   filename?: string;
   onFilenameChanged: (scriptName: string) => void;
+  onUnsavedChangesChanged: (unsavedChanges: boolean) => void;
 };
 
 const ServerInterface: FC<ServerInterfaceProps> = ({
   connection,
   filename,
   onFilenameChanged,
+  onUnsavedChangesChanged,
   visible = false,
 }: ServerInterfaceProps) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -103,6 +105,7 @@ const ServerInterface: FC<ServerInterfaceProps> = ({
           onExecuteQuery={executeQuery}
           onFilenameChanged={onFilenameChanged}
           filename={filename}
+          onUnsavedChangesChanged={onUnsavedChangesChanged}
         />
         <ResultsWindow
           results={results}

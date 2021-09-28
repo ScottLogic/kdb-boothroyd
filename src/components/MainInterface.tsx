@@ -28,11 +28,16 @@ interface ConnectionTab {
   filename?: string;
   name?: string;
   id: string;
+  unsavedChanges: boolean;
 }
 
 function titleForTab(tab: ConnectionTab) {
   const name = tab.name || tab.connection.host;
-  return tab.filename ? `${name} - ${path.basename(tab.filename)}` : name;
+  return tab.filename
+    ? `${name} - ${path.basename(tab.filename)} ${
+        tab.unsavedChanges ? "*" : ""
+      }`
+    : name;
 }
 
 const MainInterface: FC = () => {
@@ -93,6 +98,7 @@ const MainInterface: FC = () => {
       name: server.name,
       connection,
       id: uuid.v4(),
+      unsavedChanges: false,
     };
     setConnections([...currentConnections, tab]);
     setCurrentConnection(tab.id);
@@ -203,6 +209,10 @@ const MainInterface: FC = () => {
             connection={c.connection}
             onFilenameChanged={(filename: string) => {
               c.filename = filename;
+              setConnections(replaceAtIndex(connections, c, i));
+            }}
+            onUnsavedChangesChanged={(unsavedChanges: boolean) => {
+              c.unsavedChanges = unsavedChanges;
               setConnections(replaceAtIndex(connections, c, i));
             }}
             visible={c.id === currentConnection}
