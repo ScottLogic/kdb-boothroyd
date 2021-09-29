@@ -22,10 +22,14 @@ import { editorWindow, editorWrapper } from "../style";
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 
-interface EditorWindowProps {
-  onExecuteQuery: (query: string) => void;
+export interface FileManagementProps {
   onFilenameChanged: (scriptName: string) => void;
+  onUnsavedChangesChanged: (unsavedChanges: boolean) => void;
   filename?: string;
+}
+
+interface EditorWindowProps extends FileManagementProps {
+  onExecuteQuery: (query: string) => void;
 }
 
 // Set some default options for the Monaco Editor
@@ -38,8 +42,9 @@ const editorOptions = {
 
 const EditorWindow: FunctionComponent<EditorWindowProps> = ({
   onExecuteQuery,
-  onFilenameChanged: onFilenameChanged,
+  onFilenameChanged,
   filename,
+  onUnsavedChangesChanged,
 }) => {
   const uiTheme = useTheme();
 
@@ -75,6 +80,9 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
 
   // Store a reference we can use to target the run script button
   const goRef = createRef<HTMLButtonElement>();
+
+  // store previous saved script state
+  const savedScript = useRef<string>("");
 
   // Store a ref to the editor
   const editorRef = useRef<IStandaloneCodeEditor | null>(null);
@@ -128,6 +136,7 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
   // another server
   function updateScripts(newValue: string) {
     setCurrentScript(newValue);
+    onUnsavedChangesChanged(newValue !== savedScript.current);
   }
 
   async function loadScript() {
@@ -135,6 +144,8 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
     if (result) {
       const { data, filename } = result;
       setCurrentScript(data);
+      savedScript.current = data;
+      onUnsavedChangesChanged(false);
       editorRef.current?.setValue(data);
       onFilenameChanged(filename);
     }
@@ -146,6 +157,8 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
       currentScript,
       filename
     );
+    savedScript.current = currentScript;
+    onUnsavedChangesChanged(false);
     onFilenameChanged(savedFilename);
   }
 
@@ -154,6 +167,8 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
       "save-script",
       currentScript
     );
+    savedScript.current = currentScript;
+    onUnsavedChangesChanged(false);
     onFilenameChanged(savedFilename);
   }
 
@@ -184,6 +199,7 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
       iconProps: { iconName: "Play" },
       disabled: !(currentScript && currentScript != ""),
       elementRef: goRef,
+      className: "go-button",
       onClick: () => {
         runScript();
       },
@@ -192,6 +208,7 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
       key: "open",
       title: "Open",
       iconProps: { iconName: "OpenFolderHorizontal" },
+      className: "open-button",
       onClick: () => {
         loadScript();
       },
@@ -201,6 +218,7 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
       title: "Save As",
       iconProps: { iconName: "SaveAs" },
       disabled: !(currentScript && currentScript != ""),
+      className: "save-as-button",
       onClick: () => {
         saveScriptAs();
       },
@@ -210,6 +228,7 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
       title: "Save",
       iconProps: { iconName: "Save" },
       disabled: !(currentScript && currentScript != "") || !filename,
+      className: "save-button",
       onClick: () => {
         saveScript();
       },
@@ -307,7 +326,7 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
           flex: "0",
         }}
       />
-      <div ref={wrapper} style={{ ...editorWrapper }}>
+      <div ref={wrapper} style={editorWrapper}>
         <MonacoEditor
           language="kbd/q"
           theme={isDarkMode ? "vs-dark" : "vs-light"}

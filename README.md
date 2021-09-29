@@ -1,6 +1,8 @@
-# KDB Studio 2.
+# Boothroyd.
 
-A GUI for KDB+/q database built with React on Electron.
+_Now pay attention..._
+
+Boothroyd is a GUI for KDB+/q database built with React on Electron. The name, if you are wondering, is taken from the [James Bond character Q](<https://en.wikipedia.org/wiki/Q_(James_Bond)>).
 
 ## Getting Started
 

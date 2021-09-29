@@ -1,7 +1,8 @@
 const { _electron: electron } = require("playwright");
 const path = require("path");
-const { existsSync } = require("fs");
+const { existsSync, readdirSync } = require("fs");
 const fs = require("fs/promises");
+const storage = require("electron-json-storage");
 
 exports.mochaHooks = {
   beforeAll: async function () {
@@ -11,6 +12,7 @@ exports.mochaHooks = {
     const userData = await this.app.evaluate(({ app }) => {
       return app.getPath("userData");
     });
+
     this.storageDir = path.join(userData, "storage");
 
     if (!existsSync(this.storageDir)) await fs.mkdir(this.storageDir);

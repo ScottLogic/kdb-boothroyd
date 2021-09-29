@@ -86,18 +86,16 @@ export const editorWindow: CSSProperties = {
 export const editorWrapper: CSSProperties = {
   flex: "1 1 auto",
   overflow: "hidden",
-  padding: 10,
 };
 
 export const resultsWindow: CSSProperties = {
   flex: "1 1 auto",
   position: "relative",
-  overflowY: "scroll",
   minHeight: 50,
 };
 
 export const resultsWrapper: CSSProperties = {
-  overflow: "scroll",
+  overflow: "auto",
   minHeight: 50,
   height: "100%",
 };
@@ -113,5 +111,9 @@ export const serverModal: CSSProperties = {
 
 export const stackTokens: IStackTokens = {
   childrenGap: 10,
+  padding: 10,
+};
+
+export const preBlock: CSSProperties = {
   padding: 10,
 };

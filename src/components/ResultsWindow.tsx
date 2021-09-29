@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import {
   CommandBar,
   IColumn,
@@ -21,6 +21,7 @@ import { ipcRenderer } from "electron";
 
 import {
   agWrapper,
+  preBlock,
   resultsWindow,
   resultsWrapper,
   stackTokens,
@@ -49,83 +50,75 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
   isLoading,
   onExecuteQuery,
 }) => {
-  const [currentResults, setCurrentResults] = useState<any>(null);
-  const [currentScript, setCurrentScript] = useState<string | undefined>();
-  const [error, setError] = useState<string | undefined>();
-  const [columns, setColumns] = useState<IColumn[]>([]);
-  const [rows, setRows] = useState<Array<{} | string>>([]);
-  const [start, setStart] = useState(0);
-  const [currentView, setCurrentView] = useState(ResultsView.Raw);
-  const [viewOptions, setViewOptions] = useState<ICommandBarItemProps[]>([]);
-  const [sortColumn, setSortColumn] = useState<string | undefined>();
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  const [gridAPI, setGridAPI] = useState<GridApi | null>(null);
+  const [currentView, setCurrentView] = useState(ResultsView.Table);
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const gridAPI = useRef<GridApi | null>(null);
 
   const theme = useTheme();
 
-  // Check current theme
-  ipcRenderer.invoke("is-dark-mode").then((isDarkMode) => {
-    setIsDarkMode(isDarkMode);
+  const currentResults = results?.data;
+  const error = results?.error;
+  const currentScript = results?.script;
+
+  const previousResultsRef = useRef();
+  const previousResults = previousResultsRef.current;
+
+  let rows: Array<{} | string> = [];
+  let columns: Array<IColumn> = [];
+
+  let processed;
+  if (currentResults) {
+    processed = ResultsProcessor.process(currentResults);
+
+    if (Array.isArray(processed)) {
+      if (
+        currentView !== ResultsView.Table &&
+        currentResults != previousResults
+      )
+        setCurrentView(ResultsView.Table);
+
+      [columns, rows] = processed as [Array<IColumn>, Array<{}>];
+    }
+  }
+
+  useEffect(() => {
+    previousResultsRef.current = currentResults;
   });
 
-  useEffect(() => {
-    if (results) {
-      setCurrentScript(results.script);
-      setError(results.error);
-      setCurrentResults(results.data);
-    } else {
-      setCurrentScript(undefined);
-      setError(undefined);
-      setCurrentResults(null);
-    }
-  }, [results]);
-
-  // Format the results for display (needs extracting out)
-  useEffect(() => {
-    if (currentResults) {
-      const processed = ResultsProcessor.process(currentResults);
-
-      if (Array.isArray(processed)) {
-        setCurrentView(ResultsView.Table);
-        const [cols, rows] = processed as [Array<IColumn>, Array<{}>];
-
-        setColumns(cols);
-        setRows(rows);
-      }
-    }
-  }, [currentResults, error]);
-
-  useEffect(() => {
-    if (Array.isArray(currentResults) && currentResults.length > 0) {
-      setViewOptions([
-        {
-          key: "table",
-          text: "Table",
-          iconProps: { iconName: "Table" },
-          checked: currentView == ResultsView.Table,
-          onClick: () => {
-            setCurrentView(ResultsView.Table);
-          },
+  let viewOptions: ICommandBarItemProps[] = [];
+  if (Array.isArray(currentResults) && currentResults.length > 0) {
+    viewOptions = [
+      {
+        key: "table",
+        text: "Table",
+        iconProps: { iconName: "Table" },
+        className: "table-view-tab",
+        checked: currentView == ResultsView.Table,
+        onClick: () => {
+          setCurrentView(ResultsView.Table);
         },
-        {
-          key: "text",
-          text: "Raw",
-          iconProps: { iconName: "RawSource" },
-          checked: currentView == ResultsView.Raw,
-          onClick: () => {
-            setCurrentView(ResultsView.Raw);
-          },
+      },
+      {
+        key: "text",
+        text: "Raw",
+        iconProps: { iconName: "RawSource" },
+        className: "raw-view-tab",
+        checked: currentView == ResultsView.Raw,
+        onClick: () => {
+          setCurrentView(ResultsView.Raw);
         },
-      ]);
-    } else {
-      setViewOptions([]);
-    }
-  }, [currentView, currentResults]);
+      },
+    ];
+  }
 
   useEffect(() => {
     ipcRenderer.on("download-complete", (_, file) => {
       Exporter.cleanup(file);
+    });
+
+    ipcRenderer.invoke("is-dark-mode").then((isDarkMode) => {
+      setIsDarkMode(isDarkMode);
     });
 
     return () => {
@@ -206,11 +199,11 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
   ];
 
   function onGridReady(e: GridReadyEvent) {
-    setGridAPI(e.api);
+    gridAPI.current = e.api;
   }
 
   function refreshCells() {
-    gridAPI?.refreshCells();
+    gridAPI.current?.refreshCells();
   }
 
   function stringify(data: any) {
@@ -234,7 +227,7 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
         farItems={farItems}
         style={{ flex: "0" }}
       />
-      <Stack tokens={stackTokens} style={resultsWrapper}>
+      <Stack style={resultsWrapper}>
         {isLoading ? (
           <Spinner size={SpinnerSize.large} />
         ) : error ? (
@@ -254,31 +247,18 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
               {error}
             </Text>
           </MessageBar>
-        ) : error ? (
-          <MessageBar messageBarType={MessageBarType.error} isMultiline={true}>
-            <Text
-              block
-              variant={"large" as ITextProps["variant"]}
-              style={{ color: "inherit" }}
-            >
-              Error when executing query
-            </Text>
-            <br />
-            <Text block style={{ color: "inherit" }}>
-              Query: {currentScript}
-            </Text>
-            <Text block style={{ color: "inherit" }}>
-              {error}
-            </Text>
-          </MessageBar>
         ) : (
           <>
-            {typeof currentResults === "string" ||
-            currentView == ResultsView.Raw ? (
-              <pre>{currentResults ? stringify(currentResults) : ""}</pre>
+            {typeof processed === "string" ||
+            currentView === ResultsView.Raw ? (
+              <pre className="raw-results-view" style={preBlock}>
+                {currentResults ? stringify(currentResults) : ""}
+              </pre>
             ) : (
               <div
-                className={`ag-theme-balham${isDarkMode ? "-dark" : ""}`}
+                className={`table-results-view ag-theme-balham${
+                  isDarkMode ? "-dark" : ""
+                }`}
                 style={agWrapper}
               >
                 <AgGridReact

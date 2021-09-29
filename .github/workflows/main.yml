@@ -13,10 +13,27 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2.4.0
+        with:
+          node-version: "16"
+
+      # Test code formatting
+      - name: "Check formatting with Prettier"
+        if: matrix.os != 'windows-latest'
+        run: yes | npx prettier --check .
+
   test:
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        #, macos-latest, windows-latest]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -26,14 +43,28 @@ jobs:
         with:
           node-version: "16"
 
-      - name: Run Q Server
+      - name: Run Q Server (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          unzip tests/fixtures/q.zip
+          unzip tests/fixtures/q-linux.zip
           chmod a+x ./q/l32/q
           export QHOME=$GITHUB_WORKSPACE/q
-          echo $GITHUB_WORKSPACE
-          echo $QHOME
           nohup ./q/l32/q -p 5001 >output.log </dev/null &
+
+      - name: Run Q Server (OSX)
+        if: matrix.os == 'macos-latest'
+        run: |
+          unzip tests/fixtures/q-macos.zip
+          chmod a+x ./q/m64/q
+          export QHOME=$GITHUB_WORKSPACE/q
+          nohup ./q/m64/q -p 5001 >output.log </dev/null &
+
+      - name: Run Q Server (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          unzip tests/fixtures/q-windows.zip
+          Start-Job { param($curDir) & $curDir\q\w32\q.exe -p 5001 } -ArgumentList $GITHUB_WORKSPACE
+          Receive-Job -Id 1
 
       - name: Install dependencies
         run: |
@@ -42,20 +73,28 @@ jobs:
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
 
-      # Test code formatting
-      - name: "Check formatting with Prettier"
-        run: npx prettier --check .
-
       # Builds for tests
       - name: Build for test environment
         run: npm run build:test
 
-      - name: Run tests
+      - name: Run tests (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
         run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm test
+
+      - name: Run tests (Windows & OSX)
+        if: matrix.os != 'ubuntu-latest'
+        run: npm test
+
+      - name: Archive kdb log
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: kdb-output.log
+          path: output.log
 
   release:
     needs: test
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -66,12 +105,34 @@ jobs:
       - uses: actions/setup-node@v2.4.0
         with:
           node-version: "16"
+      - name: Install dependencies
+        run: npm ci
+      - name: Create Release
+        run: npx semantic-release
 
+  publish:
+    needs: release
+    runs-on: macos-latest
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ["m", "w", "l"]
+
+    if: contains(github.ref, 'main')
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: "main"
+      - uses: actions/setup-node@v2.4.0
+        with:
+          node-version: "16"
       - name: Install dependencies
         run: npm ci
       - name: Build app
         run: npm run build
-      - name: Create Release
-        run: npx semantic-release
       - name: Compile Executables and Publish
-        run: npm run dist -- -mwl
+        run: npm run dist -- -${{matrix.target}} -p always
