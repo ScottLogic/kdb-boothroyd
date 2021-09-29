@@ -37,7 +37,14 @@
         {
           "target": "nsis-web"
         }
-      ]
+      ],
+      "icon": "build/icons/icon.ico"
+    },
+    "mac": {
+      "icon": "build/icons/icon.icns"
+    },
+    "linux": {
+      "icon": "build/icons/icon.png"
     },
     "files": [
       "dist/",
@@ -45,12 +52,11 @@
       "node_modules/",
       "package.json"
     ],
-    "productName": "KDB Boothroyd",
+    "productName": "Boothroyd",
     "appId": "com.scottlogic.kdbboothroyd",
     "directories": {
       "output": "dist"
     },
-    "icon": "build/icons/icon.png",
     "publish": {
       "provider": "github",
       "vPrefixedTagName": true,

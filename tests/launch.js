@@ -10,7 +10,7 @@ describe("Application Launch", function () {
     const appWindow = await this.app.firstWindow();
     const title = await appWindow.title();
 
-    assert.strictEqual(title, "KDB Boothroyd");
+    assert.strictEqual(title, "Boothroyd");
   });
 
   it("should show the server manager dialog on launch", async function () {
