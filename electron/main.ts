@@ -23,7 +23,7 @@ function createWindow() {
     defaultHeight: 800,
   });
   mainWindow = new BrowserWindow({
-    title: "KDB Boothroyd",
+    title: "Boothroyd",
     x: mainWindowState.x,
     y: mainWindowState.y,
     width: mainWindowState.width,
