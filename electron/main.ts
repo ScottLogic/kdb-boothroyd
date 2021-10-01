@@ -5,6 +5,7 @@ import {
   nativeTheme,
   shell,
   dialog,
+  Menu,
 } from "electron";
 import { autoUpdater } from "electron-updater";
 import * as path from "path";
@@ -13,6 +14,7 @@ import * as fs from "fs";
 import windowStateKeeper from "electron-window-state";
 
 import { download } from "electron-dl";
+import { MenuItemConstructorOptions } from "electron/main";
 
 let mainWindow: Electron.BrowserWindow | null;
 const iconPath = path.join(__dirname, "..", "build", "icons", "icon.png");
@@ -39,6 +41,40 @@ function createWindow() {
 
   mainWindowState.manage(mainWindow);
 
+  const isMac = process.platform === "darwin";
+  Menu.setApplicationMenu(
+    Menu.buildFromTemplate([
+      ...(isMac
+        ? [
+            {
+              label: app.name,
+              submenu: [
+                { role: "about" },
+                { type: "separator" },
+                { role: "services" },
+                { type: "separator" },
+                { role: "hide" },
+                { role: "hideothers" },
+                { role: "unhide" },
+                { type: "separator" },
+                { role: "quit" },
+              ] as MenuItemConstructorOptions[],
+            },
+          ]
+        : []),
+      {
+        label: "File",
+        submenu: [
+          {
+            label: isMac ? "Preferences" : "Options",
+            accelerator: "CommandorControl+,",
+            click: () => {
+              mainWindow?.webContents.send("open-settings");
+            },
+          },
+        ] as MenuItemConstructorOptions[],
+      },
+      { role: "editMenu" },
   if (process.env.NODE_ENV === "development") {
     mainWindow.loadURL(`http://localhost:4000`);
     mainWindow.webContents.openDevTools();
