@@ -15,7 +15,13 @@ import React, { FC, useState } from "react";
 import { useEffect } from "react";
 import KdbConnection from "../server/kdb-connection";
 import path from "path";
-import { container, pivotClose, pivots, serverModal } from "../style";
+import {
+  container,
+  pivotClose,
+  pivots,
+  serverModal,
+  settingsModal,
+} from "../style";
 import Server from "../types/server";
 import {
   applyCustomAuth,
@@ -28,6 +34,7 @@ import ServerManager from "./server/ServerManager";
 import ServerInterface from "./ServerInterface";
 import uuid from "uuid";
 import Settings from "../settings/settings";
+import SettingsInterface from "./SettingsInterface";
 
 interface ConnectionTab {
   connection: KdbConnection;
@@ -44,6 +51,7 @@ function titleForTab(tab: ConnectionTab) {
 
 const MainInterface: FC = () => {
   const [showServerModal, setShowServerModal] = useState(true);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [currentConnection, setCurrentConnection] = useState<string | null>(
     null
   );
@@ -64,13 +72,19 @@ const MainInterface: FC = () => {
   }, [currentConnection, connections]);
 
   useEffect(() => {
-    ipcRenderer.on("show-error", (_, error: string) => {
-      setErrorMessage(error);
-      setShowError(true);
-    });
+    ipcRenderer
+      .on("show-error", (_, error: string) => {
+        setErrorMessage(error);
+        setShowError(true);
+      })
+      .on("open-settings", () => {
+        setShowSettingsModal(true);
+      });
 
     return () => {
-      ipcRenderer.removeAllListeners("show-error");
+      ipcRenderer
+        .removeAllListeners("show-error")
+        .removeAllListeners("open-settings");
     };
   }, []);
 
@@ -172,6 +186,16 @@ const MainInterface: FC = () => {
         onDismiss={() => setShowServerModal(false)}
       >
         <ServerManager onConnect={connectToServer} />
+      </Modal>
+      <Modal
+        containerClassName="settings-modal"
+        titleAriaId="Settings"
+        isOpen={showSettingsModal}
+        styles={{ main: settingsModal as IStyle }}
+        isBlocking={false}
+        onDismiss={() => setShowSettingsModal(false)}
+      >
+        <SettingsInterface onSave={() => setShowSettingsModal(false)} />
       </Modal>
       <ErrorDialog
         hidden={!showError}

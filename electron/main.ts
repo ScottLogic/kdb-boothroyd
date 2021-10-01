@@ -15,11 +15,12 @@ import windowStateKeeper from "electron-window-state";
 
 import { download } from "electron-dl";
 import { MenuItemConstructorOptions } from "electron/main";
+import Settings from "../src/settings/settings";
 
 let mainWindow: Electron.BrowserWindow | null;
 const iconPath = path.join(__dirname, "..", "build", "icons", "icon.png");
 
-function createWindow() {
+async function createWindow() {
   let mainWindowState = windowStateKeeper({
     defaultWidth: 1000,
     defaultHeight: 800,
@@ -75,6 +76,13 @@ function createWindow() {
         ] as MenuItemConstructorOptions[],
       },
       { role: "editMenu" },
+    ])
+  );
+
+  const settings = await Settings.init(app.getPath("userData"));
+
+  if (settings.get("autoUpdate")) autoUpdater.checkForUpdatesAndNotify();
+
   if (process.env.NODE_ENV === "development") {
     mainWindow.loadURL(`http://localhost:4000`);
     mainWindow.webContents.openDevTools();
@@ -150,8 +158,6 @@ function createWindow() {
       nativeTheme.shouldUseDarkColors
     );
   });
-
-  autoUpdater.checkForUpdatesAndNotify();
 
   mainWindow.on("closed", () => {
     mainWindow = null;

@@ -3,17 +3,20 @@ import fs from "fs/promises";
 
 interface SettingsData {
   customAuthPlugin?: string[];
+  autoUpdate: boolean;
 }
 
 export default class Settings {
-  data: SettingsData = {};
+  data: SettingsData = {
+    autoUpdate: true,
+  };
   filePath: string = "";
+  loaded: boolean = false;
   private static instance: Settings;
 
   constructor(userData: string) {
     if (!Settings.instance) {
       this.filePath = path.join(userData, "settings.json");
-      this.loadData(userData);
       Settings.instance = this;
     }
     return Settings.instance;
@@ -23,10 +26,14 @@ export default class Settings {
     return this.instance;
   }
 
-  static init(userData: string): Settings {
-    Settings.instance = new Settings(userData);
+  static async init(userData: string): Promise<Settings> {
+    const settings = new Settings(userData);
 
-    return Settings.instance;
+    if (!settings.loaded) {
+      await settings.loadData();
+    }
+
+    return new Promise((resolve) => resolve(settings));
   }
 
   set(key: keyof SettingsData, value: any) {
@@ -34,19 +41,19 @@ export default class Settings {
   }
 
   get(key: keyof SettingsData): any {
-    return this.data[key] || null;
+    return this.data[key];
   }
 
-  async loadData(userData: string) {
+  async loadData() {
     try {
       const raw = await fs.readFile(this.filePath, "utf-8");
       this.data = JSON.parse(raw);
+      console.log("DATA", this.data);
     } catch (e) {
-      if (e === "ENOENT") {
-        this.data = {};
-        this.save();
-      }
+      console.log("E", e);
+      if (e === "ENOENT") this.save();
     }
+    this.loaded = true;
   }
 
   async save() {

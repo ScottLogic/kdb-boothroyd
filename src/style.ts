@@ -109,6 +109,11 @@ export const serverModal: CSSProperties = {
   height: "75%",
 };
 
+export const settingsModal: CSSProperties = {
+  width: "30%",
+  height: "50%",
+};
+
 export const stackTokens: IStackTokens = {
   childrenGap: 10,
   padding: 10,
