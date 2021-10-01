@@ -34,6 +34,7 @@ interface ConnectionTab {
   filename?: string;
   name?: string;
   id: string;
+  unsavedChanges: boolean;
 }
 
 function titleForTab(tab: ConnectionTab) {
@@ -51,6 +52,16 @@ const MainInterface: FC = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   const theme = useTheme();
+
+  useEffect(() => {
+    const connection = connections.find((c) => c.id === currentConnection);
+    if (connection) {
+      ipcRenderer.send(
+        "update-title",
+        `${titleForTab(connection)} ${connection.unsavedChanges ? "*" : ""}`
+      );
+    }
+  }, [currentConnection, connections]);
 
   useEffect(() => {
     ipcRenderer.on("show-error", (_, error: string) => {
@@ -98,6 +109,7 @@ const MainInterface: FC = () => {
       name: server.name,
       connection,
       id: uuid.v4(),
+      unsavedChanges: false,
     };
     setConnections([...currentConnections, tab]);
     setCurrentConnection(tab.id);
@@ -119,6 +131,7 @@ const MainInterface: FC = () => {
   }
 
   function customPivotRenderer(
+    tab: ConnectionTab,
     link?: IPivotItemProps,
     defaultRenderer?: (link?: IPivotItemProps) => JSX.Element | null
   ): JSX.Element | null {
@@ -134,7 +147,7 @@ const MainInterface: FC = () => {
       >
         {defaultRenderer({ ...link, itemIcon: undefined })}
         <FontIcon
-          iconName="ChromeClose"
+          iconName={tab.unsavedChanges ? "LocationFill" : "ChromeClose"}
           style={{ ...pivotClose }}
           onClick={() => disconnectButtonClicked(link.itemKey)}
         />
@@ -188,7 +201,9 @@ const MainInterface: FC = () => {
                   className={`connection-tab-${c.id}`}
                   key={i.toString()}
                   headerText={titleForTab(c)}
-                  onRenderItemLink={customPivotRenderer}
+                  onRenderItemLink={(...args) =>
+                    customPivotRenderer(c, ...args)
+                  }
                 />
               ))}
             </Pivot>
@@ -208,6 +223,10 @@ const MainInterface: FC = () => {
             connection={c.connection}
             onFilenameChanged={(filename: string) => {
               c.filename = filename;
+              setConnections(replaceAtIndex(connections, c, i));
+            }}
+            onUnsavedChangesChanged={(unsavedChanges: boolean) => {
+              c.unsavedChanges = unsavedChanges;
               setConnections(replaceAtIndex(connections, c, i));
             }}
             visible={c.id === currentConnection}

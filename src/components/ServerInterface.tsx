@@ -5,22 +5,21 @@ import { renderToStaticMarkup } from "react-dom/server";
 import KdbConnection from "../server/kdb-connection";
 import { grabberBar, stackTokens } from "../style";
 import Result from "../types/results";
-import EditorWindow from "./EditorWindow";
+import EditorWindow, { FileManagementProps } from "./EditorWindow";
 import ResultsWindow from "./ResultsWindow";
 import TablePanel from "./TablePanel";
 import Split from "react-split";
 
-type ServerInterfaceProps = {
+interface ServerInterfaceProps extends FileManagementProps {
   connection: KdbConnection;
   visible: boolean;
-  filename?: string;
-  onFilenameChanged: (scriptName: string) => void;
-};
+}
 
 const ServerInterface: FC<ServerInterfaceProps> = ({
   connection,
   filename,
   onFilenameChanged,
+  onUnsavedChangesChanged,
   visible = false,
 }: ServerInterfaceProps) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -47,7 +46,7 @@ const ServerInterface: FC<ServerInterfaceProps> = ({
         setResults({
           script,
           data: null,
-          error: e,
+          error: e as string,
         });
       }
       setIsLoading(false);
@@ -101,8 +100,7 @@ const ServerInterface: FC<ServerInterfaceProps> = ({
       >
         <EditorWindow
           onExecuteQuery={executeQuery}
-          onFilenameChanged={onFilenameChanged}
-          filename={filename}
+          {...{ filename, onFilenameChanged, onUnsavedChangesChanged }}
         />
         <ResultsWindow
           results={results}

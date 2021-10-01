@@ -1,13 +1,13 @@
 {
-  "name": "kdb-studio-2",
-  "version": "1.0.1",
+  "name": "kdb-boothroyd",
+  "version": "1.4.0",
   "description": "GUI for KDB/q database",
   "main": "./dist/main.js",
   "scripts": {
     "dev:electron": "cross-env NODE_ENV=development webpack --config webpack.electron.config.js --mode development && electron .",
     "dev:react": "cross-env NODE_ENV=development webpack serve --config webpack.react.config.js --mode development",
-    "build:electron": "NODE_ENV=production webpack --config webpack.electron.config.js --mode production",
-    "build:react": "NODE_ENV=production webpack --config webpack.react.config.js --mode production",
+    "build:electron": "cross-env NODE_ENV=production webpack --config webpack.electron.config.js --mode production",
+    "build:react": "cross-env NODE_ENV=production webpack --config webpack.react.config.js --mode production",
     "build": "npm run build:electron && npm run build:react",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
@@ -27,7 +27,24 @@
   "license": "ISC",
   "build": {
     "win": {
-      "asar": false
+      "asarUnpack": [
+        "**/*.node"
+      ],
+      "target": [
+        {
+          "target": "nsis"
+        },
+        {
+          "target": "nsis-web"
+        }
+      ],
+      "icon": "build/icons/icon.ico"
+    },
+    "mac": {
+      "icon": "build/icons/icon.icns"
+    },
+    "linux": {
+      "icon": "build/icons/icon.png"
     },
     "files": [
       "dist/",
@@ -35,12 +52,11 @@
       "node_modules/",
       "package.json"
     ],
-    "productName": "KDB Studio 2",
-    "appId": "com.scottlogic.kdbstudio2",
+    "productName": "Boothroyd",
+    "appId": "com.scottlogic.kdbboothroyd",
     "directories": {
       "output": "dist"
     },
-    "icon": "build/icons/icon.png",
     "publish": {
       "provider": "github",
       "vPrefixedTagName": true,
@@ -48,6 +64,14 @@
     },
     "snap": {
       "publish": "github"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "nsisWeb": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
     }
   },
   "release": {
@@ -117,6 +141,7 @@
     "electron-dl": "^3.2.1",
     "electron-json-storage": "^4.5.0",
     "electron-updater": "^4.3.9",
+    "electron-window-state": "^5.0.3",
     "node-q": "2.x.x",
     "office-ui-fabric-core": "^11.0.0",
     "react": "^17.*",
