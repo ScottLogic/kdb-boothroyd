@@ -2,7 +2,11 @@ declare module "react-split" {
   import React from "react";
   import { Options } from "split.js";
 
-  export interface SplitProps {
+  export interface SplitProps
+    extends Omit<
+      React.HTMLAttributes<HTMLDivElement>,
+      "onDrag" | "onDragStart" | "onDragEnd"
+    > {
     sizes?: Options["sizes"];
     minSize?: Options["minSize"];
     maxSize?: Options["maxSize"];
@@ -22,8 +26,5 @@ declare module "react-split" {
     collapsed?: Number;
   }
 
-  export default class Split extends React.Component<
-    React.HTMLAttributes<HTMLDivElement> & SplitProps,
-    any
-  > {}
+  export default class Split extends React.Component<SplitProps, any> {}
 }
