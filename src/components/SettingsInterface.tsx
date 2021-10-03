@@ -1,5 +1,6 @@
 import {
   DefaultButton,
+  IconButton,
   ITextProps,
   PrimaryButton,
   Stack,
@@ -47,6 +48,17 @@ const SettingsInterface: FC<SettingsInterfaceProps> = ({
     setAuthPlugins(settings.get("customAuthPlugin") || []);
     setNewPlugin("");
   }
+
+  function addPlugin() {
+    if (!newPlugin || newPlugin === "") return;
+
+    const plugins = [...authPlugins];
+
+    plugins.push(newPlugin);
+
+    setAuthPlugins(plugins);
+    setNewPlugin("");
+  }
   return (
     <Stack tokens={stackTokens}>
       <Text variant={"large" as ITextProps["variant"]} className="header">
@@ -69,7 +81,11 @@ const SettingsInterface: FC<SettingsInterfaceProps> = ({
         }}
       >
         <Text variant={"medium" as ITextProps["variant"]} className="header">
-          Custom Authentication Plugins
+          Authentication Preprocessors
+        </Text>
+        <Text variant={"small" as ITextProps["variant"]}>
+          These will run before connecting to any of your servers and perform
+          some preprocessing on your credentials.
         </Text>
         {authPlugins.map((p, i) => (
           <TextField
@@ -87,24 +103,24 @@ const SettingsInterface: FC<SettingsInterfaceProps> = ({
           />
         ))}
 
-        <TextField
-          value={newPlugin}
-          className="plugin-input"
-          data-index={authPlugins.length}
-          onChange={(_, newValue) => setNewPlugin(newValue || "")}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              if (!newPlugin || newPlugin === "") return;
-
-              const plugins = [...authPlugins];
-
-              plugins.push(newPlugin);
-
-              setAuthPlugins(plugins);
-              setNewPlugin("");
-            }
-          }}
-        />
+        <Stack horizontal={true}>
+          <Stack.Item grow={1}>
+            <TextField
+              value={newPlugin}
+              className="plugin-input"
+              data-index={authPlugins.length}
+              onChange={(_, newValue) => setNewPlugin(newValue || "")}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  addPlugin();
+                }
+              }}
+            />
+          </Stack.Item>
+          <Stack.Item grow={0}>
+            <IconButton iconProps={{ iconName: "Add" }} onClick={addPlugin} />
+          </Stack.Item>
+        </Stack>
       </Stack>
 
       <Stack tokens={stackTokens}>
