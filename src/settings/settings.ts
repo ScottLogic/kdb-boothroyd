@@ -38,8 +38,9 @@ export default class Settings {
     return new Promise((resolve) => resolve(settings));
   }
 
-  set(key: keyof SettingsData, value: any) {
+  set(key: keyof SettingsData, value: any, persist: boolean = true) {
     this.data[key] = value;
+    if (persist) this.save();
   }
 
   get(key: keyof SettingsData): any {
