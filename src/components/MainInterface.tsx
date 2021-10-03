@@ -10,7 +10,7 @@ import {
   Stack,
   useTheme,
 } from "@fluentui/react";
-import { ipcRenderer } from "electron";
+import { ipcMain, ipcRenderer } from "electron";
 import React, { FC, useState } from "react";
 import { useEffect } from "react";
 import KdbConnection from "../server/kdb-connection";
@@ -102,6 +102,7 @@ const MainInterface: FC = () => {
     setConnections([...currentConnections, tab]);
     setCurrentConnection(tab.id);
     setShowServerModal(false);
+    ipcRenderer.send("connections-changed", ++currentConnections.length);
   }
 
   function disconnectFromServer(name: string) {
@@ -112,6 +113,7 @@ const MainInterface: FC = () => {
     connections[index].connection.reset();
 
     setConnections(removeAtIndex(connections, index));
+    ipcRenderer.send("connections-changed", --connections.length);
   }
 
   function disconnectButtonClicked(key?: string) {
