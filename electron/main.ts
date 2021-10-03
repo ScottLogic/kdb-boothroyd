@@ -101,6 +101,7 @@ function createWindow() {
     if (!response.canceled) {
       const filename = response.filePaths[0];
       const data = fs.readFileSync(filename);
+      app.addRecentDocument(filename);
       return {
         data: data.toString(),
         filename,
@@ -110,6 +111,15 @@ function createWindow() {
 
   ipcMain.handle("data-path", () => {
     return app.getPath("userData");
+  });
+
+  app.on("open-file", (_, file) => {
+    const data = fs.readFileSync(file);
+    //app.addRecentDocument(filename)
+    mainWindow?.webContents.send("file-opened", {
+      data: data.toString(),
+      file,
+    });
   });
 
   nativeTheme.on("updated", () => {

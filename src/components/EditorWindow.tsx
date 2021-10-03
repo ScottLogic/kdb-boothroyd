@@ -64,10 +64,12 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
       .on("colour-scheme-changed", (_, isDarkMode) => {
         setIsDarkMode(isDarkMode);
       })
-      .on("file-opened", (_, ...args) => {
-        const [script, filename] = args;
-        setCurrentScript(script);
-        editorRef.current?.setValue(script);
+      .on("file-opened", (_, result) => {
+        const { data, filename } = result;
+        setCurrentScript(data);
+        savedScript.current = data;
+        onUnsavedChangesChanged(false);
+        editorRef.current?.setValue(data);
         onFilenameChanged(filename);
       });
 
