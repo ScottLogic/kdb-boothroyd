@@ -1,9 +1,10 @@
-import { Menu, shell, MenuItemConstructorOptions } from "electron";
+import { Menu, shell, MenuItemConstructorOptions, app } from "electron";
 import { BrowserWindow } from "electron/main";
 
 export default function getMenu(
   appName: string,
-  mainWindow: BrowserWindow
+  mainWindow: BrowserWindow,
+  isConnected: boolean = false
 ): Menu {
   const isMac = process.platform === "darwin";
   const template: MenuItemConstructorOptions[] = [
@@ -30,12 +31,79 @@ export default function getMenu(
     {
       label: "File",
       submenu: [
-        isMac ? { role: "close" } : { role: "quit" },
+        ...[
+          {
+            label: "New Connection",
+            accelerator: "CommandOrControl+N",
+            click: () => {
+              mainWindow.webContents.send("show-server-dialog");
+            },
+          },
+          {
+            id: "close-connection-item",
+            label: "Disconnect Current",
+            accelerator: "CommandOrControl+W",
+            click: () => {
+              mainWindow.webContents.send("close-current-connection");
+            },
+            enabled: isConnected,
+          },
+          {
+            id: "close-all-connections-item",
+            label: "Disconnect All",
+            accelerator: "CommandOrControl+Shift+W",
+            click: () => {
+              mainWindow.webContents.send("close-all-connections");
+            },
+            enabled: isConnected,
+          },
+          { type: "separator" },
+          {
+            id: "open-item",
+            label: "Open",
+            accelerator: "CommandOrControl+O",
+            click: () => {
+              mainWindow.webContents.send("open-script");
+            },
+            enabled: isConnected,
+          },
+          {
+            id: "open-recent-item",
+            role: "recentDocuments",
+            submenu: [
+              {
+                label: "Clear Recent",
+                role: "clearRecentDocuments",
+              },
+            ],
+            enabled: isConnected,
+          },
+          {
+            id: "save-item",
+            label: "Save",
+            accelerator: "CommandOrControl+S",
+            click: () => {
+              mainWindow.webContents.send("save-script");
+            },
+            enabled: isConnected,
+          },
+          {
+            id: "save-as-item",
+            label: "Save As",
+            accelerator: "CommandOrControl+Shift+S",
+            click: () => {
+              mainWindow.webContents.send("save-script-as");
+            },
+            enabled: isConnected,
+          },
+          { type: "separator" },
+        ],
+        ...[isMac ? { role: "close" } : { role: "quit" }],
       ] as MenuItemConstructorOptions[],
     },
-    // { role: 'editMenu' }
     {
       label: "Editor",
+      enabled: isConnected,
       submenu: [
         { role: "undo" },
         { role: "redo" },
@@ -44,13 +112,55 @@ export default function getMenu(
         { role: "copy" },
         { role: "paste" },
         { role: "delete" },
-        { type: "separator" },
         { role: "selectAll" },
+        { type: "separator" },
+        {
+          label: "Find",
+          accelerator: "CommandOrControl+F",
+          click: () => {
+            mainWindow.webContents.send("find");
+          },
+        },
+        {
+          label: "Replace",
+          accelerator: "CommandOrControl+Alt+F",
+          click: () => {
+            mainWindow.webContents.send("replace");
+          },
+        },
       ],
     },
-    // { role: 'viewMenu' }
     {
-      label: "Results",
+      label: "Server",
+      submenu: [
+        {
+          label: "Add",
+          click: () => {
+            mainWindow.webContents.send("add-server");
+          },
+        },
+        {
+          label: "Edit",
+          click: () => {
+            mainWindow.webContents.send("edit-server");
+          },
+        },
+        {
+          label: "Delete",
+          click: () => {
+            mainWindow.webContents.send("delete-server");
+          },
+        },
+        {
+          label: "Clone Current",
+          click: () => {
+            mainWindow.webContents.send("clone-current-server");
+          },
+        },
+      ],
+    },
+    {
+      label: "Query",
       submenu: [
         {
           label: "Refresh",
@@ -65,6 +175,7 @@ export default function getMenu(
     {
       label: "Window",
       submenu: [
+        { role: "togglefullscreen" },
         { role: "minimize" },
         { role: "zoom" },
         ...(isMac
@@ -86,6 +197,7 @@ export default function getMenu(
             await shell.openExternal("https://code.kx.com/q/learn/");
           },
         },
+        ...(isMac ? [] : [{ role: "about" }]),
       ] as MenuItemConstructorOptions[],
     },
   ];

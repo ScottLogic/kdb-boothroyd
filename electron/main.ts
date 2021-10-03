@@ -82,6 +82,11 @@ function createWindow() {
     mainWindow?.setTitle(title);
   });
 
+  ipcMain.on("connections-changed", (_, count) => {
+    if (mainWindow)
+      Menu.setApplicationMenu(getMenu(app.name, mainWindow, count > 0));
+  });
+
   ipcMain.on("open-file", async (_, info) => {
     // Open a local file in the default app
     const dl = await download(BrowserWindow.getFocusedWindow()!, info.url);
