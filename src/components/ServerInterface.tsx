@@ -9,6 +9,7 @@ import EditorWindow, { FileManagementProps } from "./EditorWindow";
 import ResultsWindow from "./ResultsWindow";
 import TablePanel from "./TablePanel";
 import Split from "react-split";
+import Settings from "../settings/settings";
 
 interface ServerInterfaceProps extends FileManagementProps {
   connection: KdbConnection;
@@ -24,6 +25,8 @@ const ServerInterface: FC<ServerInterfaceProps> = ({
 }: ServerInterfaceProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<Result | undefined>();
+
+  const settings = Settings.getInstance();
 
   async function executeQuery(script: string) {
     if (connection && connection.isConnected()) {
@@ -85,7 +88,7 @@ const ServerInterface: FC<ServerInterfaceProps> = ({
 
       <Split
         direction="vertical"
-        sizes={[40, 60]}
+        sizes={settings.get("splitterSizes")}
         gutterSize={10}
         gutter={renderGutter}
         minSize={100}
@@ -96,6 +99,9 @@ const ServerInterface: FC<ServerInterfaceProps> = ({
           flex: "1 1 auto",
           alignItems: "stretch",
           minWidth: 0,
+        }}
+        onDragEnd={(sizes: number[]) => {
+          settings.set("splitterSizes", sizes);
         }}
       >
         <EditorWindow

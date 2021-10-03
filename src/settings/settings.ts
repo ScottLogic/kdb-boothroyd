@@ -4,11 +4,13 @@ import fs from "fs/promises";
 interface SettingsData {
   customAuthPlugin?: string[];
   autoUpdate: boolean;
+  splitterSizes: number[];
 }
 
 export default class Settings {
   data: SettingsData = {
     autoUpdate: true,
+    splitterSizes: [40, 60],
   };
   filePath: string = "";
   loaded: boolean = false;
