@@ -69,7 +69,7 @@ describe("Editor Window", function () {
     assert.strictEqual(await resultsView.innerText(), `"${query}"`);
   });
 
-  it("should execute a query from Ctrl+Enter", async function () {
+  it("should execute the full query from Ctrl+E", async function () {
     this.timeout(20000);
     this.retries(2);
 
@@ -78,7 +78,7 @@ describe("Editor Window", function () {
     const query = "t2:flip `name`iq!(`Dent`Beeblebrox`Prefect;98 42 126)";
     await editor.press(`${isMac ? "Meta" : "Control"}+a`);
     await editor.type(query);
-    await editor.press(`${isMac ? "Meta" : "Control"}+Enter`);
+    await editor.press(`${isMac ? "Meta" : "Control"}+e`);
 
     await this.appWindow.waitForSelector(
       ":nth-match(.table-list .ms-GroupedList-group, 2)"
@@ -95,6 +95,42 @@ describe("Editor Window", function () {
 
     const resultsView = await this.appWindow.$(".raw-results-view");
     assert.strictEqual(await resultsView.innerText(), `"${query}"`);
+  });
+
+  it("should execute the selection when I select part of the query and press Ctrl+E", async function () {
+    this.timeout(20000);
+    this.retries(2);
+
+    const editor = await this.appWindow.$(".monaco-editor textarea");
+
+    const query = "tables[];\n2+2";
+    await editor.press(`${isMac ? "Meta" : "Control"}+a`);
+    await editor.type(query);
+    await editor.press(`${isMac ? "Shift+Meta+ArrowLeft" : "Shift+Home"}`);
+    await editor.press(`${isMac ? "Meta" : "Control"}+e`);
+
+    const resultsView = await this.appWindow.waitForSelector(
+      ".raw-results-view"
+    );
+    assert.strictEqual(await resultsView.innerText(), `4`);
+  });
+
+  it("should execute the current line when I press Ctrl+Enter", async function () {
+    this.timeout(20000);
+    this.retries(2);
+
+    const editor = await this.appWindow.$(".monaco-editor textarea");
+
+    const query = "2+2;\ntables[]";
+    await editor.press(`${isMac ? "Meta" : "Control"}+a`);
+    await editor.type(query);
+    await editor.press(`ArrowUp`);
+    await editor.press(`${isMac ? "Meta" : "Control"}+Enter`);
+
+    const resultsView = await this.appWindow.waitForSelector(
+      ".raw-results-view"
+    );
+    assert.strictEqual(await resultsView.innerText(), `4`);
   });
 
   /*it ("should load a query", async function () {
