@@ -132,7 +132,7 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
         // can make the rest happen in React land by just triggering the click action on the play button.
         // Yes it's a hack, and I don't like it, but it works
         if (goRef && goRef.current) {
-          goRef.current.dataset.queryMode = "currentLine";
+          goRef.current.dataset.queryMode = QueryMode.currentLine;
           goRef.current.click();
         }
       }
@@ -142,7 +142,7 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
       monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_E,
       function () {
         if (goRef && goRef.current) {
-          goRef.current.dataset.queryMode = "selection";
+          goRef.current.dataset.queryMode = QueryMode.selection;
           goRef.current.click();
         }
       }
