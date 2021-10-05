@@ -1,6 +1,6 @@
 {
   "name": "kdb-boothroyd",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "GUI for KDB/q database",
   "main": "./dist/main.js",
   "scripts": {
