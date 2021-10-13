@@ -36,6 +36,9 @@
         },
         {
           "target": "nsis-web"
+        },
+        {
+          "target": "msi"
         }
       ],
       "icon": "build/icons/icon.ico"
