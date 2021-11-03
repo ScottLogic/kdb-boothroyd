@@ -94,7 +94,7 @@ jobs:
 
   release:
     needs: test
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -105,12 +105,34 @@ jobs:
       - uses: actions/setup-node@v2.4.0
         with:
           node-version: "16"
+      - name: Install dependencies
+        run: npm ci
+      - name: Create Release
+        run: npx semantic-release
 
+  publish:
+    needs: release
+    runs-on: macos-latest
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ["m", "w", "l"]
+
+    if: contains(github.ref, 'main')
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: "main"
+      - uses: actions/setup-node@v2.4.0
+        with:
+          node-version: "16"
       - name: Install dependencies
         run: npm ci
       - name: Build app
         run: npm run build
-      - name: Create Release
-        run: npx semantic-release
       - name: Compile Executables and Publish
-        run: npm run dist -- -mwl -p always
+        run: npm run dist -- -${{matrix.target}} -p always

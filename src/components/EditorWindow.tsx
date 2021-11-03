@@ -23,12 +23,20 @@ import QueryHistory from "./QueryHistory";
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 
-interface EditorWindowProps {
-  onExecuteQuery: (query: string) => void;
+export interface FileManagementProps {
   onFilenameChanged: (scriptName: string) => void;
+  onUnsavedChangesChanged: (unsavedChanges: boolean) => void;
   filename?: string;
 }
 
+interface EditorWindowProps extends FileManagementProps {
+  onExecuteQuery: (query: string) => void;
+}
+
+enum QueryMode {
+  currentLine = "currentLine",
+  selection = "selection",
+}
 // Set some default options for the Monaco Editor
 const editorOptions = {
   minimap: {
@@ -39,8 +47,9 @@ const editorOptions = {
 
 const EditorWindow: FunctionComponent<EditorWindowProps> = ({
   onExecuteQuery,
-  onFilenameChanged: onFilenameChanged,
+  onFilenameChanged,
   filename,
+  onUnsavedChangesChanged,
 }) => {
   const uiTheme = useTheme();
 
@@ -78,6 +87,9 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
 
   // Store a reference we can use to target the run script button
   const goRef = createRef<HTMLButtonElement>();
+
+  // store previous saved script state
+  const savedScript = useRef<string>("");
 
   // Store a ref to the editor
   const editorRef = useRef<IStandaloneCodeEditor | null>(null);
@@ -122,7 +134,20 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
         // As currentServer isn't necessarily set when we bind this and this ends up out of scope we
         // can make the rest happen in React land by just triggering the click action on the play button.
         // Yes it's a hack, and I don't like it, but it works
-        if (goRef && goRef.current) goRef.current.click();
+        if (goRef && goRef.current) {
+          goRef.current.dataset.queryMode = QueryMode.currentLine;
+          goRef.current.click();
+        }
+      }
+    );
+
+    editor.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_E,
+      function () {
+        if (goRef && goRef.current) {
+          goRef.current.dataset.queryMode = QueryMode.selection;
+          goRef.current.click();
+        }
       }
     );
   }
@@ -131,6 +156,7 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
   // another server
   function updateScripts(newValue: string) {
     setCurrentScript(newValue);
+    onUnsavedChangesChanged(newValue !== savedScript.current);
   }
 
   async function loadScript() {
@@ -138,6 +164,8 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
     if (result) {
       const { data, filename } = result;
       setCurrentScript(data);
+      savedScript.current = data;
+      onUnsavedChangesChanged(false);
       editorRef.current?.setValue(data);
       onFilenameChanged(filename);
     }
@@ -149,6 +177,8 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
       currentScript,
       filename
     );
+    savedScript.current = currentScript;
+    onUnsavedChangesChanged(false);
     onFilenameChanged(savedFilename);
   }
 
@@ -157,11 +187,13 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
       "save-script",
       currentScript
     );
+    savedScript.current = currentScript;
+    onUnsavedChangesChanged(false);
     onFilenameChanged(savedFilename);
   }
 
   // Send our commands to the server
-  async function runScript() {
+  async function runScript(queryMode: QueryMode = QueryMode.selection) {
     let script = "";
     // Reset results to trigger loading animation
     let selected;
@@ -169,14 +201,30 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
     // Get currently highlighted text
     if (editorRef.current) {
       const editor: IStandaloneCodeEditor = editorRef.current!;
-      selected = editor.getModel()?.getValueInRange(editor.getSelection()!);
+
+      switch (queryMode) {
+        case QueryMode.currentLine:
+          const lineNumber = editor.getPosition()?.lineNumber;
+          if (lineNumber)
+            selected = editor.getModel()?.getLineContent(lineNumber);
+          break;
+        case QueryMode.selection:
+        /* falls-through */
+        default:
+          selected = editor.getModel()?.getValueInRange(editor.getSelection()!);
+          break;
+      }
     }
 
     // If selected text use that, otherwise send full script
     script = selected && selected != "" ? selected : currentScript;
 
+    // Remove trailing ;
+    if (script) script = script.replace(/;$/, "");
+
     // Story query in query history
     setQueryHistory((h) => [...h, script]);
+
     // Load actual results
     onExecuteQuery(script);
   }
@@ -190,8 +238,17 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
       disabled: !(currentScript && currentScript != ""),
       elementRef: goRef,
       className: "go-button",
-      onClick: () => {
-        runScript();
+      data: {
+        queryMode: "selection",
+      },
+      onClick: (e, item) => {
+        const mode = e?.currentTarget.dataset.queryMode;
+
+        if (mode && Object.values<string>(QueryMode).includes(mode))
+          runScript(mode as QueryMode);
+        else runScript();
+
+        if (e) e.currentTarget.dataset.queryMode = "selection";
       },
     },
     {

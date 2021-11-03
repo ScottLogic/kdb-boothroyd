@@ -46,7 +46,7 @@ describe("Results Window", function () {
     const query = "2+2";
     await editor.press(`${isMac ? "Meta" : "Control"}+a`);
     await editor.type(query);
-    await editor.press(`${isMac ? "Meta" : "Control"}+Enter`);
+    await editor.press(`${isMac ? "Meta" : "Control"}+e`);
 
     const resultsView = await this.appWindow.waitForSelector(
       ".raw-results-view"
@@ -63,7 +63,7 @@ describe("Results Window", function () {
     const query = "d";
     await editor.press(`${isMac ? "Meta" : "Control"}+a`);
     await editor.type(query);
-    await editor.press(`${isMac ? "Meta" : "Control"}+Enter`);
+    await editor.press(`${isMac ? "Meta" : "Control"}+e`);
 
     const resultsView = await this.appWindow.waitForSelector(
       ".table-results-view"
@@ -98,7 +98,7 @@ describe("Results Window", function () {
     const query = "t:flip `name`iq!(`Dent`Beeblebrox`Prefect;98 42 126);t";
     await editor.press(`${isMac ? "Meta" : "Control"}+a`);
     await editor.type(query);
-    await editor.press(`${isMac ? "Meta" : "Control"}+Enter`);
+    await editor.press(`${isMac ? "Meta" : "Control"}+e`);
 
     const resultsView = await this.appWindow.waitForSelector(
       ".table-results-view"
