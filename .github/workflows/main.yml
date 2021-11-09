@@ -112,7 +112,7 @@ jobs:
 
   publish:
     needs: release
-    runs-on: macos-latest
+    runs-on: ${{ matrix.target[0] }}
 
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -120,7 +120,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: ["m", "w", "l"]
+        target:
+          [
+            ["macos-latest", "m"],
+            ["windows-latest", "w"],
+            ["ubuntu-latest", "l"],
+          ]
 
     if: contains(github.ref, 'main')
     steps:
@@ -135,4 +140,4 @@ jobs:
       - name: Build app
         run: npm run build
       - name: Compile Executables and Publish
-        run: npm run dist -- -${{matrix.target}} -p always
+        run: npm run dist -- -${{matrix.target[1]}} -p always
