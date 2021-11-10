@@ -112,17 +112,23 @@ const ResultsWindow: FunctionComponent<ResultsWindowProps> = ({
     ];
   }
 
-  useEffect(() => {
-    ipcRenderer.on("download-complete", (_, file) => {
-      Exporter.cleanup(file);
-    });
+  ipcRenderer.invoke("is-dark-mode").then((isDarkMode) => {
+    setIsDarkMode(isDarkMode);
+  });
 
-    ipcRenderer.invoke("is-dark-mode").then((isDarkMode) => {
-      setIsDarkMode(isDarkMode);
-    });
+  useEffect(() => {
+    ipcRenderer
+      .on("download-complete", (_, file) => {
+        Exporter.cleanup(file);
+      })
+      .on("colour-scheme-changed", (_, isDarkMode) => {
+        setIsDarkMode(isDarkMode);
+      });
 
     return () => {
-      ipcRenderer.removeAllListeners("download-complete");
+      ipcRenderer
+        .removeAllListeners("colour-scheme-changed")
+        .removeAllListeners("download-complete");
     };
   }, []);
 
