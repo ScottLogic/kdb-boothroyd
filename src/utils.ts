@@ -8,6 +8,10 @@ export function removeAtIndex<T>(array: T[], index: number) {
   return array.filter((_, i) => i !== index);
 }
 
+export function removeItem<T>(array: T[], item: T) {
+  return array.filter((i) => i !== item);
+}
+
 const KEY = "87EqHhoZB6aQau";
 export function encryptWithAES(text: string): string {
   return CryptoJS.AES.encrypt(text, KEY).toString();

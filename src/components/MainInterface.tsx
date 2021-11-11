@@ -9,15 +9,19 @@ import {
   PivotItem,
   Stack,
   useTheme,
+  Dialog,
+  DialogFooter,
+  PrimaryButton,
+  DefaultButton,
 } from "@fluentui/react";
 import { ipcRenderer } from "electron";
-import React, { FC, useState } from "react";
+import React, { FC, useState, useRef } from "react";
 import { useEffect } from "react";
 import KdbConnection from "../server/kdb-connection";
 import path from "path";
 import { container, pivotClose, pivots, serverModal } from "../style";
 import Server from "../types/server";
-import { decryptWithAES, removeAtIndex, replaceAtIndex } from "../utils";
+import { decryptWithAES, removeItem, replaceAtIndex } from "../utils";
 import ErrorDialog from "./ErrorDialog";
 import ServerManager from "./server/ServerManager";
 import ServerInterface from "./ServerInterface";
@@ -36,14 +40,24 @@ function titleForTab(tab: ConnectionTab) {
   return tab.filename ? `${name} - ${path.basename(tab.filename)}` : name;
 }
 
+enum UnsavedChangesAction {
+  Save,
+  Discard,
+  Cancel,
+}
+
 const MainInterface: FC = () => {
   const [showServerModal, setShowServerModal] = useState(true);
+  const [showUnsavedChangesPrompt, setShowUnsavedChangesPrompt] =
+    useState(false);
   const [currentConnection, setCurrentConnection] = useState<string | null>(
     null
   );
   const [connections, setConnections] = useState<ConnectionTab[]>([]);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const tabToClose = useRef<ConnectionTab>();
 
   const theme = useTheme();
 
@@ -104,18 +118,32 @@ const MainInterface: FC = () => {
     setShowServerModal(false);
   }
 
-  function disconnectFromServer(name: string) {
-    const index = connections.findIndex((c) => c.id === name);
-
-    if (index == -1) return;
-
-    connections[index].connection.reset();
-
-    setConnections(removeAtIndex(connections, index));
+  function closeTab(id: string) {
+    const tab = connections.find((c) => c.id === id);
+    if (tab) {
+      if (tab.unsavedChanges) {
+        tabToClose.current = tab;
+        setShowUnsavedChangesPrompt(true);
+      } else {
+        tab.connection.reset();
+        setConnections(removeItem(connections, tab));
+      }
+    }
   }
 
-  function disconnectButtonClicked(key?: string) {
-    if (key) disconnectFromServer(key);
+  function unsavedChangesPromptDismissed(action: UnsavedChangesAction) {
+    const tab = tabToClose.current!;
+    switch (action) {
+      case UnsavedChangesAction.Save:
+        break;
+      case UnsavedChangesAction.Discard:
+        tab.connection.reset();
+        setConnections(removeItem(connections, tab));
+        break;
+      case UnsavedChangesAction.Cancel:
+        break;
+    }
+    setShowUnsavedChangesPrompt(false);
   }
 
   function customPivotRenderer(
@@ -137,14 +165,12 @@ const MainInterface: FC = () => {
         <FontIcon
           iconName={tab.unsavedChanges ? "LocationFill" : "ChromeClose"}
           style={{ ...pivotClose }}
-          onClick={() => disconnectButtonClicked(link.itemKey)}
+          onClick={() => {
+            closeTab(link.itemKey!);
+          }}
         />
       </span>
     );
-  }
-
-  function onDialogDismissed() {
-    setShowError(false);
   }
 
   const emojiIcon: IIconProps = { iconName: "Database" };
@@ -161,10 +187,32 @@ const MainInterface: FC = () => {
       >
         <ServerManager onConnect={connectToServer} />
       </Modal>
+      <Dialog hidden={!showUnsavedChangesPrompt}>
+        <DialogFooter>
+          <PrimaryButton
+            onClick={() =>
+              unsavedChangesPromptDismissed(UnsavedChangesAction.Save)
+            }
+            text="Save"
+          />
+          <DefaultButton
+            onClick={() =>
+              unsavedChangesPromptDismissed(UnsavedChangesAction.Discard)
+            }
+            text="Don't Save"
+          />
+          <DefaultButton
+            onClick={() =>
+              unsavedChangesPromptDismissed(UnsavedChangesAction.Cancel)
+            }
+            text="Cancel"
+          />
+        </DialogFooter>
+      </Dialog>
       <ErrorDialog
         hidden={!showError}
         message={errorMessage}
-        onDialogDismissed={onDialogDismissed}
+        onDialogDismissed={() => setShowError(false)}
       />
       <Stack
         style={{
