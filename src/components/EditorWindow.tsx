@@ -19,6 +19,7 @@ import useResizeObserver from "@react-hook/resize-observer";
 import syntax from "../editor/syntax";
 import theme from "../editor/theme";
 import { editorWindow, editorWrapper } from "../style";
+import QueryHistory from "./QueryHistory";
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 
@@ -53,6 +54,8 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
   const uiTheme = useTheme();
 
   const [currentScript, setCurrentScript] = useState("");
+  const [showHistory, setShowHistory] = useState(false);
+  const [queryHistory, setQueryHistory] = useState<string[]>([]);
 
   // Find out if system is in dark mode so we can use the appropriate editor theme
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -216,7 +219,11 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
     // If selected text use that, otherwise send full script
     script = selected && selected != "" ? selected : currentScript;
 
+    // Remove trailing ;
     if (script) script = script.replace(/;$/, "");
+
+    // Story query in query history
+    setQueryHistory((h) => [...h, script]);
 
     // Load actual results
     onExecuteQuery(script);
@@ -271,6 +278,15 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
       className: "save-button",
       onClick: () => {
         saveScript();
+      },
+    },
+    {
+      key: "history",
+      title: "Query History",
+      iconProps: { iconName: "FullHistory" },
+      className: "history-button",
+      onClick: () => {
+        setShowHistory(true);
       },
     },
   ];
@@ -376,6 +392,11 @@ const EditorWindow: FunctionComponent<EditorWindowProps> = ({
           onChange={updateScripts}
         />
       </div>
+      <QueryHistory
+        show={showHistory}
+        history={queryHistory}
+        onDismiss={() => setShowHistory(false)}
+      />
     </Stack>
   );
 };
