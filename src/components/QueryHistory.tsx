@@ -5,6 +5,7 @@ import {
   Panel,
   SelectionMode,
   Stack,
+  Text,
 } from "@fluentui/react";
 import React, { FC, ReactNode } from "react";
 
@@ -21,7 +22,7 @@ const QueryHistory: FC<QueryHistoryProps> = ({
 }: QueryHistoryProps) => {
   const items = history.map((q) => {
     return {
-      query: q.substr(0, 100),
+      query: q, //.substr(0, 100),
       actions: ["copy"],
     };
   });
@@ -51,11 +52,11 @@ const QueryHistory: FC<QueryHistoryProps> = ({
   };
 
   const historyActions = {
-    copy: (index: number) => (
+    copy: (query: string) => (
       <IconButton
         iconProps={{ iconName: "copy" }}
         key="copy"
-        onClick={() => copyQuery(history[index])}
+        onClick={() => copyQuery(query)}
       />
     ),
   };
@@ -72,12 +73,14 @@ const QueryHistory: FC<QueryHistoryProps> = ({
         {column.key === "query" ? (
           <>
             <Stack verticalAlign="center" style={{ height: "100%" }}>
-              {item.query}
+              <Text block={true} nowrap={true}>
+                {item.query}
+              </Text>
             </Stack>
           </>
         ) : (
           item.actions.map((a: keyof typeof historyActions) => {
-            return historyActions[a](index || 0);
+            return historyActions[a](item.query);
           })
         )}
       </>
